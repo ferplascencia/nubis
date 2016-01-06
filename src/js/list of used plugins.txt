@@ -1,0 +1,78 @@
+/* JAVASCRIPT BASED */
+
+https://github.com/jeresig/jquery.hotkeys
+
+www.highcharts.com/license
+
+http://cameronspear.com/blog/twitter-bootstrap-dropdown-on-hover-plugin/
+
+https://github.com/Serhioromano/bootstrap-calendar
+
+http://silviomoreto.github.io/bootstrap-select/
+
+http://www.eyecon.ro/bootstrap-datepicker (currently not used)
+
+http://www.eyecon.ro/bootstrap-slider/https://github.com/seiyria/bootstrap-slider
+
+http://twbs.github.com/bootstrap/javascript.html#carousel
+
+https://github.com/EddieLa/BarcodeReader
+
+// bootstrap plugins
+http://twbs.github.com/bootstrap/javascript.html#buttons (used?)
+http://twbs.github.com/bootstrap/javascript.html#dropdowns (used?)
+http://twbs.github.com/bootstrap/javascript.html#modals (used?)
+http://twbs.github.com/bootstrap/javascript.html#popovers
+http://twbs.github.com/bootstrap/javascript.html#scrollspy
+http://twbs.github.com/bootstrap/javascript.html#tabs
+http://twbs.github.com/bootstrap/javascript.html#tooltip
+http://twbs.github.com/bootstrap/javascript.html#transitions
+
+http://projects.zoulcreations.com/jquery/jquery-calc/ (used?)
+
+https://bitbucket.org/pellepim/jstimezonedetect; jstz.min.js
+
+www.modernizr.com
+
+http://mootools.net/core/76bf47062d6c1983d66ce47ad66aa0e0 (used?)
+
+http://underscorejs.org/ (used?)
+
+http://pieroxy.net/blog/pages/lz-string/testing.html (currently not used)
+
+http://github.com/mindmup/bootstrap-wysiwyg (currently not used)
+
+http://jqueryvalidation.org/
+
+https://github.com/artberri/sidr
+
+www.orangehilldev.com; bootstrap-session-timeout
+
+jquery-ui
+
+jasny-bootstrap (currently not used)
+
+http://github.com/RobinHerbots/jquery.inputmask
+
+http://bootstrapformhelpers.com
+
+https://github.com/Eonasdan/bootstrap-datetimepicker
+
+http://datatables.net/license
+
+https://appendgrid.apphb.com/
+
+https://github.com/carhartl/jquery-cookie
+
+http://mjolnic.github.io/bootstrap-colorpicker/
+
+http://codemirror.net/
+
+http://bootboxjs.com/license.txt (used?)
+
+
+/* PHP BASED */
+
+https://github.com/nikic/PHP-Parser
+
+https://github.com/ghunti/HighchartsPHP (used?)
