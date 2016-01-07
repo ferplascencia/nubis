@@ -521,6 +521,7 @@ $configuration = array(
     function finish() {
         $returnStr = '<br/><div class="alert alert-success">' . Language::installConfirmation() . '</div><br/><br/>';
         $returnStr .= "<form method=post>";        
+        $returnStr .= "<input type=hidden name=" . POST_PARAM_FULLRESET . " value='1' />";
         $returnStr .= "<input type=hidden name=" . POST_PARAM_SE . " value='" . USCIC_SMS . "' />";
         $returnStr .= '<button type="submit" class="btn btn-primary">' . Language::installButtonNext() . '</button>';
         $returnStr .= "</form>";
