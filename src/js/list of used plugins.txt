@@ -268,8 +268,9 @@ Version: 5.42.2
 
 Calculator.js:
 
-
-
+License: Not provided
+Location: http://codepen.io/GianNipitella/pen/vNjqyE
+Version: Not provided
 
 
 /* PHP BASED */
@@ -293,10 +294,3 @@ MobileDetecT:
 License: MIT license with some custom add-on text
 Location: https://github.com/serbanghita/Mobile-Detect
 Version: 2.8.17
-
-
-BarCodePHP:
-
-License: Custom (free for personal or non-commercial usage, http://www.barcodebakery.com/en/download/php)
-Location: http://www.barcodephp.com
-Version: 1D
