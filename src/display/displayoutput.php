@@ -171,6 +171,8 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
             $returnStr .= '<tr><td>' . Language::labelOutputDataVarlist() . '</td><td>';
@@ -306,6 +308,8 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
             $returnStr .= '<tr><td>' . Language::labelOutputDataVarlist() . '</td><td>';
@@ -407,6 +411,8 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
             $returnStr .= '<tr><td>' . Language::labelOutputDataVarlist() . '</td><td>';
@@ -523,6 +529,8 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
             $returnStr .= '<tr><td>' . Language::labelOutputDataVarlist() . '</td><td>';
@@ -671,6 +679,8 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
             $returnStr .= '<tr><td>' . Language::labelOutputDataVarlist() . '</td><td>';
@@ -686,8 +696,8 @@ class DisplayOutput extends DisplaySysAdmin {
         //$returnStr .= "<option></option>";
         $returnStr .= "<option value=" . INTERVIEW_NOTCOMPLETED . ">" . Language::optionsDataNotCompleted() . "</option>";
         $returnStr .= "<option value=" . INTERVIEW_COMPLETED . ">" . Language::optionsDataCompleted() . "</option>";
-        $returnStr .= "</select>";
-
+        $returnStr .= "</select></td></tr>";
+        
         $returnStr .= '<tr><td>' . Language::labelOutputDataClean() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_CLEAN . ">";
         //$returnStr .= "<option></option>";
@@ -1511,7 +1521,7 @@ var chart = new Highcharts.Chart({
                 $returnStr .= "<br>" . $this->displayWarning(Language::messageNoData());
             } else {
 
-                $returnStr .= '<script src="js/highcharts/highcharts.js"></script>';
+                $returnStr .= '<script src="js/highcharts.js"></script>';
                 $returnStr .= '<script src="js/modules/exporting.js"></script>';
                 $returnStr .= '<script src="js/export-csv.js"></script>';
                 $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
