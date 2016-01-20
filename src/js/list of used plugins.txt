@@ -266,6 +266,7 @@ License: MIT license
 Location: https://blueimp.github.io/jQuery-File-Upload/
 Version: 5.42.2
 
+
 Calculator.js:
 
 License: Not provided

@@ -1110,7 +1110,7 @@ class Language extends LanguageBase {
     }
 
     static function labelToolsExportTypeSerialize() {
-        return 'Serialized';
+        return 'For import via NubiS';
     }
 
     static function labelToolsImportSettings() {

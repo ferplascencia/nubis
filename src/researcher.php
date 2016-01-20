@@ -136,6 +136,8 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_KEEP_ONLY, loadvar(DATA_OUTPUT_KEEP_ONLY));
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
         $de->setProperty(DATA_OUTPUT_ENCODING, "UTF-8");
+        $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
         //$de->displayProperties();
         $de->generate();
         $de->download();
@@ -210,6 +212,8 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_SURVEY, loadvar(DATA_OUTPUT_SURVEY));
         $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
+        $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
         $de->generateTimings();
         $de->download();
     }    
@@ -254,6 +258,8 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_SURVEY, loadvar(DATA_OUTPUT_SURVEY));
         $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
+        $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
         $de->generateParadata();
         $de->download();
     }    
@@ -312,6 +318,8 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_KEEP_ONLY, loadvar(DATA_OUTPUT_KEEP_ONLY));
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
         $de->setProperty(DATA_OUTPUT_ENCODING, "UTF-8");
+        $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
         //$de->displayProperties();
         $de->generateAuxiliary();
         $de->download();

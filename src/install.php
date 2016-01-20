@@ -60,10 +60,8 @@ class Install {
         $returnStr = $message;
         $returnStr .= $this->displayComboBox();
         $zones = $this->getTimezones();
-        $returnStr .= '<form method="post" action="index.php"><input type="hidden" name="p" value="setupRes" /><input type=hidden name=se value="2" />
-        
-        <div style="margin-top: 20px;">
-                        
+        $returnStr .= '<form method="post"><div style="margin-top: 20px;">
+                        <input type="hidden" name="p" value="setupRes" />
   <!-- Nav tabs -->
   <ul id="myTabs" class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">' . Language::installLabelWelcome() . '</a></li>
@@ -430,7 +428,8 @@ class Install {
             return $this->getContent("setup", $message);
         } else {
 // TODO: FINISH ADDING POST SETTINGS TO THE CONFIG, ADD SAMPLE SETTINGS AND ANYTHING ELSE MISSING FROM THE SETUP WIZARD
-            /* test db */            
+            /* test db */
+            
             $db = new Database();
             if ($db->connect(loadvar("databaseserver"), loadvar("databasename"), loadvar("databaseuser"), loadvar("databasepassword")) == false) { //no connection with DB.. Errormessage! 
                 $message = '<div class="alert alert-danger">' . Language::installWarningDatabase() . '</div>';
@@ -520,7 +519,7 @@ $configuration = array(
 
     function finish() {
         $returnStr = '<br/><div class="alert alert-success">' . Language::installConfirmation() . '</div><br/><br/>';
-        $returnStr .= "<form method=post>";        
+        $returnStr .= "<form method=post>"; 
         $returnStr .= "<input type=hidden name=" . POST_PARAM_FULLRESET . " value='1' />";
         $returnStr .= "<input type=hidden name=" . POST_PARAM_SE . " value='" . USCIC_SMS . "' />";
         $returnStr .= '<button type="submit" class="btn btn-primary">' . Language::installButtonNext() . '</button>';

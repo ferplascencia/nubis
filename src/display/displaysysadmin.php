@@ -152,7 +152,7 @@ class DisplaySysAdmin extends Display {
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.test'), '<span class="glyphicon glyphicon-comment"></span> ' . Language::linkTester()) . '</li>';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.issues'), '<span class="glyphicon glyphicon-thumbs-down"></span> ' . Language::linkReported()) . '</li>';
         $returnStr .= '<li class="divider"></li>';
-        //$returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.export'), '<span class="glyphicon glyphicon-export"></span> ' . Language::linkExport()) . '</li>';
+        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.export'), '<span class="glyphicon glyphicon-export"></span> ' . Language::linkExport()) . '</li>';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.import'), '<span class="glyphicon glyphicon-import"></span> ' . Language::linkImport()) . '</li>';
         $returnStr .= '<li class="divider"></li>';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.clean'), '<span class="glyphicon glyphicon-trash"></span> ' . Language::linkCleaner()) . '</li>';
@@ -4728,7 +4728,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_VERSION_CHANGE, $group->getOnVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
-                
+
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditOnClick() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table>";
@@ -4743,7 +4743,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_VERSION_CHANGE, $type->getClickVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
-        
+
         $returnStr .= '</div>';
 
         $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
@@ -5422,7 +5422,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $this->displayOnSubmit(SETTING_ON_VERSION_CHANGE, $survey->getOnVersionChange()) . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
-        
+
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditOnClick() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table>";
@@ -5811,7 +5811,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.test')) . '" class="list-group-item">' . Language::linkTester() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.issues')) . '" class="list-group-item">' . Language::linkReported() . '</a>';
         //$returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.flood')) . '" class="list-group-item">' . Language::linkFlood() . '</a>';
-        //$returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.export')) . '" class="list-group-item">' . Language::linkExport() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.export')) . '" class="list-group-item">' . Language::linkExport() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.import')) . '" class="list-group-item">' . Language::linkImport() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.clean')) . '" class="list-group-item">' . Language::linkCleaner() . '</a>';
         $returnStr .= '</div>';
@@ -5866,14 +5866,14 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<span class="label label-default">' . Language::labelToolsCleanPeriod() . '</span>';
             $returnStr .= '<div class="well well-sm">';
             $returnStr .= '<table>';
-            $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker("from", "from", "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", Config::usFormatSMS()) . '</td><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker("to", "to", "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", Config::usFormatSMS()) . '</td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker("from", "from", "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker("to", "to", "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
             $returnStr .= '</table>';
 
             $returnStr .= '</div>';
 
 
-            $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonClean() . '"/>';
+            $returnStr .= '<input type="submit" class="btn btn-default" ' . confirmAction(language::messageRemoveData(), 'REMOVE') . ' value="' . Language::buttonClean() . '"/>';
             $returnStr .= '</form>';
         } else {
             $returnStr .= $this->displayInfo(Language::messageNoSurveysAvailable());
@@ -7332,26 +7332,74 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
     function showExport() {
         $returnStr = $this->showToolsHeader(Language::headerToolsExporter());
-        $returnStr .= $content;
-
-        $returnStr .= '<form method="post">';
-        $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.exportres'));
-        $returnStr .= '<span class="label label-default">' . Language::labelToolsExportSettings() . '</span>';
-        $returnStr .= '<div class="well well-sm">';
-        $returnStr .= '<table>';
         $returnStr .= $this->displayComboBox(); // <option value=1>Blaise</option>
-        $returnStr .= '<tr><td>' . Language::labelToolsExportType() . '</td>
-                    <td><select class="selectpicker show-tick" name="importtype">                    
-                    <option value=' . EXPORT_TYPE_SERIALIZE . '>' . Language::labelToolsExportTypeSerialize() . '</option>
+        $surveys = new Surveys();
+        $surveys = $surveys->getSurveys();
+        if (sizeof($surveys) > 0) {
+
+            $returnStr .= "<form id=refreshform1 method=post>";
+            $returnStr .= '<input type=hidden name=page value="sysadmin.tools.export">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_EXPORTTYPE . '" id="' . SMS_POST_EXPORTTYPE . '_hidden" value="">';
+            $returnStr .= "</form>";
+
+            $returnStr .= "<form id=refreshform method=post>";
+            $returnStr .= '<input type=hidden name=page value="sysadmin.tools.export">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_MODE . '" id="' . SMS_POST_MODE . '_hidden" value="' . getSurveyMode() . '">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_LANGUAGE . '" id="' . SMS_POST_LANGUAGE . '_hidden" value="' . getSurveyLanguage() . '">';
+            $returnStr .= "</form>";
+
+            $returnStr .= '<form method="post">';
+            $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.exportres'));
+            $returnStr .= '<span class="label label-default">' . Language::labelToolsExportSettings() . '</span>';
+            $returnStr .= '<div class="well well-sm">';
+            $returnStr .= '<table>';
+            $returnStr .= '<tr><td>' . Language::labelTestSurvey() . "</td><td><select onchange='document.getElementById(\"" . SMS_POST_SURVEY . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();' name=" . POST_PARAM_SUID . " class='selectpicker show-tick'>";
+            $current = new Survey(getSurvey());
+            foreach ($surveys as $survey) {
+                $selected = "";
+                if ($survey->getSuid() == $current->getSuid()) {
+                    $selected = "SELECTED";
+                }
+                $returnStr .= "<option $selected value=" . $survey->getSuid() . '>' . $survey->getName() . '</option>';
+            }
+            $returnStr .= "</select></td></tr>";
+            $sel = array(EXPORT_TYPE_SERIALIZE => "", EXPORT_TYPE_SQL => "");
+            if (loadvar(SMS_POST_EXPORTTYPE) != "") {
+                $sel[loadvar(SMS_POST_EXPORTTYPE)] = "SELECTED";
+            }
+
+            $returnStr .= '<tr><td>' . Language::labelToolsExportType() . '</td>
+                    <td><select ' . "onchange='document.getElementById(\"" . SMS_POST_EXPORTTYPE . "_hidden\").value=this.value; document.getElementById(\"refreshform1\").submit();'" . ' class="selectpicker show-tick" name="' . SETTING_EXPORT_TYPE . '">  
+                    <option ' . $sel[EXPORT_TYPE_SERIALIZE] . ' value=' . EXPORT_TYPE_SERIALIZE . '>' . Language::labelToolsExportTypeSerialize() . '</option>
+                    <option ' . $sel[EXPORT_TYPE_SQL] . '  value=' . EXPORT_TYPE_SQL . '>' . Language::labelToolsExportTypeSQL() . '</option>                                            
                     </select></td>
                     </tr>';
-        $returnStr .= '</table>';
-        $returnStr .= '</div>';
 
-        $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonExport() . '"/>';
-        $returnStr .= '</form>';
+            if (loadvar(SMS_POST_EXPORTTYPE) == EXPORT_TYPE_SQL) {
+                $returnStr .= '<tr><td>' . Language::labelToolsExportCreate() . '</td>
+                    <td><select class="selectpicker show-tick" name="' . SETTING_EXPORT_CREATE . '">                    
+                    <option value=' . EXPORT_CREATE_YES . '>' . Language::labelToolsExportCreateYes() . '</option>
+                    <option value=' . EXPORT_CREATE_NO . '>' . Language::labelToolsExportCreateNo() . '</option>
+                    </select></td>
+                    </tr>';
+                $returnStr .= '<tr><td>' . Language::labelToolsExportHistory() . '</td>
+                    <td><select class="selectpicker show-tick" name="' . SETTING_EXPORT_HISTORY . '">                    
+                    <option value=' . EXPORT_HISTORY_YES . '>' . Language::labelToolsExportHistoryYes() . '</option>
+                    <option value=' . EXPORT_HISTORY_NO . '>' . Language::labelToolsExportHistoryNo() . '</option>
+                    </select></td>
+                    </tr>';
+            }
+            $returnStr .= '</table>';
+            $returnStr .= '</div>';
 
-//END CONTENT
+            $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonExport() . '"/>';
+            $returnStr .= '</form>';
+        } else {
+            $returnStr .= $this->displayInfo(Language::messageNoSurveysAvailable());
+        }
+
+        //END CONTENT
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
 
@@ -7361,21 +7409,31 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
     function showImport($content = "") {
         $returnStr = $this->showToolsHeader(Language::headerToolsImporter());
+        $returnStr .= $this->displayComboBox();
         $returnStr .= $content;
 
-        $returnStr .= '<form method="post">';
+        $returnStr .= "<form id=refreshform method=post>";
+        $returnStr .= '<input type=hidden name=page value="sysadmin.tools.import">';
+        $returnStr .= '<input type=hidden name="' . SMS_POST_IMPORTTYPE . '" id="' . SMS_POST_IMPORTTYPE . '_hidden" value="">';
+        $returnStr .= "</form>";
+
+        $returnStr .= '<form method="post" enctype="multipart/form-data">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.importres'));
         $returnStr .= '<span class="label label-default">' . Language::labelToolsImportSettings() . '</span>';
         $returnStr .= '<div class="well well-sm">';
         $returnStr .= '<table>';
-        $returnStr .= $this->displayComboBox(); // <option value=1>Blaise</option>
-        $returnStr .= '<tr><td>' . Language::labelToolsImportType() . '</td>
-                    <td><select class="selectpicker show-tick" name="importtype">                    
-                    <option value=' . IMPORT_TYPE_MMIC . '>' . Language::labelToolsImportTypeMMIC() . '</option>
+        $sel = array(IMPORT_TYPE_BLAISE => "", IMPORT_TYPE_MMIC => "", IMPORT_TYPE_NUBIS => "");
+        if (loadvar(SMS_POST_IMPORTTYPE) != "") {
+            $sel[loadvar(SMS_POST_IMPORTTYPE)] = "SELECTED";
+        }
+        $returnStr .= '<tr><td>' . Language::labelToolsImportType() . "</td>
+                    <td><select onchange='document.getElementById(\"" . SMS_POST_IMPORTTYPE . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();' class='selectpicker show-tick' name='" . SETTING_IMPORT_TYPE . "'>" . '                    
+                    <option ' . $sel[IMPORT_TYPE_NUBIS] . ' value=' . IMPORT_TYPE_NUBIS . '>' . Language::labelToolsImportTypeNubis() . '</option>
+                    <option ' . $sel[IMPORT_TYPE_MMIC] . '  value=' . IMPORT_TYPE_MMIC . '>' . Language::labelToolsImportTypeMMIC() . '</option>
                     </select></td>
                     </tr>';
         $returnStr .= '<tr><td>' . Language::labelToolsImportTarget() . '</td>
-                    <td><select class="selectpicker show-tick" name="importas">                    
+                    <td><select class="selectpicker show-tick" name="' . SETTING_IMPORT_AS . '">                    
                     <option value=' . IMPORT_TARGET_ADD . '>' . Language::labelToolsImportTargetAdd() . '</option>
                     <option value=' . IMPORT_TARGET_REPLACE . '>' . Language::labelToolsImportTargetReplace() . '</option>';
         $returnStr .= '</select></td>
@@ -7383,25 +7441,30 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
-        $returnStr .= '<span class="label label-default">' . Language::labelToolsImportDatabase() . '</span>';
-        $returnStr .= '<div class="well well-sm">';
-        $returnStr .= '<table>';
-        $returnStr .= '<tr><td>' . Language::labelDatabaseServer() . '</td><td><input class="form-control" type=text name="databaseServer" value="localhost" /></td></tr>';
-        $returnStr .= '<tr><td>' . Language::labelDatabaseName() . '</td><td><input class="form-control" type=text name="databaseName" value="mmicsource" /></td></tr>';
-        $returnStr .= $this->displayComboBox();
-        /* $returnStr .= '<tr><td>' . Language::labelToolsImportDatabaseType() . '</td>
-          <td><select class="selectpicker show-tick" name="databaseType">
-          <option value=1>' . Language::labelDatabaseTypeMySQL() . '</option>
-          <option value=2>' . Language::labelDatabaseTypeOracle() . '</option>
-          </select></td>
-          </tr>'; */
-        $returnStr .= '<tr><td>' . Language::labelDatabaseUsername() . '</td><td><input class="form-control" type=text name="databaseUsername" value="root" /></td></tr>';
-        $returnStr .= '<tr><td>' . Language::labelDatabasePassword() . '</td><td><input class="form-control" type=password name="databasePassword" /></td></tr>';
-        $returnStr .= '<tr><td>' . Language::labelDatabaseTablename() . '</td><td><input class="form-control" type=text name="databaseTablename" value="sc1" /></td></tr>';
-        $returnStr .= '</table>';
-        $returnStr .= '</div>';
+        if (loadvar(SMS_POST_IMPORTTYPE) == IMPORT_TYPE_MMIC) {
+            $returnStr .= '<span class="label label-default">' . Language::labelToolsImportDatabase() . '</span>';
+            $returnStr .= '<div class="well well-sm">';
+            $returnStr .= '<table>';
+            $returnStr .= '<tr><td>' . Language::labelDatabaseServer() . '</td><td><input class="form-control" type=text name="' . SETTING_IMPORT_SERVER . '" placeholder="localhost" /></td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelDatabaseName() . '</td><td><input class="form-control" type=text name="' . SETTING_IMPORT_DATABASE . '" value="" /></td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelDatabaseUsername() . '</td><td><input class="form-control" type=text name="' . SETTING_IMPORT_USER . '" value="" /></td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelDatabasePassword() . '</td><td><input class="form-control" type=password name="' . SETTING_IMPORT_PASSWORD . '" /></td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelDatabaseTablename() . '</td><td><input class="form-control" type=text name="' . SETTING_IMPORT_TABLE . '" value="" /></td></tr>';
+            $returnStr .= '</table>';
+            $returnStr .= '</div>';
+        } else {
+            $returnStr .= '<span class="label label-default">' . Language::labelToolsImportFile() . '</span>';
+            $returnStr .= '<div class="well well-sm">';
+            //$returnStr .= "<textarea placeholder='Paste contents of export file here' class='form-control' style='min-width: 300px; width: 100%; min-height: 300px;' name='" . SETTING_IMPORT_TEXT . "'></textarea>";
+            $returnStr .= '<div style="position:relative;"><a class="btn btn-primary" href="javascript:;">' . Language::buttonBrowse() . '
+            <input type="file" style="position:absolute;z-index:2;top:0;left:0;filter: alpha(opacity=0);-ms-filter:\'progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\';opacity:0;background-color:transparent;color:transparent;" name="' . SETTING_IMPORT_TEXT . '" size="40"  onchange=\'$("#upload-file-info").html($(this).val());\'>
+        </a>
+        &nbsp;
+        <span class="label label-info" id="upload-file-info"></span></div>';
+            $returnStr .= '</div>';
+        }
 
-        $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonImport() . '"/>';
+        $returnStr .= '<input type="submit" class="btn btn-default" ' . confirmAction(language::messageImportSurvey(), 'IMPORT') . ' value="' . Language::buttonImport() . '"/>';
         $returnStr .= '</form>';
 
 //END CONTENT
@@ -7635,61 +7698,5 @@ $( ".uscic-form-control-admin" ).contextMenu({
         return $returnStr;
     }
 
-    /* function showEditorBar() {
-      $returnStr = '<link href="js/wysiwyg/bootstrap-wysiwyg.css" rel="stylesheet">
-      <script type="text/javascript" src="js/wysiwyg/bootstrap-wysiwyg.js"></script>
-      <script type="text/javascript" src="js/wysiwyg/jquery-hotkeys.js"></script>';
-      $returnStr .= '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
-      <div class="btn-group">
-      <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font"><i class="glyphicon glyphicon-font"></i><b class="caret"></b></a>
-      <ul class="dropdown-menu">
-      <li><a data-edit="fontName Serif" style="font-family:\'Serif\'">Serif</a></li><li><a data-edit="fontName Sans" style="font-family:\'Sans\'">Sans</a></li><li><a data-edit="fontName Arial" style="font-family:\'Arial\'">Arial</a></li><li><a data-edit="fontName Arial Black" style="font-family:\'Arial Black\'">Arial Black</a></li><li><a data-edit="fontName Courier" style="font-family:\'Courier\'">Courier</a></li><li><a data-edit="fontName Courier New" style="font-family:\'Courier New\'">Courier New</a></li><li><a data-edit="fontName Comic Sans MS" style="font-family:\'Comic Sans MS\'">Comic Sans MS</a></li><li><a data-edit="fontName Helvetica" style="font-family:\'Helvetica\'">Helvetica</a></li><li><a data-edit="fontName Impact" style="font-family:\'Impact\'">Impact</a></li><li><a data-edit="fontName Lucida Grande" style="font-family:\'Lucida Grande\'">Lucida Grande</a></li><li><a data-edit="fontName Lucida Sans" style="font-family:\'Lucida Sans\'">Lucida Sans</a></li><li><a data-edit="fontName Tahoma" style="font-family:\'Tahoma\'">Tahoma</a></li><li><a data-edit="fontName Times" style="font-family:\'Times\'">Times</a></li><li><a data-edit="fontName Times New Roman" style="font-family:\'Times New Roman\'">Times New Roman</a></li><li><a data-edit="fontName Verdana" style="font-family:\'Verdana\'">Verdana</a></li></ul>
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size"><i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
-      <ul class="dropdown-menu">
-      <li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li>
-      <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
-      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
-      </ul>
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><i class="glyphicon glyphicon-bold"></i></a>
-      <a class="btn btn-primary" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i class="glyphicon glyphicon-italic"></i></a>
-      <a class="btn btn-primary" data-edit="underline" title="" data-original-title="Underline (Ctrl/Cmd+U)"><i class="glyphicon glyphicon-text-width"></i></a>
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary" data-edit="insertunorderedlist" title="" data-original-title="Bullet list"><i class="glyphicon glyphicon-list"></i></a>
-      <a class="btn btn-primary" data-edit="insertorderedlist" title="" data-original-title="Number list"><i class="glyphicon glyphicon-list-alt"></i></a>
-      <a class="btn btn-primary" data-edit="outdent" title="" data-original-title="Reduce indent (Shift+Tab)"><i class="glyphicon glyphicon-indent-left"></i></a>
-      <a class="btn btn-primary" data-edit="indent" title="" data-original-title="Indent (Tab)"><i class="glyphicon glyphicon-indent-right"></i></a>
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary" data-edit="justifyleft" title="" data-original-title="Align Left (Ctrl/Cmd+L)"><i class="glyphicon glyphicon-align-left"></i></a>
-      <a class="btn btn-primary" data-edit="justifycenter" title="" data-original-title="Center (Ctrl/Cmd+E)"><i class="glyphicon glyphicon-align-center"></i></a>
-      <a class="btn btn-primary" data-edit="justifyright" title="" data-original-title="Align Right (Ctrl/Cmd+R)"><i class="glyphicon glyphicon-align-right"></i></a>
-      <a class="btn btn-primary" data-edit="justifyfull" title="" data-original-title="Justify (Ctrl/Cmd+J)"><i class="glyphicon glyphicon-align-justify"></i></a>
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Hyperlink"><i class="glyphicon glyphicon-link"></i></a>
-      <div class="dropdown-menu input-append">
-      <input class="span2" placeholder="URL" data-edit="createLink" type="text">
-      <button class="btn" type="button">Add</button>
-      </div>
-      <a class="btn btn-primary" data-edit="unlink" title="" data-original-title="Remove Hyperlink"><i class="glyphicon glyphicon-remove"></i></a>
-
-      </div>
-
-      <div class="btn-group">
-      <a class="btn btn-primary" title="" id="pictureBtn" data-original-title="Insert picture (or just drag &amp; drop)"><i class="glyphicon glyphicon-picture"></i></a>
-      <input data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 37px; height: 30px;" type="file">
-      </div>
-      <div class="btn-group">
-      <a class="btn btn-primary" data-edit="undo" title="" data-original-title="Undo (Ctrl/Cmd+Z)"><i class="glyphicon glyphicon-backward"></i></a>
-      <a class="btn btn-primary" data-edit="redo" title="" data-original-title="Redo (Ctrl/Cmd+Y)"><i class="glyphicon glyphicon-forward"></i></a>
-      </div>
-      </div>';
-      return $returnStr;
-      } */
 }
 

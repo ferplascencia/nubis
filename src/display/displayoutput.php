@@ -1663,7 +1663,6 @@ var chart = new Highcharts.Chart({
                 $bracks .= ",";
             }
         }
-        $returnStr = '<script src="js/export-csv.js"></script>';
         $returnStr .= "<script type='text/javascript'>
             
 

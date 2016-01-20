@@ -38,7 +38,7 @@ if ($db->getDb() == null) { //no connection with DB.. Errormessage!
         
         // in SMS mode and no correct config, then we run install        
         if ($loaded == 2) {
-            require_once('install.php');              
+            require_once('install.php');        
             $install = new Install(loadvar('p'));
             exit;
         }

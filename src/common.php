@@ -35,15 +35,23 @@ class Common {
     }
 
     static function surveyTables() {
-        return array("_sections", "_variables", "_context", "_engines", "_next", "_routing", "_screens", "_settings", "_surveys", "_groups", "_tracks", "_progressbars");
+        return array("_sections", "_variables", "_context", "_engines", "_next", "_routing", "_screens", "_settings", "_surveys", "_groups", "_tracks", "_progressbars", "_types", "_versions");
     }
 
     static function surveyDataTables() {
-        return array("_actions", "_data", "_screendumps", "_states", "_times", "_paradata", "_logs");
+        return array("_actions", "_data", "_screendumps", "_states", "_times", "_paradata", "_logs", "_loopdata");
     }
 
     static function surveyTestDataTables() {
-        return array("_test_actions", "_test_data", "_test_screendumps", "_test_states", "_test_times");
+        return array("_test_actions", "_test_data", "_test_screendumps", "_test_states", "_test_times", "_test_loopdata");
+    }
+    
+    static function surveyExportTables() {
+        return array("_sections", "_variables", "_routing", "_settings", "_surveys", "_groups", "_tracks", "_types", "_versions");
+    }
+    
+    static function allTables() {
+        return array("_actions", "_communication", "_context","_consolidated_times","_data", "_datarecords","_engines","_files","_groups","_households","_interviewstatus","_issues","_lab","_logs","_loopdata","_next","_observations","_paradata","_pictures","_progressbars","_psus","_remarks","_respondents","_routing","_screendumps","_screens","_sections","_settings","_states","_surveys","_test_actions","_test_data","_test_datarecords","_test_files","_test_interviewstatus","_test_lab","_test_logs","_test_loopdata","_test_observations","_test_paradata","_test_pictures","_test_screendumps","_test_states","_test_consolidated_times","_test_times","_times","_tracks","_types","_users","_variables","_versions");
     }
 
     static function surveyCoreVariables() {

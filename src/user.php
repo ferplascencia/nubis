@@ -150,7 +150,6 @@ class User {
     
     function getSurveysAccess() {
         $access = unserialize(gzuncompress($this->getAccess()));
-        //print_R($access);
         return array_keys($access);
     }
 

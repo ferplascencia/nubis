@@ -168,9 +168,9 @@ define('INDICATOR_CUSTOMTEMPLATEANSWER', "INPUT");
 
 define('IMPORT_TYPE_BLAISE', 1);
 define('IMPORT_TYPE_MMIC', 2);
+define('IMPORT_TYPE_NUBIS', 3);
 define('IMPORT_TARGET_ADD', 1);
 define('IMPORT_TARGET_REPLACE', 2);
-define('EXPORT_TYPE_SERIALIZE', 1);
 
 define('MODE_CAPI', 1);
 define('MODE_CATI', 2);
@@ -261,7 +261,8 @@ define('DATA_OUTPUT_FORMATMODE', 'formatmode');
 define('DATA_OUTPUT_FILEEXTENSION_STATA', 'dta');
 define('DATA_OUTPUT_FILEEXTENSION_CSV', 'csv');
 define('DATA_OUTPUT_ENCODING', 'encoding');
-define('DATA_OUTPUT_INCREMENTAL', 'increment');
+define('DATA_OUTPUT_FROM', 'datafrom');
+define('DATA_OUTPUT_TO', 'datato');
 define('OUTPUT_SCREENDUMPS_TYPE_HTML', "1");
 define('OUTPUT_SCREENDUMPS_TYPE_CAROUSEL', "2");
 define('OBJECT_SURVEY', 1);
@@ -1334,5 +1335,43 @@ define('CONFIGURATION_SESSION_TIMEOUT', 'sessiontimewarn');
 define('CONFIGURATION_SESSION_LOGOUT', 'sessionlogout');
 define('CONFIGURATION_SESSION_REDIRECT', 'sessionredirect');
 define('CONFIGURATION_SESSION_PING', 'sessionping');
+
+
+/* export settings */
+define('SETTING_EXPORT_TYPE', 'exporttype');
+define('SETTING_EXPORT_HISTORY', 'exporthistory');
+define('SETTING_EXPORT_CREATE', 'exportcreate');
+define('EXPORT_HISTORY_YES', 1);
+define('EXPORT_HISTORY_NO', 2);
+define('EXPORT_CREATE_YES', 1);
+define('EXPORT_CREATE_NO', 2);
+define('EXPORT_TYPE_SQL', 1);
+define('EXPORT_TYPE_SERIALIZE', 2);
+define('EXPORT_PLACEHOLDER_TABLE', '$importtablename$');
+define('EXPORT_PLACEHOLDER_SUID', '$importsuid$');
+define('EXPORT_PLACEHOLDER_URID', '$importurid$');
+define('EXPORT_COLUMN_SUID', 'suid');
+define('EXPORT_COLUMN_URID', 'urid');
+define('EXPORT_FILE_NUBIS', '.nubis');
+define('EXPORT_FILE_SQL', '.sql');
+define('SMS_POST_EXPORTTYPE', 'smsexport');
+
+/* import settings */
+define('SMS_POST_IMPORTTYPE', 'smsimport');
+define('SETTING_IMPORT_TYPE', 'importtype');
+define('SETTING_IMPORT_AS', 'importas');
+define('SETTING_IMPORT_SERVER', 'databaseServer');
+define('SETTING_IMPORT_DATABASE', 'databaseName');
+define('SETTING_IMPORT_USER', 'databaseUsername');
+define('SETTING_IMPORT_PASSWORD', 'databasePassword');
+define('SETTING_IMPORT_TABLE', 'databaseTablename');
+define('SETTING_IMPORT_TEXT', 'importtext');
+define('EXPORT_DELIMITER', '~dsdfrfeterthbgf~');
+define('EXPORT_SQL_DELIMITER', ';');
+define('EXPORT_PLACEHOLDER_QUOTE', '~DOUBLEQUOTE~');
+define('EXPORT_PLACEHOLDER_COMMA', '~COMMA~');
+define('EXPORT_PLACEHOLDER_LINEBREAK', '~LINEBREAK~');
+define('IMPORT_STATEMENT_INSERT', 'INSERT INTO');
+define('IMPORT_STATEMENT_INSERT_VALUES', 'VALUES');
 
 ?>

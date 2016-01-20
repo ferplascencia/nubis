@@ -301,15 +301,12 @@ function setSurveyVersion($l) {
 function getSurveyVersion($survey = "") {
 
     /* SMS */
-
     if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
         if ($survey == "") {
             global $survey;
         }
         return $survey->getCurrentVersion();
     }
-
-
 
     /* SURVEY */
     global $version;
@@ -956,7 +953,7 @@ function isSurveyTemplate($t) {
     if ($t == $template) {
         return true;
     }
-    
+
     return inArray($l, array_keys(Common::surveyOverallTemplates()));
 }
 
@@ -1002,7 +999,7 @@ function getSurveyTemplate() {
                     }
                     break;
                 }
-            }                        
+            }
         }
     }
 
@@ -1411,103 +1408,6 @@ function getReferences($text, $indicator) {
     return array_unique($fills);
 }
 
-/* OLD FILL FUNCTIONS */
-/* function getDynamicText($text) {
-  $fills = array();
-  $split = "(\\" . INDICATOR_FILL . ")";
-  //echo $text;
-  $fillList = preg_split($split, $text);
-  //print_r($fillList);
-  for ($cnt = 1; $cnt < sizeof($fillList); $cnt++) {
-
-  // set fill
-  $fillRef = $fillList[$cnt];
-
-  // get everything between [ and ]
-  // (adapted from http://stackoverflow.com/questions/10104473/php-capturing-text-between-square-brackets)
-  $matches = array();
-  preg_match("/\[(.*?)\]/", $fillList[$cnt], $matches);
-
-  //$text = '[This] is a [test] string, [eat] my [shorts].';
-  //preg_match("/\[(.*?)\]/", $text, $matches);
-  //var_dump($matches[1]);
-
-  if (isset($matches[1])) {
-  $fillRef = str_replace($matches[1], TEXT_RANDOM_FILL, $fillRef);
-  }
-  $fill = preg_split("([\s+\-%=<>(){}!?'\"&*~@#|/:;,$\r\n])", $fillRef);
-
-  // if ends with a dot, then remove it (possible leftover from 'Hi, My Name is ^FLName.')
-  $cnt1 = 0;
-  while (endsWith($fill[0], ".")) {
-  $fill[0] = substr($fill[0], 0, strrpos($fill[0], "."));
-  $cnt1++;
-  if ($cnt1 > 500) {
-  break;
-  }
-  }
-
-  if (isset($matches[1])) {
-  //echo $fill[0] . '----' . $matches[1] . "<br/>";
-  $fills[] = str_replace(TEXT_RANDOM_FILL, $matches[1], $fill[0]);
-  } else {
-  //echo $fill[0] . "<hr>";
-  $fills[] = $fill[0];
-  }
-  }
-
-  //print_r($fills);
-  return array_unique($fills);
-  }
-
-  function getDynamicTextNoValues($text) {
-  $fills = array();
-  $split = "(\\" . INDICATOR_FILL_NOVALUE . ")";
-  //echo $text;
-  $fillList = preg_split($split, $text);
-  //print_r($fillList);
-  for ($cnt = 1; $cnt < sizeof($fillList); $cnt++) {
-
-  // set fill
-  $fillRef = $fillList[$cnt];
-
-  // get everything between [ and ]
-  // (adapted from http://stackoverflow.com/questions/10104473/php-capturing-text-between-square-brackets)
-  $matches = array();
-  preg_match("/\[(.*?)\]/", $fillList[$cnt], $matches);
-
-  //$text = '[This] is a [test] string, [eat] my [shorts].';
-  //preg_match("/\[(.*?)\]/", $text, $matches);
-  //var_dump($matches[1]);
-
-  if (isset($matches[1])) {
-  $fillRef = str_replace($matches[1], TEXT_RANDOM_FILL, $fillRef);
-  }
-  $fill = preg_split("([\s+\-%=<>(){}!?'\"&*~@#|/:;,$\r\n])", $fillRef);
-
-  // if ends with a dot, then remove it (possible leftover from 'Hi, My Name is ^FLName.')
-  $cnt1 = 0;
-  while (endsWith($fill[0], ".")) {
-  $fill[0] = substr($fill[0], 0, strrpos($fill[0], "."));
-  $cnt1++;
-  if ($cnt1 > 500) {
-  break;
-  }
-  }
-
-  if (isset($matches[1])) {
-  //echo $fill[0] . '----' . $matches[1] . "<br/>";
-  $fills[] = str_replace(TEXT_RANDOM_FILL, $matches[1], $fill[0]);
-  } else {
-  //echo $fill[0] . "<hr>";
-  $fills[] = $fill[0];
-  }
-  }
-
-  //print_r($fills);
-  return array_unique($fills);
-  } */
-
 function excludeText($rule, &$removed) {
     $pattern = '/[\'|\"][^\r\n\"\']*[\'|\"]/';
     $matches = array();
@@ -1543,6 +1443,21 @@ function prepareDatabaseString($string, $striptags = true) {
         $string = strip_tags($string);
     }
     return escapeString($string);
+}
+
+function prepareExportString($string) {
+    $string = str_replace('"', EXPORT_PLACEHOLDER_QUOTE, $string);
+    $string = str_replace(',', EXPORT_PLACEHOLDER_COMMA, $string);
+    $string = str_replace("\r\n", EXPORT_PLACEHOLDER_LINEBREAK, $string);
+    return $string;
+}
+
+function prepareImportString($val) {
+    $val = str_replace('"', '', $val);
+    $val = str_replace(EXPORT_PLACEHOLDER_QUOTE, '"', $val);
+    $val = str_replace(EXPORT_PLACEHOLDER_COMMA, ',', $val);
+    $val = str_replace(EXPORT_PLACEHOLDER_LINEBREAK, "\r\n", $val);
+    return $val;
 }
 
 function escapeString($string) {

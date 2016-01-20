@@ -394,6 +394,8 @@ class SysAdmin {
                     break;
                 case "sysadmin.tools.export": return $this->showExport();
                     break;
+                case "sysadmin.tools.exportres": return $this->showExportRes();
+                    break;
                 case "sysadmin.tools.import": return $this->showImport();
                     break;
                 case "sysadmin.tools.importres": return $this->showImportRes();
@@ -931,7 +933,7 @@ class SysAdmin {
                 $var->setTyd(-1);
                 $var->setPosition(6);
                 $var->save();
-                
+
                 $var = new VariableDescriptive();
                 $var->setVsid(7);
                 $var->setName(VARIABLE_TEMPLATE);
@@ -3695,7 +3697,7 @@ class SysAdmin {
         if (!inArray(loadvar(SETTING_DEFAULT_MODE), $ans)) {
             $content = $displaySysAdmin->displayError(Language::messageModeSettingsNotChanged());
         } else {
-            $current = explode("~", $survey->getAllowedModes());            
+            $current = explode("~", $survey->getAllowedModes());
             $survey->setDefaultMode(loadvar(SETTING_DEFAULT_MODE));
             $survey->setChangeMode(loadvar(SETTING_CHANGE_MODE));
             $survey->setReentryMode(loadvar(SETTING_REENTRY_MODE));
@@ -3711,7 +3713,7 @@ class SysAdmin {
                         $u->removeMode($_SESSION['SUID'], $c);
                     }
                 }
-                foreach ($ans as $a) {                    
+                foreach ($ans as $a) {
                     if (!inArray($a, $current)) {
                         if (inArray($u->getUrid(), $update) || inArray(-1, $update)) {
                             $u->addMode($_SESSION['SUID'], $a, $survey->getAllowedLanguages($a));
@@ -3720,7 +3722,7 @@ class SysAdmin {
                 }
                 $u->saveChanges();
             }
-            
+
             if (!inArray(getSurveyMode(), $ans)) {
                 $_SESSION['SURVEY_MODE'] = $ans[0];
             }
@@ -3802,7 +3804,7 @@ class SysAdmin {
                 $u->saveChanges();
             }
             $content = $displaySysAdmin->displaySuccess(Language::messageLanguageSettingsChanged());
-            
+
             if (!inArray(getSurveyLanguage(), $ans)) {
                 $_SESSION['SURVEY_LANGUAGE'] = $ans[0];
             }
@@ -4905,7 +4907,7 @@ class SysAdmin {
         }
         $de->setProperty(DATA_OUTPUT_VARLIST, $cookievars);
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
-        
+
         $this->determineModeLanguage($de);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
@@ -4952,7 +4954,7 @@ class SysAdmin {
         }
         $de->setProperty(DATA_OUTPUT_VARLIST, $cookievars);
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
-        
+
         $this->determineModeLanguage($de);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
@@ -4996,7 +4998,7 @@ class SysAdmin {
         }
         $de->setProperty(DATA_OUTPUT_VARLIST, $cookievars);
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
-        
+
         $this->determineModeLanguage($de);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
@@ -5028,9 +5030,9 @@ class SysAdmin {
         }
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
         $de->setProperty(DATA_OUTPUT_INCLUDE_VALUE_LABELS, loadvar(DATA_OUTPUT_INCLUDE_VALUE_LABELS));
-        $de->setProperty(DATA_OUTPUT_INCLUDE_VALUE_LABEL_NUMBERS, loadvar(DATA_OUTPUT_INCLUDE_VALUE_LABEL_NUMBERS));        
+        $de->setProperty(DATA_OUTPUT_INCLUDE_VALUE_LABEL_NUMBERS, loadvar(DATA_OUTPUT_INCLUDE_VALUE_LABEL_NUMBERS));
         $de->setProperty(DATA_OUTPUT_MARK_EMPTY, loadvar(DATA_OUTPUT_MARK_EMPTY));
-        
+
         $this->determineModeLanguage($de);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
@@ -6186,8 +6188,6 @@ class SysAdmin {
                     $db->executeQuery($query);
                     $query = "delete from " . $table . "_loopdata where suid=" . $cl . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_pictures where suid=" . $cl . $tsquery;
-                    $db->executeQuery($query);
                 }
             }
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsCleanOk());
@@ -6421,7 +6421,7 @@ class SysAdmin {
         if (sizeof($messages) == 0) {
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsCompileOk());
         } else {
-            $content = $displaySysAdmin->displayError(Language::messageToolsCompileNotOk());
+            $content = $displaySysAdmin->displayError(Language::messageToolsCompileNotOk());            
         }
         return $displaySysAdmin->showCompile($content);
     }
@@ -6435,7 +6435,9 @@ class SysAdmin {
 
         /* update last page */
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
-
+        require_once("exporter.php");
+        $exporter = new Exporter(loadvar(POST_PARAM_SUID));
+        $exporter->export();
         $displaySysAdmin = new DisplaySysAdmin();
         return $displaySysAdmin->showExport();
     }
@@ -6452,9 +6454,15 @@ class SysAdmin {
 
         require_once("importer.php");
         $importer = new Importer();
-        $content = $importer->import();
+        $result = $importer->import();
         $displaySysAdmin = new DisplaySysAdmin();
-        return $displaySysAdmin->showImport($displaySysAdmin->displaySuccess($content));
+        if ($result == "") {
+            $content = $displaySysAdmin->displaySuccess(Language::messageToolsImportOk());
+        } else {
+            $content = $displaySysAdmin->displayError(Language::messageToolsImportNotOk($result));            
+        }
+
+        return $displaySysAdmin->showImport($content);
     }
 
     function showTest() {
@@ -6643,16 +6651,15 @@ class SysAdmin {
         $_SESSION['LASTPAGE'] = "sysadmin.users";
         return $displayUsers->showUsers($content);
     }
-    
+
     function determineModeLanguage(&$de) {
         $user = new User($_SESSION['URID']);
         $modes = $user->getModes(loadvar('survey'));
-        
+
         $mods = "";
         if (loadvar(DATA_OUTPUT_MODES) == "") {
             $mods = implode("~", $modes);
-        }
-        else {
+        } else {
             $ms = loadvar(DATA_OUTPUT_MODES);
             $ms1 = array();
             foreach ($ms as $m) {
@@ -6663,7 +6670,7 @@ class SysAdmin {
             $mods = implode("~", $ms1);
         }
         $de->setProperty(DATA_OUTPUT_MODES, $mods);
-        
+
         $modes = explode("~", $mods);
         $langs = "";
         if (loadvar(DATA_OUTPUT_LANGUAGES) == "") {
@@ -6672,8 +6679,7 @@ class SysAdmin {
                 $langs = explode("~", $user->getLanguages(loadvar('survey'), $m));
             }
             $langs = implode("~", array_unique($langs));
-        }
-        else {
+        } else {
             $ls = loadvar(DATA_OUTPUT_LANGUAGES);
             $ls1 = array();
             foreach ($ls as $l) {

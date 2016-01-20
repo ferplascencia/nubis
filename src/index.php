@@ -1,3 +1,4 @@
+
 <?php
 
 /*
@@ -20,11 +21,12 @@ require_once("dbConfig.php");
 $loaded = dbConfig::load();
 require_once("config.php");
 
-// start session
+// start session if installed
 if ($loaded == 3) {
     session_set_cookie_params(0, getSessionPath()); // set cookie path
     session_start();
 }
+
 if ((isset($_POST[POST_PARAM_FULLRESET]) && is_Numeric($_POST[POST_PARAM_FULLRESET])) || (isset($_GET[POST_PARAM_FULLRESET]) && is_Numeric($_GET[POST_PARAM_FULLRESET]))) { //reset session!
     endSession();
     $param = '';
@@ -136,6 +138,5 @@ if (loadvar(POST_PARAM_SMS_AJAX) == SMS_AJAX_CALL) { // sms ajax call
     $action = new Action($sesid);
     echo $action->getAction();
 }
-
 ?>
 

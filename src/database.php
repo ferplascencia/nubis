@@ -68,6 +68,14 @@ class Database {
     function getNumberOfRows($result) {
         return @mysqli_num_rows($result);
     }
+    
+    function getNumberOfFields($result) {
+        return @mysqli_num_fields($result);
+    }
+    
+    function getFields($result) {
+        return @mysqli_fetch_fields($result);
+    }
 
     function getRow($result, $type = MYSQLI_BOTH) {
         return @mysqli_fetch_array($result, $type);

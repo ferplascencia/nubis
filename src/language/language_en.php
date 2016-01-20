@@ -1062,7 +1062,7 @@ class Language extends LanguageBase {
     }
 
     static function labelToolsCleanTo() {
-        return 'to';
+        return 'To';
     }
 
     static function labelToolsCheckRouting() {
@@ -1110,7 +1110,15 @@ class Language extends LanguageBase {
     }
 
     static function labelToolsExportTypeSerialize() {
-        return 'Serialized';
+        return 'For import via NubiS';
+    }
+    
+    static function labelToolsExportTypeSQL() {
+        return 'For import via e.g PHPMyAdmin';
+    }
+    
+    static function labelToolsExportType() {
+        return 'Type';
     }
 
     static function labelToolsImportSettings() {
@@ -1124,17 +1132,21 @@ class Language extends LanguageBase {
     static function labelToolsImportTypeMMIC() {
         return 'MMIC';
     }
+    
+    static function labelToolsImportTypeNubis() {
+        return 'NubiS';
+    }
 
     static function labelToolsImportTarget() {
         return 'Import type';
     }
 
     static function labelToolsImportTargetAdd() {
-        return 'Add to project';
+        return 'Add to current project';
     }
 
     static function labelToolsImportTargetReplace() {
-        return 'Replace current';
+        return 'Replace current project';
     }
 
     static function labelToolsImportDatabase() {
@@ -4593,25 +4605,25 @@ class Language extends LanguageBase {
           'is': 'Ã�slenska',
           'cs': 'Ä�eÅ¡tina',
           'el': 'ÎµÎ»Î»Î·Î½Î¹ÎºÎ¬',
-          'av': '�?°�?²�?°Ñ€ �?¼�?°Ñ†Ó€',
-          'ab': '�?°Ò§Ñ�Ñƒ�?° �?±Ñ‹�?·ÑˆÓ™�?°',
-          'ba': '�?±�?°ÑˆÒ¡�?¾Ñ€Ñ‚ Ñ‚�?µ�?»�?µ',
-          'be': '�?±�?µ�?»�?°Ñ€ÑƒÑ��?º�?°Ñ� �?¼�?¾�?²�?°',
-          'bg': '�?±ÑŠ�?»�?³�?°Ñ€Ñ��?º�?¸ �?µ�?·�?¸�?º',
-          'os': '�?¸Ñ€�?¾�?½ Ã¦�?²�?·�?°�?³',
-          'kv': '�?º�?¾�?¼�?¸ �?ºÑ‹�?²',
-          'ky': '�?šÑ‹Ñ€�?³Ñ‹�?·Ñ‡�?°',
-          'mk': '�?¼�?°�?º�?µ�?´�?¾�?½Ñ��?º�?¸ Ñ˜�?°�?·�?¸�?º',
-          'mn': '�?¼�?¾�?½�?³�?¾�?»',
-          'ce': '�?½�?¾Ñ…Ñ‡�?¸�?¹�?½ �?¼�?¾Ñ‚Ñ‚',
-          'ru': 'Ñ€ÑƒÑ�Ñ��?º�?¸�?¹ Ñ��?·Ñ‹�?º',
-          'sr': 'Ñ�Ñ€�?¿Ñ��?º�?¸ Ñ˜�?µ�?·�?¸�?º',
-          'tt': 'Ñ‚�?°Ñ‚�?°Ñ€ Ñ‚�?µ�?»�?µ',
-          'tg': 'Ñ‚�?¾Ò·�?¸�?ºÓ£',
-          'uk': 'Ñƒ�?ºÑ€�?°Ñ—�?½Ñ�ÑŒ�?º�?° �?¼�?¾�?²�?°',
-          'cv': 'Ñ‡Ó‘�?²�?°Ñˆ Ñ‡Ó—�?»Ñ…�?¸',
-          'cu': 'Ñ©�?·Ñ‹�?ºÑŠ Ñ��?»�?¾�?²Ñ£�?½ÑŒÑ��?ºÑŠ',
-          'kk': 'Ò›�?°�?·�?°Ò› Ñ‚Ñ–�?»Ñ–',
+          'av': 'Ð°Ð²Ð°Ñ€ Ð¼Ð°Ñ†Ó€',
+          'ab': 'Ð°Ò§Ñ�ÑƒÐ° Ð±Ñ‹Ð·ÑˆÓ™Ð°',
+          'ba': 'Ð±Ð°ÑˆÒ¡Ð¾Ñ€Ñ‚ Ñ‚ÐµÐ»Ðµ',
+          'be': 'Ð±ÐµÐ»Ð°Ñ€ÑƒÑ�ÐºÐ°Ñ� Ð¼Ð¾Ð²Ð°',
+          'bg': 'Ð±ÑŠÐ»Ð³Ð°Ñ€Ñ�ÐºÐ¸ ÐµÐ·Ð¸Ðº',
+          'os': 'Ð¸Ñ€Ð¾Ð½ Ã¦Ð²Ð·Ð°Ð³',
+          'kv': 'ÐºÐ¾Ð¼Ð¸ ÐºÑ‹Ð²',
+          'ky': 'ÐšÑ‹Ñ€Ð³Ñ‹Ð·Ñ‡Ð°',
+          'mk': 'Ð¼Ð°ÐºÐµÐ´Ð¾Ð½Ñ�ÐºÐ¸ Ñ˜Ð°Ð·Ð¸Ðº',
+          'mn': 'Ð¼Ð¾Ð½Ð³Ð¾Ð»',
+          'ce': 'Ð½Ð¾Ñ…Ñ‡Ð¸Ð¹Ð½ Ð¼Ð¾Ñ‚Ñ‚',
+          'ru': 'Ñ€ÑƒÑ�Ñ�ÐºÐ¸Ð¹ Ñ�Ð·Ñ‹Ðº',
+          'sr': 'Ñ�Ñ€Ð¿Ñ�ÐºÐ¸ Ñ˜ÐµÐ·Ð¸Ðº',
+          'tt': 'Ñ‚Ð°Ñ‚Ð°Ñ€ Ñ‚ÐµÐ»Ðµ',
+          'tg': 'Ñ‚Ð¾Ò·Ð¸ÐºÓ£',
+          'uk': 'ÑƒÐºÑ€Ð°Ñ—Ð½Ñ�ÑŒÐºÐ° Ð¼Ð¾Ð²Ð°',
+          'cv': 'Ñ‡Ó‘Ð²Ð°Ñˆ Ñ‡Ó—Ð»Ñ…Ð¸',
+          'cu': 'Ñ©Ð·Ñ‹ÐºÑŠ Ñ�Ð»Ð¾Ð²Ñ£Ð½ÑŒÑ�ÐºÑŠ',
+          'kk': 'Ò›Ð°Ð·Ð°Ò› Ñ‚Ñ–Ð»Ñ–',
           'hy': 'Õ€Õ¡ÕµÕ¥Ö€Õ¥Õ¶',
           'yi': '×™×™Ö´×“×™×©',
           'he': '×¢×‘×¨×™×ª',
@@ -4646,11 +4658,11 @@ class Language extends LanguageBase {
           'ti': 'á‰µáŒ�áˆ­áŠ›',
           'am': 'áŠ áˆ›áˆ­áŠ›',
           'iu': 'á�ƒá“„á’ƒá‘Žá‘�á‘¦',
-          'oj': 'á�Šá“‚á�?‘á“ˆá�¯á’§á�Žá“�',
-          'cr': 'á“€á�¦á�ƒá�?­á��á��á�£',
+          'oj': 'á�Šá“‚á”‘á“ˆá�¯á’§á�Žá“�',
+          'cr': 'á“€á�¦á�ƒá”­á��á��á�£',
           'km': 'áž�áŸ’áž˜áŸ‚ážš',
           'zh': 'ä¸­æ–‡Â (ZhÅ�ngwÃ©n)',
-          'ja': 'æ—¥æœ¬èªžÂ (ã�«ã�»ã‚“ã��?)',
+          'ja': 'æ—¥æœ¬èªžÂ (ã�«ã�»ã‚“ã�”)',
           'ii': 'ê†ˆêŒ ê’¿ Nuosuhxop',
           'ko': 'í•œêµ­ì–´Â (éŸ“åœ‹èªž)'
           }; */
@@ -6909,6 +6921,65 @@ class Language extends LanguageBase {
         return 'If adding mode, update users:';
     }
     
+    static function labelToolsExportHistoryYes() {
+        return 'Yes';
+    }
+    
+    static function labelToolsExportHistoryNo() {
+        return 'No';
+    }
+    
+    static function labelToolsExportHistory() {
+        return 'Include history';
+    }
+    
+    static function messageRemoveData() {
+        return "Are you sure you want to remove all data for the selected components? Type `REMOVE` to continue.";
+    }
+    
+    static function messageImportSurvey() {
+        return "Are you sure you want to continue with the import? NOTE: If you are replacing the current survey(s), all survey components and data will be removed! Type `IMPORT` to continue.";
+    }
+    
+    static function labelImportText() {
+        return 'Export file content';
+    }
+    
+    static function labelToolsImportFile() {
+        return 'Import from';
+    }
+    
+    static function labelToolsExportCreate() {
+        return 'Include database scheme';
+    }
+    
+    static function labelToolsExportCreateYes() {
+        return 'Yes';
+    }
+    
+    static function labelToolsExportCreateNo() {
+        return 'No';
+    }
+    
+    static function labelExportFile() {
+        return 'Import from';
+    }
+    
+    static function messageImportNoFile() {
+        return 'no file selected.';
+    }
+    
+    static function messageImportInvalidFile() {
+        return 'invalid file selected.';
+    }
+    
+    static function messageToolsImportNotOk($result) {
+        return 'Import failed: ' . $result;
+    }
+    
+    static function buttonBrowse() {
+        return 'Browse';
+    }
 }
 
 ?>

@@ -38,14 +38,14 @@ $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . add
 // start a new interview each time
 $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';            
 
-// set language to be used
-$returnStr .= '<input type=hidden name=language value=1>';
+// set language to be used (1=English)
+$returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value=1>';
 
 // set interview mode to be used (1=CAPI, 2=CATI, 3=CASI, 4=CADI)
-$returnStr .= '<input type=hidden name=mode value=3>';
+$returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value=3>';
 
 // survey execution mode (0=normal, 1=test mode)
-$returnStr .= '<input type=hidden name=executionmode value=1>';
+$returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value=' . SURVEY_EXECUTION_MODE_TEST . '>';
 
 // define start button
 $returnStr .= '

@@ -618,7 +618,7 @@ class Display {
                                    error.insertAfter($(element).closest(\'div.form-group\').children().last());            
                                 }
                            }';
-            $errorplacement1 = str_replace("ignore-empty", "ignore-error", str_replace("data-validation-empty", "data-validation-error",$errorplacement));
+            $errorplacement1 = str_replace("ignore-empty", "ignore-error", str_replace("data-validation-empty", "data-validation-error", $errorplacement));
         } else if ($placement == ERROR_PLACEMENT_AT_TOP || $placement == ERROR_PLACEMENT_AT_BOTTOM) {
             $errorplacement .= 'showErrors: function(errorMap, errorList) {
                         $(\'#uscic-errors\').empty();
@@ -656,33 +656,33 @@ class Display {
                         $(\'#uscic-errors\').append(str);
                     }';
         } else if ($placement == ERROR_PLACEMENT_WITH_QUESTION_TOOLTIP) {
-            
+
             // TODO: IF WE EVER FINISH THE BELOW, NEED TO CREATE ERRORPLACEMENT AND ERRORPLACEMENT1 INSTEAD
             // MAKE SURE THEN TO ADD THE CODE NEEDED TO ADD IGNORE-EMPTY/IGNORE-ERROR
-            /*$str .= 'showErrors: function(errorMap, errorList) {
+            /* $str .= 'showErrors: function(errorMap, errorList) {
 
-      // Clean up any tooltips for valid elements
-      $.each(this.validElements(), function (index, element) {
-          var $element = $(element);
+              // Clean up any tooltips for valid elements
+              $.each(this.validElements(), function (index, element) {
+              var $element = $(element);
 
-          $element.data("title", "") // Clear the title - there is no error associated anymore
+              $element.data("title", "") // Clear the title - there is no error associated anymore
               .removeClass("error")
               .tooltip("destroy");
-      });
+              });
 
-      // Create new tooltips for invalid elements
-      $.each(errorList, function (index, error) {
-          var $element = $(error.element);
-          $element.tooltip("destroy") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+              // Create new tooltips for invalid elements
+              $.each(errorList, function (index, error) {
+              var $element = $(error.element);
+              $element.tooltip("destroy") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
               .data("title", error.message)
               .addClass("error")
               .tooltip(); // Create a new tooltip based on the error messsage we just set in the title';
-            if ($paradata == true) {
-                $str .= 'lookupCode($(error.element).attr("name"), $(error.element).attr("name") + "-" + error.message);';
-            }
-            $str .= '
-      });
-      }';*/
+              if ($paradata == true) {
+              $str .= 'lookupCode($(error.element).attr("name"), $(error.element).attr("name") + "-" + error.message);';
+              }
+              $str .= '
+              });
+              }'; */
         }
 
         /* add empty checking function */
@@ -2042,7 +2042,7 @@ class Display {
         return $returnStr;
     }
 
-    function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {        
+    function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {
         $surveys = new Surveys($suid);
         $surveys = $surveys->getSurveys();
         $returnStr = "<select $onchange $multiple class='selectpicker show-tick' name=$name id=$id>";
@@ -3435,11 +3435,11 @@ function inputMaskingSupported() {
         $returnStr .= '</select>';
         return $returnStr;
     }
-    
+
     function displayUsersUpdate($users, $name = 'uridsel') {
         $returnStr = "<select style='width:300px' class='form-control selectpicker show-tick' multiple name='" . $name . "[]'>";
-        $returnStr .= "<option selected value=-1>" . Language::labelAll() . "</option>";        
-        foreach ($users as $user) {            
+        $returnStr .= "<option selected value=-1>" . Language::labelAll() . "</option>";
+        foreach ($users as $user) {
             $returnStr .= "<option value=" . $user->getUrid() . ">" . $user->getName() . "</option>";
         }
         $returnStr .= '</select>';
@@ -4121,5 +4121,5 @@ function inputMaskingSupported() {
                 '</div>' .
                 '</div>';
         return $returnStr;
-    }    
+    }
 }

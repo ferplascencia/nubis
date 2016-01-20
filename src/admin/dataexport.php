@@ -109,7 +109,8 @@ class DataExport {
         $this->setProperty(DATA_OUTPUT_VARLIST, "");
         $this->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATARECORD_TABLE);
         $this->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, "");
-        $this->setProperty(DATA_OUTPUT_INCREMENTAL, "");
+        $this->setProperty(DATA_OUTPUT_FROM, "");
+        $this->setProperty(DATA_OUTPUT_TO, "");
         $this->minprimkeylength = Config::getMinimumPrimaryKeyLength();
         $this->maxprimkeylength = Config::getMaximumPrimaryKeyLength();
     }
@@ -215,14 +216,21 @@ class DataExport {
         $this->languages = $this->getProperty(DATA_OUTPUT_LANGUAGES);
         $this->modes = $this->getProperty(DATA_OUTPUT_MODES);
         $this->versions = $this->getProperty(DATA_OUTPUT_VERSIONS);
+        $extracompleted = '';
 
         /* get records to consider if only completed */
         if ($this->getProperty(DATA_OUTPUT_COMPLETED) == INTERVIEW_COMPLETED) {
             $extracompleted = " and completed=" . $this->getProperty(DATA_OUTPUT_COMPLETED);
         }
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extracompleted .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extracompleted .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+        }
 
         $datanames = array();
-
+        $extra = "";
         if ($this->getProperty(DATA_OUTPUT_TYPE) == DATA_OUTPUT_TYPE_DATARECORD_TABLE) {
             $query = "select distinct datanames from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_datarecords where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extracompleted . $extra;
             $res = $this->db->selectQuery($query);
@@ -341,7 +349,7 @@ class DataExport {
                             $variable = $record->getData($varnames[$i]);
                             $line = "";
                             if ($variable) {
-                                
+
                                 /* no match on language, mode and version, then treat as never gotten */
                                 if (!(sizeof($this->languages) == 0 || (sizeof($this->languages) > 0 && inArray($variable->getLanguage(), $this->languages)))) {//
                                     continue;
@@ -528,8 +536,21 @@ class DataExport {
         }
 
         /* get records to consider if only completed */
+        $extracompleted = "";
+        $extra = "";
         if ($this->getProperty(DATA_OUTPUT_COMPLETED) == INTERVIEW_COMPLETED) {
             $extracompleted = " and completed=" . $this->getProperty(DATA_OUTPUT_COMPLETED);
+        }
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extracompleted .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+            $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extracompleted .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+            $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+        }
+        $primkeys = array();
+        if ($extracompleted != "") {
             if ($this->getProperty(DATA_OUTPUT_TYPE) == DATA_OUTPUT_TYPE_DATARECORD_TABLE) {
                 $query = "select distinct primkey from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_datarecords where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extracompleted;
                 $res = $this->db->selectQuery($query);
@@ -550,6 +571,7 @@ class DataExport {
             unset($res);
         }
 
+
         $this->languages = $this->getProperty(DATA_OUTPUT_LANGUAGES);
         $this->modes = $this->getProperty(DATA_OUTPUT_MODES);
         $this->versions = $this->getProperty(DATA_OUTPUT_VERSIONS);
@@ -564,7 +586,7 @@ class DataExport {
         if ($this->survey->getDataEncryptionKey() != "") {
             $decrypt = "aes_decrypt(remark, '" . $this->survey->getDataEncryptionKey() . "') as remark_dec";
         }
-        $query = "select *, $decrypt from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_observations where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . " order by primkey";
+        $query = "select *, $decrypt from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_observations where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . " order by primkey";
         $res = $this->db->selectQuery($query);
         //echo $query;
         //exit;
@@ -688,11 +710,16 @@ class DataExport {
             //echo $extra;
             //exit;
         }
-
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+        }
 
         $cutoff = DATA_TIMINGS_CUTOFF; // more than 5 minutes we ignore in calculating total interview time	
         $data = '';
-        $select = "select primkey, variable, timespent, language, mode from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . " order by primkey asc, ts asc";
+        $select = "select primkey, variable, timespent, language, mode from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, ts asc";
         //echo $select;
         //exit;
         $res = $this->db->selectQuery($select);
@@ -869,13 +896,19 @@ class DataExport {
             //echo $extra;
             //exit;
         }
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+        }
 
         $decrypt = "paradata as paradata_dec";
         if ($this->survey->getDataEncryptionKey() != "") {
             $decrypt = "aes_decrypt(paradata, '" . $this->survey->getDataEncryptionKey() . "') as paradata_dec";
         }
         $data = '';
-        $select = "select primkey, displayed, language, mode, $decrypt, ts from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . " order by primkey asc, pid asc";
+        $select = "select primkey, displayed, language, mode, $decrypt, ts from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, pid asc";
         //echo $select;
         //exit;
         $res = $this->db->selectQuery($select);
@@ -1001,7 +1034,7 @@ class DataExport {
         $width = 1;
         $soem = 0;
         $labelset = false;
-        
+
         /* array */
         if (inArray(strtoupper($variablename), $this->arrayfields) && contains($variablename, "[") == false) {
             return; // don't add generic array method
@@ -1348,12 +1381,15 @@ class DataExport {
         $extracompleted = "";
         if ($this->getProperty(DATA_OUTPUT_COMPLETED) == INTERVIEW_COMPLETED) {
             $extracompleted = " and completed=" . $this->getProperty(DATA_OUTPUT_COMPLETED);
-        }        
+        }
 
         // find any data names in the data   
         $extra = "";
-        if ($this->getProperty(DATA_OUTPUT_INCREMENTAL) != "") {
-            $extra = " and ts > '" . $this->getProperty(DATA_OUTPUT_INCREMENTAL) . "'";
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
         }
         $datanames = array();
         $this->maxwidths = array();
@@ -1380,7 +1416,7 @@ class DataExport {
                 if ($this->survey->getDataEncryptionKey() != "") {
                     $decrypt = "cast(aes_decrypt(answer, '" . $this->survey->getDataEncryptionKey() . "') as char)";
                 }
-                $query = "SELECT variablename, MAX( LENGTH( " . $decrypt . " )) AS max FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data WHERE suid = " . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . " GROUP BY variablename";
+                $query = "SELECT variablename, MAX( LENGTH( " . $decrypt . " )) AS max FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data WHERE suid = " . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . $extracompleted . " GROUP BY variablename";
                 $res = $this->db->selectQuery($query);
                 if ($res) {
                     if ($this->db->getNumberOfRows($res) == 0) {
@@ -1728,7 +1764,7 @@ class DataExport {
         $this->variables = array();
         $this->formats = array();
 
-        /* http://www.stata.com/help.cgi?dta */
+        /* http://www.stata.com/help.cgi?dta_113 */
 
         /* determine length and format of variables */
         for ($i = 0; $i < $this->variablenumber; $i++) {
@@ -1781,6 +1817,9 @@ class DataExport {
         for ($i = 0; $i < $this->variablenumber; $i++) {
             $this->writeByte($this->recordbytes, $this->variabletypes[$i]);
         }
+        
+        $trunced = array();
+        $untrunced = array();
 
         /* variable list */
         for ($i = 0; $i < $this->variablenumber; $i++) {
@@ -1826,15 +1865,13 @@ class DataExport {
             $this->writeString($this->recordbytes, $this->stripNonAscii($this->labels[$i]), 81, $encoding);
         }
 
-        /* no trunced names */
-        $trunced = array();
-        $untrunced = array();
+        /* no long names, so the characteristics section is empty */
         if (sizeof($trunced) == 0) {
             for ($i = 0; $i < 5; $i++) {
                 $this->writeByte($this->recordbytes, 0);
             }
         }
-        // trunced names
+        // trunced names: add as characteristics
         else {
             $actualname = "actual";
             for ($i = 0; $i < $this->variablenumber; $i++) {
@@ -2130,6 +2167,10 @@ class DataExport {
                         }
                     }
                 }
+                $stringobj = str_replace("\"", "\"\"", $stringobj);
+                $stringobj = str_replace("\r", "", $stringobj);
+                $stringobj = str_replace("\n", "", $stringobj);
+                $stringobj = str_replace("\r\n", "", $stringobj);
                 $this->writeString($this->recordbytes, $stringobj, $type, $encoding);
                 $stringobj = null;
                 unset($stringobj);
@@ -2436,6 +2477,9 @@ class DataExport {
             }
 
             $stringobj = str_replace("\"", "\"\"", $stringobj);
+            $stringobj = str_replace("\r", "", $stringobj);
+            $stringobj = str_replace("\n", "", $stringobj);
+            $stringobj = str_replace("\r\n", "", $stringobj);
             $line .= '"' . $stringobj . '"';
             $stringobj = null;
             unset($stringobj);
