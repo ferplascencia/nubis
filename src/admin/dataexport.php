@@ -991,7 +991,10 @@ class DataExport {
     /* RAW DATA FILES */
 
     function processVariable($variablename, $var) {
-
+        
+        // remove any spacing
+        $variablename = trim($variablename);
+        
         // already processed
         if (inArray(strtoupper($variablename), $this->lookup)) {
             return;
