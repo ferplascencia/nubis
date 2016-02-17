@@ -955,7 +955,563 @@ class BasicEngine extends Object {
         $this->state = $state;
     }
 
+    // check assignment values
     function checkAnswer($variablename, $answer) {
+        if ($this->survey->isValidateAssignment() == true) {
+            $answer = trim($answer);
+            $var = $this->getVariableDescriptive($variablename);
+            $ans = $var->getAnswerType();
+            switch ($ans) {
+                case ANSWER_TYPE_OPEN:
+                /* fall through */
+                case ANSWER_TYPE_STRING:
+                    $min = $this->getFill($variablename, $var, SETTING_MINIMUM_LENGTH);
+                    $max = $this->getFill($variablename, $var, SETTING_MAXIMUM_LENGTH);
+                    $len = strlen($answer);
+                    if ($min > 0 && $len < $min) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    if ($max > 0 && $len > $max) {
+                        return INVALID_ASSIGNMENT;
+                    }
+
+                    $min = $this->getFill($variablename, $var, SETTING_MINIMUM_WORDS);
+                    $max = $this->getFill($variablename, $var, SETTING_MAXIMUM_WORDS);
+                    $count = str_word_count($answer);
+                    if ($min > 0 && $count < $min) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    if ($max > 0 && $count > $max) {
+                        return INVALID_ASSIGNMENT;
+                    }
+
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_INTEGER:
+                    if (!is_integer($answer)) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_DOUBLE:
+                    if (!is_numeric($answer)) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_DROPDOWN:
+                /* fall through */
+                case ANSWER_TYPE_ENUMERATED:
+                    if (!is_integer($answer)) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    $options = $this->getFill($variablename, $var, SETTING_OPTIONS);
+                    foreach ($options as $c) {
+                        if ($c["code"] == $answer) {
+                            return VALID_ASSIGNMENT;
+                        }
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_MULTIDROPDOWN:
+                /* fall through */
+                case ANSWER_TYPE_SETOFENUMERATED:
+                    $answers = explode(SEPARATOR_SETOFENUMERATED, $answer);
+                    $options = $this->getFill($variablename, $var, SETTING_OPTIONS);
+                    foreach ($answers as $a) {
+                        if (!is_integer($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                        $found = false;
+                        foreach ($options as $c) {
+                            if ($c["code"] == $a) {
+                                $found = true;
+                                break;
+                            }
+                        }
+                        if ($found == false) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_SLIDER:
+                /* fall through */
+                case ANSWER_TYPE_RANGE:
+                    $min = $this->getFill($variablename, $var, SETTING_MINIMUM_RANGE);
+                    $max = $this->getFill($variablename, $var, SETTING_MAXIMUM_RANGE);
+                    $others = $this->getFill($variablename, $var, SETTING_OTHER_RANGE);
+                    $others = explode(",", $others);
+
+                    // real range
+                    if (contains($min, ".") || contains($max, ".")) {
+                        if (!is_numeric($answer)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                        if (($answer < $min || $answer > $max) && !inArray($answer, $others)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                        return $this->checkAnswerComparison($variablename, $var, $answer);
+                    }
+                    // integer range
+                    else {
+                        if (!is_integer($answer)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                        if (($answer < $min || $answer > $max) && !inArray($answer, $others)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                        return $this->checkAnswerComparison($variablename, $var, $answer);
+                    }
+                /* date/time/datetime */
+                case ANSWER_TYPE_DATETIME:
+                /* fall through */
+                case ANSWER_TYPE_DATE:
+                    if (strtotime($answer) == false) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_TIME:
+                    if (strtotime(date("Y-m-d") . " " . $answer) == false) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                    return $this->checkAnswerComparison($variablename, $var, $answer);
+                case ANSWER_TYPE_NONE:
+                /* fall through */
+                case ANSWER_TYPE_SECTION:
+                    return INVALID_ASSIGNMENT;
+            }
+        }
+        return VALID_ASSIGNMENT;
+    }
+
+    function checkAnswerComparison($variablename, $var, $answer) {
+
+        /* error checks numeric comparison */
+        $at = $var->getAnswerType();
+
+        if (inArray($at, array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
+            $answerstring = implode(SEPARATOR_SETOFENUMERATED, sort(explode(SEPARATOR_SETOFENUMERATED, $answer)));
+            $eq = trim($this->getFill($variable, $var, SETTING_COMPARISON_EQUAL_TO));
+            if ($eq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $eq);
+                foreach ($arr as $a) {
+                    $arrstring = implode(SEPARATOR_SETOFENUMERATED, sort(explode(SEPARATOR_SETOFENUMERATED, $a)));
+                    if ($arrstring != $answerstring) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                }
+            }
+            $neq = trim($this->getFill($variable, $var, SETTING_COMPARISON_NOT_EQUAL_TO));
+            if ($neq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $neq);
+                foreach ($arr as $a) {
+                    $arrstring = implode(SEPARATOR_SETOFENUMERATED, sort(explode(SEPARATOR_SETOFENUMERATED, $a)));
+                    if ($arrstring == $answerstring) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                }
+            }
+            $answers = explode(SEPARATOR_SETOFENUMERATED, $answer);
+            $geq = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER_EQUAL_TO));
+            if ($geq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $geq);
+                foreach ($arr as $a) {
+                    foreach ($answers as $b) {
+                        if ($b < $a) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $gr = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER));
+            if ($gr != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $gr);
+                foreach ($arr as $a) {
+                    foreach ($answers as $b) {
+                        if ($b <= $a) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $seq = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER_EQUAL_TO));
+            if ($seq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $seq);
+                foreach ($arr as $a) {
+                    foreach ($answers as $b) {
+                        if ($b > $a) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $sm = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
+            if ($sm != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $sm);
+                foreach ($arr as $a) {
+                    foreach ($answers as $b) {
+                        if ($b >= $a) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+
+            return $this->checkAnswerSetOfEnumeratedChecks($variablename, $var, $answer);
+        } else if (inArray($at, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SLIDER))) {
+            $eq = trim($this->getFill($variable, $var, SETTING_COMPARISON_EQUAL_TO));
+            if ($eq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $eq);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if (trim($a) != $answer) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $neq = trim($this->getFill($variable, $var, SETTING_COMPARISON_NOT_EQUAL_TO));
+            if ($neq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $neq);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if (trim($a) == $answer) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $geq = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER_EQUAL_TO));
+            if ($geq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $geq);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if ($answer < trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $gr = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER));
+            if ($gr != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $gr);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if ($answer <= trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $seq = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER_EQUAL_TO));
+            if ($seq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, seq);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if ($answer > trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $sm = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
+            if ($sm != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $sm);
+                foreach ($arr as $a) {
+                    if (is_numeric(trim($a))) {
+                        if ($answer >= trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+        }
+        // string comparison
+        else if (inArray($at, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_OPEN))) {
+            $eq = trim($this->getFill($variable, $var, SETTING_COMPARISON_EQUAL_TO));
+            if ($eq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $eq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($answer != trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $neq = trim($this->getFill($variable, $var, SETTING_COMPARISON_NOT_EQUAL_TO));
+            if ($neq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $neq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($answer == trim($a)) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $eq = trim($this->getFill($variable, $var, SETTING_COMPARISON_EQUAL_TO_IGNORE_CASE));
+            if ($eq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $eq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if (strtoupper($answer) != strtotupper(trim($a))) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+            $neq = trim($this->getFill($variable, $var, SETTING_COMPARISON_NOT_EQUAL_TO_IGNORE_CASE));
+            if ($neq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $neq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if (strtoupper($answer) == strtoupper(trim($a))) {
+                            return INVALID_ASSIGNMENT;
+                        }
+                    }
+                }
+            }
+        }
+        // error checking date/time
+        else if (inArray($at, array(ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
+            $eq = trim($this->getFill($variable, $var, SETTING_COMPARISON_EQUAL_TO));
+            if ($eq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $eq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) != $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+            $neq = trim($this->getFill($variable, $var, SETTING_COMPARISON_NOT_EQUAL_TO));
+            if ($neq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $neq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) == $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+            $geq = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER_EQUAL_TO));
+            if ($geq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $geq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) < $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+            //echo 'yyyyy';
+            $gr = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER));
+            //echo "<hr>" . $var->getComparisonGreater() . '----' . $gr;
+            if ($gr != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $gr);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) <= $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+            $seq = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER_EQUAL_TO));
+            if ($seq != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $seq);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) > $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+            $sm = trim($this->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
+            if ($sm != "") {
+                $arr = explode(SEPARATOR_COMPARISON, $sm);
+                foreach ($arr as $a) {
+                    $variable = str_replace(" ", "", $a);
+                    $vartemp = $this->getVariableDescriptive($variable);
+                    if ($vartemp->getVsid() == "") { // if not a variable, then we assume it is a literal text
+                        if ($at == ANSWER_TYPE_TIME) {
+                            $a = date("Y-m-d") . " " . $a;
+                        }
+                        if ($t = strtotime($a)) {
+                            if (strtotime($answer) >= $t) {
+                                return INVALID_ASSIGNMENT;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return VALID_ASSIGNMENT;
+    }
+
+    function checkAnswerSetOfEnumeratedChecks($name, $variable, $var) {
+        $min = $this->getFill($variable, $var, SETTING_MINIMUM_SELECTED);
+        if ($min != "") {
+            if (sizeof(explode(SEPARATOR_SETOFENUMERATED, $answer)) < $min) {
+                return INVALID_ASSIGNMENT;
+            }
+        }
+        $max = $this->getFill($variable, $var, SETTING_MAXIMUM_SELECTED);
+        if ($max != "") {
+            if (sizeof(explode(SEPARATOR_SETOFENUMERATED, $answer)) > $max) {
+                return INVALID_ASSIGNMENT;
+            }
+        }
+        $exact = $this->getFill($variable, $var, SETTING_EXACT_SELECTED);
+        if ($exact != "") {
+            if (sizeof(explode(SEPARATOR_SETOFENUMERATED, $answer)) != $exact) {
+                return INVALID_ASSIGNMENT;
+            }
+        }
+        $invalidsub = $this->getFill($variable, $var, SETTING_INVALIDSUB_SELECTED);
+        if ($invalidsub != "") {
+            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);        
+            $invalids = explode(SEPARATOR_COMPARISON, $invalidsub);
+            foreach ($invalids as $s) {
+                $invalid = explode(",", $s);
+                $selected = array();
+                $invalidselected = array();
+                for ($cnt = 0; $cnt < sizeof($invalid); $cnt++) {
+                    $inv = $invalid[$cnt];
+                    if (contains($inv, "-")) {
+                        $t = explode("-", $inv);
+                        $all = true;
+                        for ($cnt1 = $t[0]; $cnt1 <= $t[1]; $cnt1++) {
+                            if (!inArray($cnt1, $indices)) {
+                                $all = false;
+                                break;
+                            }
+                            $invalidselected[] = $cnt1;
+                        }
+                        if ($all == true) {
+                            $selected[$cnt] = 0;
+                        }
+                        else {
+                            $selected[$cnt] = -1;
+                        }
+                    }
+                    else {
+                        $invalidselected[] = $inv;
+                        $key = array_search($inv, $indices);
+                        if (!$key) {
+                            $selected[$cnt] = -1; // returns -1 if not found
+                        }
+                        else {
+                            $selected[$cnt] = $key;
+                        }                    
+                    }
+                }
+
+                // no -1, then all found
+                if (!inArray(-1, $selected)) {
+                    return INVALID_ASSIGNMENT;                    
+                }
+            }
+        }
+        $invalid = $this->getFill($variable, $var, SETTING_INVALID_SELECTED);
+        if ($invalid != "") {
+            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);        
+            $invalids = explode(SEPARATOR_COMPARISON, $invalidsub);
+            foreach ($invalids as $s) {
+                $invalid = explode(",", $s);
+                $selected = array();
+                $invalidselected = array();
+                for ($cnt = 0; $cnt < sizeof($invalid); $cnt++) {
+                    $inv = $invalid[$cnt];
+                    if (contains($inv, "-")) {
+                        $t = explode("-", $inv);
+                        $all = true;
+                        for ($cnt1 = $t[0]; $cnt1 <= $t[1]; $cnt1++) {
+                            if (!inArray($cnt1, $indices)) {
+                                $all = false;
+                                break;
+                            }
+                            $invalidselected[] = $cnt1;
+                        }
+                        if ($all == true) {
+                            $selected[$cnt] = 0;
+                        }
+                        else {
+                            $selected[$cnt] = -1;
+                        }
+                    }
+                    else {
+                        $invalidselected[] = $inv;
+                        $key = array_search($inv, $indices);
+                        if (!$key) {
+                            $selected[$cnt] = -1; // returns -1 if not found
+                        }
+                        else {
+                            $selected[$cnt] = $key;
+                        }                    
+                    }
+                }
+
+                // no -1, then all found
+                if (!inArray(-1, $selected)) {
+
+                    // if size of selected indices is the same as the total number selected, then false;
+                    // otherwise we selected more than the invalid set and we thus allow it
+                    if (sizeof($indices) == sizeof($invalidselected)) {
+                        return INVALID_ASSIGNMENT;
+                    }
+                }
+            }
+        }
+    }
+
+    // server based validation, inactive right now
+    function validateAnswer($variablename, $answer) {
         return true;
         /* $var = $this->getVariable($variablename);
 
@@ -1006,7 +1562,7 @@ class BasicEngine extends Object {
 
     function setAnswer($variablename, $answer, $dirty = DATA_CLEAN) {
 
-        if ($this->checkAnswer($variablename, $answer)) {
+        if ($this->validateAnswer($variablename, $answer)) {
             /* $vardesc = $this->getVariableDescriptive($variablename);
               if ($vardesc->getSeid() == $this->getSeid()) {
               $full = $this->getParentPrefix() . $this->getPrefix();
@@ -1022,7 +1578,7 @@ class BasicEngine extends Object {
             //echo $vardesc->getSeid() . '||||' .  $this->getSeid() . "::::" . $this->getParentPrefix() . $this->getPrefix();
             $variablename = $this->prefixVariableName($variablename);
             //echo '<hr>storing:' . $variablename;
-            $this->addLogs($variablename, $answer, $dirty);            
+            $this->addLogs($variablename, $answer, $dirty);
             return $this->state->setData($variablename, $answer, $dirty);
         }
         //$this->addLogs($variablename, $answer, $dirty);
@@ -2173,6 +2729,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         $this->setAnswer(VARIABLE_MODE, getSurveyMode());
                         $this->setAnswer(VARIABLE_PLATFORM, $_SERVER['HTTP_USER_AGENT']);
                         $this->setAnswer(VARIABLE_EXECUTION_MODE, getSurveyExecutionMode());
+                        $this->setAnswer(VARIABLE_TEMPLATE, getSurveyTemplate());
                         $this->setAnswer(VARIABLE_END, null);
 
                         /* set interview data as incompleted */
@@ -2346,6 +2903,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         $this->setAnswer(VARIABLE_MODE, getSurveyMode());
                         $this->setAnswer(VARIABLE_PLATFORM, $_SERVER['HTTP_USER_AGENT']);
                         $this->setAnswer(VARIABLE_EXECUTION_MODE, getSurveyExecutionMode());
+                        $this->setAnswer(VARIABLE_TEMPLATE, getSurveyTemplate());
 
                         // redoing preloads
                         if ($reentry_preload == PRELOAD_REDO_YES) {
@@ -2535,6 +3093,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $this->setAnswer(VARIABLE_MODE, getSurveyMode());
                 $this->setAnswer(VARIABLE_PLATFORM, $_SERVER['HTTP_USER_AGENT']);
                 $this->setAnswer(VARIABLE_EXECUTION_MODE, getSurveyExecutionMode());
+                $this->setAnswer(VARIABLE_TEMPLATE, getSurveyTemplate());
 
                 /* preload */
                 $pd = loadvarSurvey('pd');
@@ -2651,6 +3210,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 $this->doBackState($lastrgid, $dkrfnacheck);
                 $cnt = 0;
+                
                 // this was a section call, so we need to go back one more state
                 while ($this->getDisplayed() == "") {
                     $this->setSeid($this->getParentSeid());
@@ -2819,7 +3379,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         
                     }
                 }
-
 
                 /* re-do action */
                 $this->doAction($this->getRgid());
@@ -4585,7 +5144,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 foreach ($exclusive as $arr) {
                     $first = $arr[0];
                     $second = $arr[1];
-                    
+
                     // get all numbers in first part
                     $firstnumbers = array();
                     if (contains($first, "-")) {
@@ -4632,13 +5191,13 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                                 break;
                             }
                         }
-                        
+
                         // found all numbers in the second group, so don't add to avoid invalid
                         if ($allsecond == true) {
                             $add = false;
                         }
                     }
-                    
+
                     // we found an invalid combination, then stop
                     if ($add == false) {
                         break;

@@ -1062,7 +1062,7 @@ class Language extends LanguageBase {
     }
 
     static function labelToolsCleanTo() {
-        return 'to';
+        return 'To';
     }
 
     static function labelToolsCheckRouting() {
@@ -1112,6 +1112,14 @@ class Language extends LanguageBase {
     static function labelToolsExportTypeSerialize() {
         return 'For import via NubiS';
     }
+    
+    static function labelToolsExportTypeSQL() {
+        return 'For import via e.g PHPMyAdmin';
+    }
+    
+    static function labelToolsExportType() {
+        return 'Type';
+    }
 
     static function labelToolsImportSettings() {
         return 'Settings';
@@ -1124,17 +1132,21 @@ class Language extends LanguageBase {
     static function labelToolsImportTypeMMIC() {
         return 'MMIC';
     }
+    
+    static function labelToolsImportTypeNubis() {
+        return 'NubiS';
+    }
 
     static function labelToolsImportTarget() {
         return 'Import type';
     }
 
     static function labelToolsImportTargetAdd() {
-        return 'Add to project';
+        return 'Add to current project';
     }
 
     static function labelToolsImportTargetReplace() {
-        return 'Replace current';
+        return 'Replace current project';
     }
 
     static function labelToolsImportDatabase() {
@@ -4677,7 +4689,7 @@ class Language extends LanguageBase {
     }
 
     static function helpInvalidSet() {
-        return ' (e.g. 1,2; 2,3-4)';
+        return ' (e.g. 1,2 ' .SEPARATOR_COMPARISON . ' 2,3-4)';
     }
 
     static function labelHouseholdMember() {
@@ -6791,6 +6803,198 @@ class Language extends LanguageBase {
     
     static function headerOutputParadataData() {
         return 'Paradata';
+    }
+
+    static function timingsBracketsPerQuestion() {
+        return array("Less than 30 seconds", "Less than 1 minute", "Less than 1.5 minutes", "Less than 2 minutes", "Less than 2.5 minutes", "Less than 3 minutes", "Less than 3.5 minutes", "Less than 4 minutes", "Less than 4.5 minutes");
+    }
+    
+    static function labelAggregateTimings() {
+        return 'Total time spent';
+    }
+    
+    static function labelInterviews() {
+        return 'interviews';
+    }
+
+    static function labelInterviewsUpper() {
+        return 'Interviews';
+    }
+
+    static function labelShowRawData() {
+        return 'Raw data';
+    }
+    
+     static function labelShowTimingsData() {
+        return 'Timings';
+    }
+
+    static function labelShowParadata() {
+        return 'Paradata';
+    }    
+    
+    static function labelShowAuxData() {
+        return 'Auxiliary data';
+    }   
+    
+    static function labelDataSingle() {
+        return 'From a single survey';
+    }
+
+    static function labelDataMultiple() {
+        return 'Combined from multiple surveys';
+    }      
+    
+    static function labelUserSurveyAllowed() {
+        return 'Surveys';
+    }
+    
+    static function labelUserGeneral() {
+        return 'General';
+    }
+    
+    static function labelUserAccess() {
+        return 'Access';
+    }
+    
+    static function labelSysadminMain() {
+        return 'Allowed to manage users';
+    }
+    
+    static function labelSysadminAdmin() {
+        return 'Not allowed to manage users';
+    }
+    
+    static function labelUserSurveyAccess() {
+        return 'Survey';
+    }
+    
+    static function labelUserAddUser() {
+        return 'Add new user';
+    }
+    
+    static function labelUserFilter() {
+        return 'Filter on user type: ';
+    }
+    
+    static function labelUserUserName() {
+        return 'Username';
+    } 
+    
+    static function labelUserUserNameName() {
+        return 'Name';
+    }
+    
+    static function labelUserUserType() {
+        return 'Type';
+    }
+    
+    static function labelAll() {
+        return 'All';
+    }
+      
+    static function labelUserActive() {
+        return 'Active';
+    }
+    
+    static function labelUserUserSubType() {
+        return 'Sub type';
+    }
+    
+    static function labelUserSupervisor() {
+        return 'Supervisor';
+    }
+    
+    static function labelUserPassword() {
+        return 'Password';
+    }
+    
+    static function labelUserPassword2() {
+        return 'Password (re-enter)';
+    }
+    
+    static function labelSettingsLanguageAdd() {
+        return 'If adding language, update users:';
+    }
+    
+    static function labelSettingsModeAdd() {
+        return 'If adding mode, update users:';
+    }
+    
+    static function labelToolsExportHistoryYes() {
+        return 'Yes';
+    }
+    
+    static function labelToolsExportHistoryNo() {
+        return 'No';
+    }
+    
+    static function labelToolsExportHistory() {
+        return 'Include history';
+    }
+    
+    static function messageRemoveData() {
+        return "Are you sure you want to remove all data for the selected components? Type `REMOVE` to continue.";
+    }
+    
+    static function messageImportSurvey() {
+        return "Are you sure you want to continue with the import? NOTE: If you are replacing the current survey(s), all survey components and data will be removed! Type `IMPORT` to continue.";
+    }
+    
+    static function labelImportText() {
+        return 'Export file content';
+    }
+    
+    static function labelToolsImportFile() {
+        return 'Import from';
+    }
+    
+    static function labelToolsExportCreate() {
+        return 'Include database scheme';
+    }
+    
+    static function labelToolsExportCreateYes() {
+        return 'Yes';
+    }
+    
+    static function labelToolsExportCreateNo() {
+        return 'No';
+    }
+    
+    static function labelExportFile() {
+        return 'Import from';
+    }
+    
+    static function messageImportNoFile() {
+        return 'no file selected.';
+    }
+    
+    static function messageImportInvalidFile() {
+        return 'invalid file selected.';
+    }
+    
+    static function messageToolsImportNotOk($result) {
+        return 'Import failed: ' . $result;
+    }
+    
+    static function buttonBrowse() {
+        return 'Browse';
+    }
+    
+    static function labelTypeEditValidationAssignment() {
+        return 'Assignment';
+    }
+    
+    static function labelValidateAssignment() {
+        return 'Validate value';
+    }
+    
+    static function optionsValidateYes() {
+        return 'Yes';
+    }
+    
+    static function optionsValidateNo() {
+        return 'No';
     }
 }
 

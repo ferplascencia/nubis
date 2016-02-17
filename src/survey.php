@@ -1226,7 +1226,8 @@ class Survey extends Component {
             SETTING_TIMEOUT_REDIRECT => Config::sessionRedirectURL(),
             SETTING_TIMEOUT_ALIVE_BUTTON => Language::sessionExpiredKeepAliveButton(),
             SETTING_TIMEOUT_LOGOUT_BUTTON => Language::sessionExpiredLogoutButton(),
-            SETTING_TIMEOUT_TITLE => Language::sessionExpiredTitle()
+            SETTING_TIMEOUT_TITLE => Language::sessionExpiredTitle(),
+            SETTING_VALIDATE_ASSIGNMENT => VALIDATE_ASSIGNMENT_NO
         );
     }
 
@@ -2774,6 +2775,24 @@ class Survey extends Component {
 
     function setInputMaskPlaceholder($value) {
         $this->setSettingValue(SETTING_INPUT_MASK_PLACEHOLDER, $value);
+    }
+    
+    function getValidateAssignment($default = true) {
+        if ($this->getSettingValue(SETTING_VALIDATE_ASSIGNMENT, $default) != "") {
+            return $this->getSettingValue(SETTING_VALIDATE_ASSIGNMENT, $default);
+        }
+        return $this->getDefaultValue(SETTING_VALIDATE_ASSIGNMENT);
+    }
+    
+    function isValidateAssignment() {
+        if ($this->getValidateAssignment() == VALIDATE_ASSIGNMENT_YES) {
+            return true;
+        }
+        return false;
+    }
+    
+    function setValidateAssignment($value) {
+        $this->setSettingValue(SETTING_VALIDATE_ASSIGNMENT, $value);
     }
 
     /* date time picker functions */

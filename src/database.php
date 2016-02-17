@@ -20,7 +20,7 @@ class Database {
             
             //$this->db = @mysqli_connect(Config::dbServer(), Config::dbUser(), Config::dbPassword());  //default mysql
             $this->db = @mysqli_connect(null, Config::dbUser(), Config::dbPassword());  //default mysql
-            if ($this->db != null) {
+            if ($this->db != null) {                
                 if (mysqli_select_db($this->db, Config::dbName())) {
                     @mysqli_query($this->db, 'SET CHARACTER SET utf8;');
                     @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
@@ -62,7 +62,7 @@ class Database {
     }
 
     function getLastInsertedId() {
-        return @mysql_insert_id($this->db);
+        return @mysqli_insert_id($this->db);
     }
 
     function getNumberOfRows($result) {

@@ -2151,7 +2151,7 @@ class SysAdmin {
             $var->setComparisonNotEqualToIgnoreCase(loadvar(SETTING_COMPARISON_NOT_EQUAL_TO_IGNORE_CASE));
         }
 
-        if (inArray($answertype, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DATE, ANSWER_TYPE_TIME, ANSWER_TYPE_DATETIME, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
+        if (inArray($answertype, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DATE, ANSWER_TYPE_TIME, ANSWER_TYPE_DATETIME, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
             $var->setInputMaskEnabled(loadvar(SETTING_INPUT_MASK_ENABLED));
             $var->setInputMask(loadvar(SETTING_INPUT_MASK));
             $var->setInputMaskCustom(loadvarAllowHTML(SETTING_INPUT_MASK_CUSTOM));
@@ -3617,7 +3617,7 @@ class SysAdmin {
         $survey->setMaximumRequired(loadvar(SETTING_GROUP_MAXIMUM_REQUIRED));
         $survey->setUniqueRequired(loadvar(SETTING_GROUP_UNIQUE_REQUIRED));
         $survey->setSameRequired(loadvar(SETTING_GROUP_SAME_REQUIRED));
-
+        $survey->setValidateAssignment(loadvar(SETTING_VALIDATE_ASSIGNMENT));
         $survey->save();
 
         $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
@@ -4332,7 +4332,7 @@ class SysAdmin {
             $type->setComparisonNotEqualToIgnoreCase(loadvar(SETTING_COMPARISON_NOT_EQUAL_TO_IGNORE_CASE));
         }
 
-        if (inArray($t, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DATE, ANSWER_TYPE_TIME, ANSWER_TYPE_DATETIME, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
+        if (inArray($t, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DATE, ANSWER_TYPE_TIME, ANSWER_TYPE_DATETIME, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
             $type->setInputMaskEnabled(loadvar(SETTING_INPUT_MASK_ENABLED));
             $type->setInputMask(loadvar(SETTING_INPUT_MASK));
             $type->setInputMaskPlaceholder(loadvar(SETTING_INPUT_MASK_PLACEHOLDER));

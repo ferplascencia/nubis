@@ -498,7 +498,7 @@ class DisplayQuestionBasic extends Display {
         /* we have object that holds display settings */
         $returnStrButtons = "";
         if ($queryobject) {
-            
+
             //$labels = array($queryobject->getLabelNextButton(), $queryobject->getLabelDKButton(), $queryobject->getLabelRFButton(), $queryobject->getLabelNAButton());
             $buttonformat = $queryobject->getButtonFormatting();
             if ($this->engine->getForward() == true) {
@@ -523,7 +523,7 @@ class DisplayQuestionBasic extends Display {
 
                 $clicknext = $this->engine->replaceFills($queryobject->getClickNext());
                 $clicknext = str_replace("'", "", $clicknext);
-                
+
                 /* we do empty and/or error checking for single variable */
                 //if (sizeof($queryvariables) == 1) {
                 if (trim($groupname) == "") {
@@ -538,7 +538,7 @@ class DisplayQuestionBasic extends Display {
                             if ($ifempty == IF_EMPTY_WARN) {
                                 $extra_empty_check .= "document.getElementById(\"em\").value=1; ";
                             }
-                            $extra_empty_check .= "empty = true;}";                            
+                            $extra_empty_check .= "empty = true;}";
                         }
 
                         $extra_error_check = "";
@@ -553,7 +553,7 @@ class DisplayQuestionBasic extends Display {
                             if ($iferror == IF_ERROR_WARN) {
                                 $extra_error_check .= "document.getElementById(\"er\").value=1; ";
                             }
-                            $extra_error_check .= "error = true;}";                            
+                            $extra_error_check .= "error = true;}";
                         }
                         if ($lastcheck != "") {
                             $lastcheck = "if (" . $lastcheck . ") { enableButtons(); return false;}";
@@ -998,16 +998,16 @@ class DisplayQuestionBasic extends Display {
         foreach ($messages as $k => $v) {
             $str .= $k . "='" . str_replace("\n", "", str_replace("'", "", strip_tags(convertHTLMEntities($v, ENT_QUOTES)))) . "' ";
         }
-        
+
         // add allow empty and allow error indicators
         $numbers = $this->engine->getDisplayNumbers();
         $var = $this->engine->getVariableDescriptive(array_search(str_replace("answer", "", $name), $numbers));
         $str .= " data-validation-empty=" . $var->getIfEmpty();
         $iferror = $var->getIfError();
         $ifgroup = $var->getIfErrorGroup();
-        
+
         // if this is the first variable in a group, it might have errors that must be fixed, so we check for that
-        if ($iferror != $ifgroup && $ifgroup == 1) { 
+        if ($iferror != $ifgroup && $ifgroup == 1) {
             $iferror = $ifgroup;
         }
         $str .= " data-validation-error=" . $iferror;
@@ -1087,6 +1087,7 @@ class DisplayQuestionBasic extends Display {
         }
 
         $returnStr = '<div id="vsid_' . $var->getVsid() . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-texttype="' . SETTING_QUESTION . '" class="' . $this->inlineeditable . $class . ' ' . $qa . '">' . $this->applyFormatting($text, $questionformat) . $this->inlineediticon . "</div>";
+        //$returnStr = '<div id="vsid_' . $var->getVsid() . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-texttype="' . SETTING_QUESTION . '">' . $this->applyFormatting($text, $questionformat) . $this->inlineediticon . "</div>";
         return $returnStr;
     }
 
@@ -1184,12 +1185,11 @@ class DisplayQuestionBasic extends Display {
                                                 
                                                     <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>
                                                 
-                                                </div>
-                                             </td>
-                                            </tr>';
+                                                </div>';
                     if ($disabled == '') {
                         $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"], true);
                     }
+                    $returnStr .= '</td></tr>';
                 } else {
                     $returnStr .= '<div class="radio uscic-radio"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
                                                 <div class="uscic-radiobutton ' . $inlineclass . ' ' . $qa . '">
@@ -1240,7 +1240,7 @@ class DisplayQuestionBasic extends Display {
         $seq = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_SMALLER_EQUAL_TO));
 
         if ($eq != "") {
-            $values = explode("-", $eq);
+            $values = explode(SEPARATOR_COMPARISON, $eq);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($v != $code) {
@@ -1251,7 +1251,7 @@ class DisplayQuestionBasic extends Display {
         }
 
         if ($neq != "") {
-            $values = explode("-", $neq);
+            $values = explode(SEPARATOR_COMPARISON, $neq);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($v == $code) {
@@ -1261,7 +1261,7 @@ class DisplayQuestionBasic extends Display {
             }
         }
         if ($ge != "") {
-            $values = explode("-", $ge);
+            $values = explode(SEPARATOR_COMPARISON, $ge);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($code <= $v) {
@@ -1271,7 +1271,7 @@ class DisplayQuestionBasic extends Display {
             }
         }
         if ($geq != "") {
-            $values = explode("-", $geq);
+            $values = explode(SEPARATOR_COMPARISON, $geq);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($code < $v) {
@@ -1281,7 +1281,7 @@ class DisplayQuestionBasic extends Display {
             }
         }
         if ($se != "") {
-            $values = explode("-", $se);
+            $values = explode(SEPARATOR_COMPARISON, $se);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($code >= $v) {
@@ -1291,7 +1291,7 @@ class DisplayQuestionBasic extends Display {
             }
         }
         if ($seq != "") {
-            $values = explode("-", $seq);
+            $values = explode(SEPARATOR_COMPARISON, $seq);
             foreach ($values as $v) {
                 if (is_numeric($v)) {
                     if ($code > $v) {
@@ -1371,69 +1371,80 @@ class DisplayQuestionBasic extends Display {
         }
 
         /* start table */
-        $returnStr .= '<table id="table_' . $var->getName() . '" class="table ' . $bordered . ' uscic-table-enumerated-horizontal">';
-
+        $returnStr .= $this->displayTableSaw();
         $noofcolumns = sizeof($orderedoptions);
         $cellwidth = "width=" . round(100 / $noofcolumns) . "%";
         $label = $var->getEnumeratedLabel();
         $order = $var->getEnumeratedOrder();
+        if ($order == ORDER_LABEL_FIRST) {
+            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-preappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
+        } else {
+            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-postappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
+        }
 
         /* split, then add header */
         if ($split == true) {
 
             if ($order == ORDER_LABEL_FIRST) {
                 $returnStr .= "<thead><tr class='uscic-table-row-header-enumerated'>";
+            } else {
+                $returnStr .= "<thead><tr style='display: none;'>";
+            }
 
-                $headeralign = $var->getHeaderAlignment();
-                $hqa = "";
-                switch ($headeralign) {
-                    case ALIGN_LEFT:
-                        $hqa = "text-left";
+            $headeralign = $var->getHeaderAlignment();
+            $hqa = "";
+            switch ($headeralign) {
+                case ALIGN_LEFT:
+                    $hqa = "text-left";
+                    break;
+                case ALIGN_RIGHT:
+                    $hqa = "text-right";
+                    break;
+                case ALIGN_JUSTIFIED:
+                    $hqa = "text-justify";
+                    break;
+                case ALIGN_CENTER:
+                    $hqa = "text-center";
+                    break;
+                default:
+                    break;
+            }
+
+            foreach ($orderedoptions as $option) {
+
+                switch ($label) {
+                    case ENUMERATED_LABEL_INPUT_ONLY:
+                        $labelstr = "";
                         break;
-                    case ALIGN_RIGHT:
-                        $hqa = "text-right";
+                    case ENUMERATED_LABEL_LABEL_ONLY:
+                        $labelstr = $option["label"];
                         break;
-                    case ALIGN_JUSTIFIED:
-                        $hqa = "text-justify";
+                    case ENUMERATED_LABEL_LABEL_CODE:
+                        $labelstr = "(" . $option["code"] . ") " . $option["label"];
                         break;
-                    case ALIGN_CENTER:
-                        $hqa = "text-center";
+                    case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
+                        $acr = "";
+                        if (trim($option["acronym"]) != "") {
+                            $acr = " " . $option["acronym"];
+                        }
+                        $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
                         break;
                     default:
+                        $labelstr = $option["label"];
                         break;
                 }
 
-                foreach ($orderedoptions as $option) {
-
-                    switch ($label) {
-                        case ENUMERATED_LABEL_INPUT_ONLY:
-                            $labelstr = "";
-                            break;
-                        case ENUMERATED_LABEL_LABEL_ONLY:
-                            $labelstr = $option["label"];
-                            break;
-                        case ENUMERATED_LABEL_LABEL_CODE:
-                            $labelstr = "(" . $option["code"] . ") " . $option["label"];
-                            break;
-                        case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
-                            $acr = "";
-                            if (trim($option["acronym"]) != "") {
-                                $acr = " " . $option["acronym"];
-                            }
-                            $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
-                            break;
-                        default:
-                            $labelstr = $option["label"];
-                            break;
-                    }
-
-                    $returnStr .= "<th class='uscic-table-row-cell-header-enumerated'><div class='" . $hqa . "'>" . $this->applyFormatting($labelstr, $var->getHeaderFormatting()) . "</div></th>";
-                }
-
-                $returnStr .= "</tr></thead>";
+                $returnStr .= "<th class='uscic-table-row-cell-header-enumerated'><div class='" . $hqa . "'>" . $this->applyFormatting($labelstr, $var->getHeaderFormatting()) . "</div></th>";
             }
-        }
 
+            $returnStr .= "</tr></thead>";
+        } else {
+            $returnStr .= "<thead><tr style='display: none;'>";
+            foreach ($orderedoptions as $o) {
+                $returnStr .= "<th></th>";
+            }
+            $returnStr .= '</tr></thead>';
+        }
         $returnStr .= "<tbody><tr class='uscic-table-row-enumerated-horizontal'>";
 
         $dkrfna = $this->addDKRFNAButton($varname, $var, $variable);
@@ -1487,16 +1498,24 @@ class DisplayQuestionBasic extends Display {
                             break;
                     }
 
-                    $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated-horizontal' . $disabled . '"><div class="radio uscic-enumerated-horizontal">
+                    if ($order == ORDER_LABEL_FIRST) {
+                        $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated-horizontal' . $disabled . '"><div class="radio uscic-enumerated-horizontal">
+                                            <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-enumerated-label' . $disabled . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</label>
+                                                <div class="uscic-radio' . $inlineclass . ' ' . $qa . '">
+                                                    <input ' . $disabled . ' class="uscic-radio-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>';
+                        $returnStr .= '</div>
+                                            </div>';
+                    } else {
+                        $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated-horizontal' . $disabled . '"><div class="radio uscic-enumerated-horizontal">
 
-                                        <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-enumerated-label' . $disabled . '">
+                                            <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-enumerated-label' . $disabled . '">
 
-                                            <div class="uscic-radio' . $inlineclass . ' ' . $qa . '">
+                                                <div class="uscic-radio' . $inlineclass . ' ' . $qa . '">
 
-                                                <input ' . $disabled . ' class="uscic-radio-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>' . $this->applyFormatting($labelstr, $var->getAnswerFormatting());
-
-                    $returnStr .= '</div></label>
-                                        </div>';
+                                                    <input ' . $disabled . ' class="uscic-radio-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>' . $this->applyFormatting($labelstr, $var->getAnswerFormatting());
+                        $returnStr .= '</div></label>
+                                            </div>';
+                    }
                 } else {
 
                     $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated-horizontal' . $disabled . '" ' . $cellwidth . '><div class="' . $qa . '">
@@ -1508,10 +1527,10 @@ class DisplayQuestionBasic extends Display {
                                    </div>';
                 }
 
-                $returnStr .= '</td>';
                 if ($disabled == '') {
                     $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"], true);
                 }
+                $returnStr .= '</td>';
             } else {
                 $returnStr .= '<td class="uscic-table-row-cell-enumerated"></td>';
             }
@@ -1569,7 +1588,6 @@ class DisplayQuestionBasic extends Display {
                     }
                     $returnStr .= "<th class='uscic-table-row-cell-footer-enumerated'><div class='" . $hqa . "'>" . $this->applyFormatting($labelstr, $var->getHeaderFormatting()) . "</div></th>";
                 }
-
                 $returnStr .= "</tr></tfoot>";
             }
         }
@@ -2032,65 +2050,77 @@ class DisplayQuestionBasic extends Display {
         }
 
         /* start table */
-        $returnStr .= '<table id="table_' . $var->getName() . '" class="table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
-
+        $returnStr .= $this->displayTableSaw();
         $noofcolumns = sizeof($orderedoptions);
         $cellwidth = "width=" . round(100 / $noofcolumns) . "%";
         $order = $var->getEnumeratedOrder();
+        if ($order == ORDER_LABEL_FIRST) {
+            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-preappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
+        } else {
+            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-postappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
+        }
+
         /* split, then add header */
         if ($split == true) {
 
             if ($order == ORDER_LABEL_FIRST) {
                 $returnStr .= "<thead><tr class='uscic-table-row-header-enumerated'>";
+            } else {
+                $returnStr .= "<thead><tr style='display: none;'>";
+            }
 
-                $headeralign = $var->getHeaderAlignment();
-                $hqa = "";
-                switch ($headeralign) {
-                    case ALIGN_LEFT:
-                        $hqa = "text-left";
+            $headeralign = $var->getHeaderAlignment();
+            $hqa = "";
+            switch ($headeralign) {
+                case ALIGN_LEFT:
+                    $hqa = "text-left";
+                    break;
+                case ALIGN_RIGHT:
+                    $hqa = "text-right";
+                    break;
+                case ALIGN_JUSTIFIED:
+                    $hqa = "text-justify";
+                    break;
+                case ALIGN_CENTER:
+                    $hqa = "text-center";
+                    break;
+                default:
+                    break;
+            }
+
+            foreach ($orderedoptions as $option) {
+
+                switch ($label) {
+                    case ENUMERATED_LABEL_INPUT_ONLY:
+                        $labelstr = "";
                         break;
-                    case ALIGN_RIGHT:
-                        $hqa = "text-right";
+                    case ENUMERATED_LABEL_LABEL_ONLY:
+                        $labelstr = $option["label"];
                         break;
-                    case ALIGN_JUSTIFIED:
-                        $hqa = "text-justify";
+                    case ENUMERATED_LABEL_LABEL_CODE:
+                        $labelstr = "(" . $option["code"] . ") " . $option["label"];
                         break;
-                    case ALIGN_CENTER:
-                        $hqa = "text-center";
+                    case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
+                        $acr = "";
+                        if (trim($option["acronym"]) != "") {
+                            $acr = " " . $option["acronym"];
+                        }
+                        $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
                         break;
                     default:
+                        $labelstr = $option["label"];
                         break;
                 }
-
-                foreach ($orderedoptions as $option) {
-
-                    switch ($label) {
-                        case ENUMERATED_LABEL_INPUT_ONLY:
-                            $labelstr = "";
-                            break;
-                        case ENUMERATED_LABEL_LABEL_ONLY:
-                            $labelstr = $option["label"];
-                            break;
-                        case ENUMERATED_LABEL_LABEL_CODE:
-                            $labelstr = "(" . $option["code"] . ") " . $option["label"];
-                            break;
-                        case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
-                            $acr = "";
-                            if (trim($option["acronym"]) != "") {
-                                $acr = " " . $option["acronym"];
-                            }
-                            $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
-                            break;
-                        default:
-                            $labelstr = $option["label"];
-                            break;
-                    }
-
-                    $returnStr .= "<th class='uscic-table-row-cell-header-setofenumerated'><div class='" . $hqa . "'><span id='vsid_option" . $var->getVsid() . $option["code"] . "' uscic-target='vsid_" . $var->getVsid() . "' uscic-answercode='" . $option["code"] . "' uscic-texttype='" . SETTING_OPTIONS . "' class='" . $this->inlineeditable . "'>" . $this->applyFormatting($labelstr, $var->getHeaderFormatting()) . "</span></div></th>";
-                }
-
-                $returnStr .= "</tr></thead>";
+                $returnStr .= "<th class='uscic-table-row-cell-header-setofenumerated'><div class='" . $hqa . "'><span id='vsid_option" . $var->getVsid() . $option["code"] . "' uscic-target='vsid_" . $var->getVsid() . "' uscic-answercode='" . $option["code"] . "' uscic-texttype='" . SETTING_OPTIONS . "' class='" . $this->inlineeditable . "'>" . $this->applyFormatting($labelstr, $var->getHeaderFormatting()) . "</span></div></th>";
             }
+
+            $returnStr .= "</tr></thead>";
+        } else {
+            $returnStr .= "<thead><tr style='display: none;'>";
+            foreach ($orderedoptions as $o) {
+                $returnStr .= "<th></th>";
+            }
+            $returnStr .= '</tr></thead>';
         }
 
 
@@ -2124,13 +2154,7 @@ class DisplayQuestionBasic extends Display {
                 }
 
                 if ($split == false) {
-                    $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-setofenumerated-horizontal' . $disabled . '"><div class="checkbox uscic-setofenumerated-horizontal">
 
-                                        <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-setofenumerated-label' . $disabled . '">
-
-                                            <div class="uscic-checkbox' . $inlineclass . ' ' . $qa . '">
-
-                                                <input ' . $disabled . ' class="uscic-checkbox-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>';
                     if ($split == false) {
                         switch ($label) {
                             case ENUMERATED_LABEL_INPUT_ONLY:
@@ -2154,13 +2178,25 @@ class DisplayQuestionBasic extends Display {
                                 break;
                         }
 
-                        $returnStr .= '<span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>';
+                        if ($order == ORDER_LABEL_FIRST) {
+                            $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-setofenumerated-horizontal' . $disabled . '"><div class="checkbox uscic-setofenumerated-horizontal">
+                                        <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-setofenumerated-label' . $disabled . '"></label>';
+                            $returnStr .= '<span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>
+                                            <div class="uscic-checkbox' . $inlineclass . ' ' . $qa . '">
+                                                <input ' . $disabled . ' class="uscic-checkbox-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>';
+                            $returnStr .= '</div></div>';
+                        } else {
+                            $returnStr .= '<td ' . $cellwidth . ' id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-setofenumerated-horizontal' . $disabled . '"><div class="checkbox uscic-setofenumerated-horizontal">
+                                        <label for="' . $id . '_' . $option["code"] . '" id="label' . $id . '_' . $option["code"] . '" class="uscic-table-setofenumerated-label' . $disabled . '">
+
+                                            <div class="uscic-checkbox' . $inlineclass . ' ' . $qa . '">
+
+                                                <input ' . $disabled . ' class="uscic-checkbox-table ' . $dkrfnaclass . '" ' . $this->getErrorTextString($varname) . ' ' . $inlinejavascript . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>';
+
+                            $returnStr .= '<span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>';
+                            $returnStr .= '</div></label></div>';
+                        }
                     }
-                    $returnStr .= '</div>
-
-                                         </label>
-
-                                        </div>';
                 } else {
 
                     $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-setofenumerated-horizontal' . $disabled . '" ' . $cellwidth . '><div class="' . $qa . '">
@@ -3830,8 +3866,7 @@ function getEvents() {
         if ($template != "") {
             $group = $this->engine->getGroup($template);
             $click = $this->engine->replaceFills($group->getClickLanguageChange());
-        }
-        else {
+        } else {
             $vars = explode("~", $variablenames);
             $var = $this->engine->getVariableDescriptive($vars[0]);
             $click = $this->engine->replaceFills($var->getClickLanguageChange());
@@ -3872,14 +3907,13 @@ function getEvents() {
         if ($template != "") {
             $group = $this->engine->getGroup($template);
             $click = $this->engine->replaceFills($group->getClickModeChange());
-        }
-        else {
+        } else {
             $vars = explode("~", $variablenames);
             $var = $this->engine->getVariableDescriptive($vars[0]);
             $click = $this->engine->replaceFills($var->getClickModeChange());
         }
         $click = str_replace("'", "", $click);
-        
+
         $returnStr = '<div class="btn-group">
   <button type="button" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
     ' . Language::surveyChangeMode() . ' <span class="caret"></span>

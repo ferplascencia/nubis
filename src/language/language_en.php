@@ -4689,7 +4689,7 @@ class Language extends LanguageBase {
     }
 
     static function helpInvalidSet() {
-        return ' (e.g. 1,2; 2,3-4)';
+        return ' (e.g. 1,2 ' .SEPARATOR_COMPARISON . ' 2,3-4)';
     }
 
     static function labelHouseholdMember() {
@@ -6979,6 +6979,22 @@ class Language extends LanguageBase {
     
     static function buttonBrowse() {
         return 'Browse';
+    }
+    
+    static function labelTypeEditValidationAssignment() {
+        return 'Assignment';
+    }
+    
+    static function labelValidateAssignment() {
+        return 'Validate value';
+    }
+    
+    static function optionsValidateYes() {
+        return 'Yes';
+    }
+    
+    static function optionsValidateNo() {
+        return 'No';
     }
 }
 

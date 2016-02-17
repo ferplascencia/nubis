@@ -698,7 +698,7 @@ class DataExport {
 //exit;
         $query = "delete from table " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid;
         $this->db->executeQuery($query);
-        $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT suid, primkey, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
+        $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT suid, primkey, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
         $this->db->executeQuery($query);
 
         // check for filter
@@ -1123,7 +1123,7 @@ class DataExport {
                             //    $optioncodes .= SEPARATOR_SETOFENUMERATED;
                             //}
                             $optioncodes[] = $code;
-                            $optionlabels[] = trim(strip_tags($option["label"]));
+                            $optionlabels[] = $this->prepareLabel(trim(strip_tags($option["label"])));
                             if ($code > $soem) {
                                 $soem = $code;
                             }
@@ -1158,7 +1158,7 @@ class DataExport {
                         if (is_array($options)) {
                             foreach ($options as $option) {
                                 $code = $option["code"];
-                                $lab = trim(strip_tags($option["label"]));
+                                $lab = $this->prepareLabel(trim(strip_tags($option["label"])));
                                 $sn = strlen($code) + strlen($lab) + 1; //(one space)
                                 if ($sn > $so) {
                                     $so = $sn;
@@ -1248,7 +1248,7 @@ class DataExport {
                     $this->lookup[] = strtoupper($variablename . "s" . $code);
 
                     if ($var->getOutputSetOfEnumeratedBinary() == SETOFENUMERATED_DEFAULT) {
-                        $this->valuelabels[] = strip_tags($valueLabel);
+                        $this->valuelabels[] = trim(strip_tags($valueLabel));
                         if ($valwidth == VALUELABEL_WIDTH_SHORT) {
                             $width = strlen($code);
                         } else {
@@ -1293,7 +1293,7 @@ class DataExport {
 
                 $this->variablenames[] = $variablename;
                 $this->lookup[] = strtoupper($variablename);
-                $this->valuelabels[] = strip_tags($valueLabel);
+                $this->valuelabels[] = trim(strip_tags($valueLabel));
                 $this->labels[] = $label;
                 $this->datatypes[] = STATA_TYPE_STRING;
 
@@ -1313,7 +1313,7 @@ class DataExport {
         else {
             $this->variablenames[] = $variablename;
             $this->lookup[] = strtoupper($variablename);
-            $this->valuelabels[] = strip_tags($valueLabel);
+            $this->valuelabels[] = trim(strip_tags($valueLabel));
             $this->labels[] = $label;
             $this->datatypes[] = $datatype;
 
@@ -1731,7 +1731,7 @@ class DataExport {
         $rn = str_replace("]", "_", $rn);
         $rn = str_replace(",", "_", $rn);
         $rn = trim(str_replace(".", "", $rn));
-        return $rn;
+        return $this->stripNonAscii($rn);
     }
 
     function stripNonAscii($str) {
@@ -1739,7 +1739,7 @@ class DataExport {
         return preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $str);
     }
 
-    function prepareLabel($label, $replace = array("'", "^")) {
+    function prepareLabel($label, $replace = array("'", "^", "~")) {
         foreach ($replace as $r) {
             $label = str_replace($r, "", $label);
         }
@@ -1865,7 +1865,7 @@ class DataExport {
 
         /* label list */
         for ($i = 0; $i < $this->variablenumber; $i++) {
-            $this->writeString($this->recordbytes, $this->stripNonAscii($this->labels[$i]), 81, $encoding);
+            $this->writeString($this->recordbytes, $this->prepareLabel($this->labels[$i]), 81, $encoding);
         }
 
         /* no long names, so the characteristics section is empty */
@@ -1890,7 +1890,7 @@ class DataExport {
                     }
 
                     /* make original name in same format as the other ones */
-                    $rn = $this->stripNonAscii($this->prepareName($rn));
+                    $rn = $this->prepareName($rn);
 
                     /* open */
                     $this->writeByte($this->recordbytes, 1);
@@ -2077,9 +2077,33 @@ class DataExport {
                 $value = $this->getValue($primkey, $record, $fieldname);
             }
 
-            if (inArray(strtoupper($fieldname), $this->arrayfields) && contains($fieldname, "[") == false) {
-                if ($value != null) {
-                    $value = implode("-", flatten(unserialize(gzuncompress($value))));
+            // old array handling
+            //if (inArray(strtoupper($fieldname), $this->arrayfields) && contains($fieldname, "[") == false) {
+            //    if ($value != null) {
+            //        $value = implode("-", flatten(unserialize(gzuncompress($value))));
+            //    }
+            //}
+            
+            // we have a value, then check for serialized array answer
+            if ($value != null) {
+                
+                // variable is an instance of an array variable
+                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {                
+
+                    // this is a compressed string!
+                    $v = gzuncompress($value);
+                    if ($v !== false) {
+
+                        // this is a serialized string!
+                        if (unserialize($v) !== false) {
+                            $v1 = unserialize(gzuncompress($value));
+                            
+                            // the unserialized is an array or object, then output empty string so it appears as empty (not skipped)
+                            if (is_array($v1) || is_object($v1)) {
+                                $value = "";
+                            }
+                        }
+                    }
                 }
             }
 
@@ -2442,9 +2466,26 @@ class DataExport {
                 $value = $this->getValue($primkey, $record, $fieldname);
             }
 
-            if (inArray(strtoupper($fieldname), $this->arrayfields) && contains($fieldname, "[") == false) {
-                if ($value != null) {
-                    $value = implode("-", flatten(unserialize(gzuncompress($value))));
+            // we have a value, then check for serialized array answer
+            if ($value != null) {
+                
+                // variable is an instance of an array variable
+                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {                
+
+                    // this is a compressed string!
+                    $v = gzuncompress($value);
+                    if ($v !== false) {
+
+                        // this is a serialized string!
+                        if (unserialize($v) !== false) {
+                            $v1 = unserialize(gzuncompress($value));
+                            
+                            // the unserialized is an array or object, then output empty string so it appears as empty (not skipped)
+                            if (is_array($v1) || is_object($v1)) {
+                                $value = "";
+                            }
+                        }
+                    }
                 }
             }
 

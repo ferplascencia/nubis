@@ -321,6 +321,7 @@ define('FUNCTION_DO_MOVE_FORWARD', 'doMoveForward');
 define('FUNCTION_SHOW_QUESTION', 'showQuestion');
 define('FUNCTION_GET_ANSWER', 'getAnswer');
 define('FUNCTION_SET_ANSWER', 'setAnswer');
+define('FUNCTION_CHECK_ANSWER', 'checkAnswer');
 define('FUNCTION_DO_EXIT', 'doExit');
 define('FUNCTION_IN_ARRAY', 'inArray');
 define('FUNCTION_ADD_ASSIGNMENT', 'addAssignment');
@@ -824,6 +825,12 @@ define('SETTING_USER_LANGUAGES', 'userlanguages');
 define('SETTING_USER_MODES', 'usermodes');
 define('SETTING_USER_SURVEYS', 'usersurveys');
 define('SETTING_USER_SURVEY', 'usersurvey');
+
+define('SETTING_VALIDATE_ASSIGNMENT', 'assignmentvalidation');
+define('VALIDATE_ASSIGNMENT_YES', 1);
+define('VALIDATE_ASSIGNMENT_NO', 2);
+define('VALID_ASSIGNMENT', 1);
+define('INVALID_ASSIGNMENT', 2);
 
 /* placeholders */
 define('PLACEHOLDER_TEXTFIELD', '$textfield$');

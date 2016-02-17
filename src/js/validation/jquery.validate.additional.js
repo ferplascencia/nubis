@@ -1064,7 +1064,7 @@ jQuery.validator.addMethod('maximumselecteddropdown', function(value, element, p
 
 jQuery.validator.addMethod('invalidsubselecteddropdown', function(value, element, param) {
     var name = $(element).attr("name");
-    var invalids = param.split(";");
+    var invalids = param.split("#");
     var indices = new Array();
     $('[name="' + name + '"] option:selected').each(function() {
         indices.push(parseInt($(this).val()));
@@ -1113,7 +1113,7 @@ jQuery.validator.addMethod('invalidsubselecteddropdown', function(value, element
 
 jQuery.validator.addMethod('invalidselecteddropdown', function(value, element, param) {
     var name = $(element).attr("name");
-    var invalids = param.split(";");
+    var invalids = param.split("#");
     var indices = new Array();
     $('[name="' + name + '"] option:selected').each(function() {
         indices.push(parseInt($(this).val()));

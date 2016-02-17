@@ -15,6 +15,8 @@
 require_once("../constants.php");
 require_once("../functions.php");
 require_once("../dbConfig.php");
+$_SESSION['SYSTEM_ENTRY'] = USCIC_SMS;
+$loaded = dbConfig::load("../conf.php");
 require_once("../config.php");
 require_once("../globals.php");
 require_once("../user.php");
@@ -27,7 +29,6 @@ if (loadvar('r') != '') {
 }
 
 // include language
-$_SESSION['SYSTEM_ENTRY'] = USCIC_SMS;
 $l = getSMSLanguage();
 if (file_exists("language/language" . getSMSLanguagePostFix($l) . ".php")) {
     require_once('language_' . getSMSLanguagePostFix($l) . '.php');

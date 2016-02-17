@@ -139,7 +139,6 @@ class Display {
       <script src="bootstrap/assets/js/respond.min.js"></script>
     <![endif]-->
     ';
-
         $returnStr .= '</head>
                     <body>
                     ';
@@ -590,7 +589,8 @@ class Display {
             $errorplacement .= 'showErrors: function(errorMap, errorList) {';
             $errorplacement .= '$.each(errorList, function (index, error) {';
             $errorplacement .= 'if ($(error.element).attr("data-validation-empty") == 3) {';
-            $errorplacement .= '$(error.element).addClass("ignore-empty")';
+            $errorplacement .= 'var name = $(error.element).attr("name");';
+            $errorplacement .= '$("[name=\'" + name + "\']").addClass("ignore-empty")';
             $errorplacement .= '}';
             if ($paradata == true) {
                 $errorplacement .= 'lookupCode($(error.element).attr("name"), $(error.element).attr("name") + "-" + error.message);';
@@ -627,7 +627,8 @@ class Display {
                         $.each(errorList, function (index, error) {
                             //var $element = $(error.element);
                             if ($(error.element).attr("data-validation-empty") == 3) {
-                                $(error.element).addClass("ignore-empty");
+                                var name = $(error.element).attr("name");
+                                $("[name=\'" + name + "\']").addClass("ignore-empty");
                             }
                             str = str + "<p class=\'help-block uscic-help-block\'>" + error.message + "</p>";';
             if ($paradata == true) {
@@ -643,7 +644,8 @@ class Display {
                         var str = "";
                         $.each(errorList, function (index, error) {
                             if ($(error.element).attr("data-validation-error") == 3) {
-                                $(error.element).addClass("ignore-error");
+                                var name = $(error.element).attr("name");
+                                $("[name=\'" + name + "\']").addClass("ignore-error");
                             }
                             var $element = $(error.element);
                             str = str + "<p class=\'help-block uscic-help-block\'>" + error.message + "</p>";';
@@ -2289,6 +2291,19 @@ class Display {
         $returnStr .= "</select>";
         return $returnStr;
     }
+    
+    function displayValidateAssignment($name, $current, $generic = false) {
+        $returnStr = "<select class='selectpicker show-tick' name=$name>";
+        $selected = array(SETTING_FOLLOW_GENERIC => "", VALIDATE_ASSIGNMENT_YES => "", VALIDATE_ASSIGNMENT_NO => "");
+        $selected[$current] = "selected";
+        if ($generic) {
+            $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
+        }
+        $returnStr .= "<option " . $selected[VALIDATE_ASSIGNMENT_YES] . " value=" . VALIDATE_ASSIGNMENT_YES . ">" . Language::optionsValidateYes() . "</option>";
+        $returnStr .= "<option " . $selected[VALIDATE_ASSIGNMENT_NO] . " value=" . VALIDATE_ASSIGNMENT_NO . ">" . Language::optionsValidateNo() . "</option>";
+        $returnStr .= "</select>";
+        return $returnStr;
+    }
 
     function displayExclusive($name, $current, $generic = false) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
@@ -2647,7 +2662,7 @@ class Display {
         $uncheck = array();
 
         // determine incompatible sets
-        $sets = explode(";", $invalidsub);
+        $sets = explode(SEPARATOR_COMPARISON, $invalidsub);
         foreach ($sets as $set) {
             $setarray = explode(",", $set);
 
@@ -2655,7 +2670,6 @@ class Display {
             if (sizeof($setarray) != 2) {
                 continue;
             } else {
-
                 $first = $setarray[0];
                 $second = $setarray[1];
                 $uncheck[$first] = $second;
@@ -2912,6 +2926,21 @@ class Display {
         if (!isRegisteredScript("js/cookie/uscic.cookie.js")) {
             registerScript('js/cookie/uscic.cookie.js');
             $returnStr .= '<script type="text/javascript" src="js/cookie/uscic.cookie.js"></script>';
+        }
+        return $returnStr;
+    }
+    
+    /*  TABLE MOBILE HANDLING */
+    function displayTableSaw() {
+        $returnStr = "";
+        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.nubis.js")) {
+            $returnStr .= "<script type='text/javascript' src='js/tablesaw/stackonly/tablesaw.stackonly.nubis.js'></script>";
+        }
+        if (!isRegisteredScript("js/tablesaw/tablesaw-init.js")) {
+            $returnStr .= "<script type='text/javascript' src='js/tablesaw/tablesaw-init.js'></script>";
+        }
+        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.css")) {
+            $returnStr .= '<link href="js/tablesaw/stackonly/tablesaw.stackonly.css" type="text/css" rel="stylesheet">';
         }
         return $returnStr;
     }
@@ -3195,11 +3224,25 @@ function unmaskForm() {
 
 function inputMaskingSupported() {
     var ua = navigator.userAgent;
-    var androidchrome = ua.match(new RegExp("android.*chrome.*", "i")) !== null;
+    //alert(ua);
+    //var androidchrome = ua.match(new RegExp("android.*chrome.*", "i")) !== null;
+    var androidchrome = ua.match(new RegExp("android.*chrome.*", "i")) !== null;    
+    if (androidchrome) {    
+        var bs = ua.match(/Chrome\/(\d+)/);        
+        if (bs[1] < 38) { 
+            return false;
+        }
+    }
     var androidfirefox = ua.match(new RegExp("android.*firefox.*", "i")) !== null;
-    var kindle = /Kindle/i.test(ua) || /Silk/i.test(ua) || /KFTT/i.test(ua) || /KFOT/i.test(ua) || /KFJWA/i.test(ua) || /KFJWI/i.test(ua) || /KFSOWI/i.test(ua) || /KFTHWA/i.test(ua) || /KFTHWI/i.test(ua) || /KFAPWA/i.test(ua) || /KFAPWI/i.test(ua);
-    if (androidchrome === true || androidfirefox === true || kindle === true) {
+    if (androidfirefox) {    
         return false;
+    }
+    var kindle = /Kindle/i.test(ua) || /Silk/i.test(ua) || /KFTT/i.test(ua) || /KFOT/i.test(ua) || /KFJWA/i.test(ua) || /KFJWI/i.test(ua) || /KFSOWI/i.test(ua) || /KFTHWA/i.test(ua) || /KFTHWI/i.test(ua) || /KFAPWA/i.test(ua) || /KFAPWI/i.test(ua);
+    if(kindle) {
+        var match = ua.match(/\bSilk\/([0-9]+)\b/);
+        if (match[1] < 47) { // works silk 47 and higher 
+            return false;
+        }
     }
     return true;
 }

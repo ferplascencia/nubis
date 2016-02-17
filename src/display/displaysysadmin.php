@@ -2075,7 +2075,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<div class='well'>";
             $returnStr .= "<table>";
             switch ($answertype) {
-
                 case ANSWER_TYPE_ENUMERATED:
                     $returnStr .= "<tr><td>" . Language::labelInlineEditExclusive() . "</td>";
                     $returnStr .= "<td>" . $this->displayExclusive(SETTING_INLINE_EXCLUSIVE, $variable->getInlineExclusive(), true) . "</td></tr>";
@@ -2198,7 +2197,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
 
         //if (inArray($answertype, array(ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DATE, ANSWER_TYPE_TIME, ANSWER_TYPE_DATETIME))) {
-        if (inArray($answertype, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
+        if (inArray($answertype, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
             $returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationMasking() . '</span>';
             $returnStr .= "<div class='well'>";
             $returnStr .= "<table>";
@@ -3921,7 +3920,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '</div>';
         }
 
-        if (inArray($t, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
+        if (inArray($t, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
             $returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationMasking() . '</span>';
             $returnStr .= "<div class='well'>";
             $returnStr .= "<table>";
@@ -5386,7 +5385,15 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<td><input name='" . SETTING_GROUP_EXACT_REQUIRED . "' type='text' class='form-control autocompletebasic' value='" . $survey->getExactRequired() . "'></td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
-
+        
+        $returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationAssignment() . '</span>';
+        $returnStr .= "<div class='well'>";
+        $returnStr .= "<table>";        
+        $returnStr .= "<tr><td>" . Language::labelValidateAssignment() . "</td>";
+        $returnStr .= "<td>" . $this->displayValidateAssignment(SETTING_VALIDATE_ASSIGNMENT, $survey->getValidateAssignment()) . "</td></tr>";
+        $returnStr .= '</table>';
+        $returnStr .= '</div>';
+        
         $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonSave() . '"/>';
         $returnStr .= "</form></div>";
         $returnStr .= $this->showSettingsFooter($survey);
@@ -7526,7 +7533,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
     function showIssues($content = "") {
         $returnStr = $this->showToolsHeader(Language::linkReported());
-        $returnStr .= $content;
+        $returnStr .= $content;        
         $surveys = new Surveys();
         $surveys = $surveys->getSurveys();
         if (sizeof($surveys) > 0) {
@@ -7581,7 +7588,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                 $returnStr .= "<br/><table id='issuetable' class='table table-bordered table-striped'><thead>";
                 $returnStr .= "<th>Reported by</th><th>Reported on</th><th>Category</th><th>Description</th><th>Primary key</th><th>Interview mode</th><th>Language</th>";
                 $returnStr .= "</thead><tbody>";
-                $modes = ConfCommonig::surveyModes();
+                $modes = Common::surveyModes();
                 $languages = Language::getLanguagesArray();
                 $cats = Language::reportProblemCategories();
                 foreach ($issues as $is) {

@@ -1496,7 +1496,7 @@ function getInvalidSetString($var, $invalid) {
         return $invalid;
     }
 
-    $subs = explode(";", $invalid);
+    $subs = explode(SEPARATOR_COMPARISON, $invalid);
     foreach ($subs as $sub) {
         $expl = explode(",", $sub);
         $names = array();
@@ -1528,7 +1528,7 @@ function getInvalidSubsetString($var, $invalidsub) {
         return $invalidsub;
     }
 
-    $subs = explode(";", $invalidsub);
+    $subs = explode(SEPARATOR_COMPARISON, $invalidsub);
     foreach ($subs as $sub) {
         $expl = explode(",", $sub);
         $names = array();

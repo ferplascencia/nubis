@@ -3192,6 +3192,11 @@ class Compiler {
             $stmt = new PHPParser_Node_Arg($stmts[0]);
             $this->updateVariables($stmt);
             $args[] = $stmt;
+            
+            // add check assignment statement
+            $ifstmt = new PHPParser_Node_Expr_Equal(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_CHECK_ANSWER)), array($stmt)), new PHPParser_Node_Scalar_LNumber(2));
+            $ifnode = new PHPParser_Node_Stmt_If($ifstmt, array('stmts' => array(new PHPParser_Node_Stmt_Return())));            
+            $assignfunctionnode->addStmt($ifnode);
 
             /* check if we need to add code for undoing assignment if going back */
             $name = $parts[0];

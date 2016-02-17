@@ -288,9 +288,9 @@ class Variable {
                     }
                 }
 
-                // store complete array answer if value(s)
+                // store complete array answer if value(s), don't strip any tags!
                 if (sizeof($answer) > 0) {
-                    $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), gzcompress(serialize($answer)));
+                    $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), gzcompress(serialize($answer)), false);
                 }
                 // no values, then store as empty
                 else {
@@ -372,8 +372,9 @@ class Variable {
                 //print_r($arr);
                 // store updated array first, so the last call sets the in-memory answer properly
                 //$engine->setAnswer($varname, gzcompress(serialize($arr)));
-                // store complete array answer
-                $this->storeAnswer($primkey, $engine->prefixVariableName($varname), gzcompress(serialize($arr)));
+                
+                // store complete array answer, don't strip any tags!
+                $this->storeAnswer($primkey, $engine->prefixVariableName($varname), gzcompress(serialize($arr)), false);
                 
                 // array answer, then add individual entries
                 if (is_array($answer)) {
@@ -396,7 +397,8 @@ class Variable {
                 // answer itself is an array
                 if (is_array($answer)) {
                     //echo 'STORING: ' .                 $this->completevariablename;
-                    $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), gzcompress(serialize($answer)));
+                    // store array answer, don't strip any tags!
+                    $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), gzcompress(serialize($answer)), false);
                 }
                 // answer is not an array
                 else {
@@ -409,7 +411,7 @@ class Variable {
         }
     }
 
-    private function storeAnswer($primkey, $variable, $answer) {
+    private function storeAnswer($primkey, $variable, $answer, $striptags = true) {
         global $db, $engine;
         $dirty = $this->getDirty();
         $prim = $primkey;
@@ -451,9 +453,9 @@ class Variable {
                 $answer = 'null';
             }
             else {
-                $answer = '"' . prepareDatabaseString($ans) . '"';
+                $answer = '"' . prepareDatabaseString($ans, $striptags) . '"';
                 if ($key != "") {
-                    $answer = "aes_encrypt('" . prepareDatabaseString($ans) . "', '" . $key . "')";
+                    $answer = "aes_encrypt('" . prepareDatabaseString($ans, $striptags) . "', '" . $key . "')";
                 }
             }    
             $queryparams = 'suid, primkey, variablename, answer, dirty, version, language, mode';

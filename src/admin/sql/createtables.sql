@@ -155,6 +155,32 @@ CREATE TABLE IF NOT EXISTS `survey1_context` (
 
 
 
+CREATE TABLE IF NOT EXISTS `survey1_consolidated_times` (
+
+    `suid` int(11) NOT NULL DEFAULT '1',
+
+    `primkey` varchar(150) NOT NULL,
+
+    `begintime` varchar(50) NOT NULL,
+
+    `stateid` int(11) DEFAULT NULL,  
+
+    `variable` varchar(50) NOT NULL,
+
+    `timespent` int(11) NOT NULL DEFAULT '0',
+
+    `language` int(11) NOT NULL DEFAULT '1',
+
+    `mode` int(11) NOT NULL DEFAULT '1',
+
+    `version` int(11) NOT NULL DEFAULT '1',
+
+    `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (`suid`,`primkey`,`begintime`,`variable`)
+) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
+
+
 -- --------------------------------------------------------
 
 
@@ -1514,32 +1540,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_times` (
 -- Table structure for table `survey1_times`
 
 --
-
-CREATE TABLE IF NOT EXISTS `survey1_consolidated_times` (
-
-    `suid` int(11) NOT NULL DEFAULT '1',
-
-    `primkey` varchar(150) NOT NULL,
-
-    `begintime` varchar(50) NOT NULL,
-
-    `stateid` int(11) DEFAULT NULL,  
-
-    `variable` varchar(50) NOT NULL,
-
-    `timespent` int(11) NOT NULL DEFAULT '0',
-
-    `language` int(11) NOT NULL DEFAULT '1',
-
-    `mode` int(11) NOT NULL DEFAULT '1',
-
-    `version` int(11) NOT NULL DEFAULT '1',
-
-    `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (`suid`,`primkey`,`begintime`,`variable`)
-) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
-
 
 CREATE TABLE IF NOT EXISTS `survey1_times` (
 
