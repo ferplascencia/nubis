@@ -62,6 +62,7 @@ class Install {
         $zones = $this->getTimezones();
         $returnStr .= '<form method="post"><div style="margin-top: 20px;">
                         <input type="hidden" name="p" value="setupRes" />
+                        <input type="hidden" name="se" value="2" />
   <!-- Nav tabs -->
   <ul id="myTabs" class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">' . Language::installLabelWelcome() . '</a></li>
