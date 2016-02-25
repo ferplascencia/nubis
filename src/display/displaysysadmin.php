@@ -126,12 +126,17 @@ class DisplaySysAdmin extends Display {
         $surveys = new Surveys();
         $surveys = $surveys->getSurveys();
         $returnStr .= '<ul class="dropdown-menu">';
-        foreach ($surveys as $survey) {
-            $span = '';
-            if (isset($_SESSION['SUID']) && $_SESSION['SUID'] == $survey->getSuid()) {
-                $span = ' <span class="glyphicon glyphicon-chevron-down"></span>';
+        if (sizeof($surveys) > 0) {
+            foreach ($surveys as $survey) {
+                $span = '';
+                if (isset($_SESSION['SUID']) && $_SESSION['SUID'] == $survey->getSuid()) {
+                    $span = ' <span class="glyphicon glyphicon-chevron-down"></span>';
+                }
+                $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey', 'suid' => $survey->getSuid()), $survey->getName() . $span, "", POST_PARAM_NOAJAX . "=" . NOAJAX) . '</li>';
             }
-            $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey', 'suid' => $survey->getSuid()), $survey->getName() . $span, "", POST_PARAM_NOAJAX . "=" . NOAJAX) . '</li>';
+        }
+        else {
+            $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey.addsurvey'), 'Add new survey') . '</li>';
         }
         $returnStr .= '</ul>';
         $returnStr .= '</li>';
