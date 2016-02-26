@@ -1,6 +1,13 @@
 # nubis
 NubiS Survey Software System
 
+NUBIS, Copyright (C) 2014 Bart Orriens, Albert Weerman
+
+This software is offered under the General Public License Version 2.1 included in each source code file being provided. 
+The GPL governs the use of any of the versions of NUBIS, and any related updates, source code, appearance, structure and organization (the “ Programs ”), regardless of the delivery mechanism.
+Please also note that NubiS comes bundled with third party software licensed under the Apache, MIT or custom licenses (as listed below). For the complete
+text of the NubiS license please just refer to the license file. For convenience a copy of the Apache and MIT licenses are also includedl with NubiS.
+
 NubiS is a complete data collection tool that has been developed by the team behind the <a target="_blank" href="https://uasdata.usc.edu/">Understanding America Study (UAS) panel</a> at the Center for Economic and Social Research at the University of Southern California. 
 
 NubiS runs on any server, pc, laptop or netbook as well as on android tablets or smartphones. The NubiS system includes all the traditional modes of data collection like self-administered, face-to-face, and telephone interviewing. NubiS can also collect continuous information from smartphones, tablets or other external devices like accelerometers, GPS devices, blood pressure meters and other biomedical devices. This information can be combined with survey data and for example used to prompt or ask questions to respondents.
