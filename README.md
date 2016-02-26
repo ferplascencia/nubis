@@ -5,8 +5,8 @@ NUBIS, Copyright (C) 2014 Bart Orriens, Albert Weerman
 
 This software is offered under the General Public License Version 2.1 included in each source code file being provided. 
 The GPL governs the use of any of the versions of NUBIS, and any related updates, source code, appearance, structure and organization (the “ Programs ”), regardless of the delivery mechanism.
-Please also note that NubiS comes bundled with third party software licensed under the Apache, MIT or custom licenses (as listed below). For the complete
-text of the NubiS license please just refer to the license file. For convenience a copy of the Apache and MIT licenses are also includedl with NubiS.
+Please also note that NubiS comes bundled with third party software licensed under the Apache 2.0, MIT or custom licenses (as listed below). For the complete
+text of the NubiS license please just refer to the license file. For convenience a generic copy of the Apache 2.0 and MIT licenses are also included with NubiS.
 
 NubiS is a complete data collection tool that has been developed by the team behind the <a target="_blank" href="https://uasdata.usc.edu/">Understanding America Study (UAS) panel</a> at the Center for Economic and Social Research at the University of Southern California. 
 
