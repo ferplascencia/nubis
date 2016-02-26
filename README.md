@@ -293,6 +293,13 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 </tr>
 
 <tr>
+<td>TableSaw</td>
+<td><a target="_blank" href="https://github.com/filamentgroup/tablesaw">https://github.com/filamentgroup/tablesaw</a></td>
+<td>MIT License</td>
+<td>2.0.2</td>
+</tr>
+
+<tr>
 <td>TabWindowVisibilityManager</td>
 <td><a target="_blank" href="http://greensock.com/forums/topic/9059-cross-browser-to-detect-tab-or-window-is-active-so-animations-stay-in-sync-using-html5-visibility-api/">http://greensock.com/forums/topic/9059-cross-browser-to-detect-tab-or-window-is-active-so-animations-stay-in-sync-using-html5-visibility-api/</a></td>
 <td>Custom (no restrictions on usage)</td>
