@@ -164,19 +164,58 @@ class Compiler {
 
             //echo 'jjjj' . end($this->loops);
             // check for end of for loop
-            $enddo = $this->findEndDo(end($this->loops));
-            //echo '====' . $enddo;
-            if ($nextrgid > $enddo) {
-                $nextrgid = end($this->loops);
+            $enddo = -1;
+            if (sizeof($this->loops) > 0) {
+                $enddo = $this->findEndDo(end($this->loops));
             }
-            // check for end of while loop
-            else {
-                $enddo = $this->findEndWhile(end($this->whiles));
-                //echo '====' . $enddo;
+            $endwhile = -1;
+            if (sizeof($this->whiles) > 0) {
+                $endwhile = $this->findEndWhile(end($this->whiles));
+            }
+            if ($enddo != -1 && $endwhile != -1) {
+                if ($endwhile < $enddo) {
+                    if ($nextrgid > $endwhile) {
+                        $nextrgid = end($this->whiles);
+                    }
+                } else {
+                    if ($nextrgid > $enddo) {
+                        $nextrgid = end($this->loops);
+                    }
+                }
+            } else if ($enddo != -1) {
                 if ($nextrgid > $enddo) {
+                    $nextrgid = end($this->loops);
+                }
+            } else if ($endwhile != -1) {
+                if ($nextrgid > $endwhile) {
                     $nextrgid = end($this->whiles);
                 }
             }
+            /*                //echo '====' . $enddo;
+              if ($nextrgid > $enddo) {
+              $nextrgid = end($this->loops);
+              }
+              // check for end of while loop
+              else {
+              if (sizeof($this->whiles) > 0) {
+              $enddo = $this->findEndWhile(end($this->whiles));
+              //echo '====' . $enddo;
+              if ($nextrgid > $enddo) {
+              $nextrgid = end($this->whiles);
+              }
+              }
+              }
+              }
+              // check for end of while loop
+              else {
+              if (sizeof($this->whiles) > 0) {
+              $enddo = $this->findEndWhile(end($this->whiles));
+              //echo '====' . $enddo;
+              if ($nextrgid > $enddo) {
+              $nextrgid = end($this->whiles);
+              }
+              }
+              } */
 
             // last loop action, then link back to beginning of loop
             if ($this->lastloopactions[end($this->loops)] == $rgid) {
@@ -552,7 +591,7 @@ class Compiler {
             $text[] = $group->getKeyboardBindingRF();
             $text[] = $group->getKeyboardBindingNA();
             $text[] = $group->getKeyboardBindingRemark();
-            
+
             $text[] = $group->getOnBack();
             $text[] = $group->getOnNext();
             $text[] = $group->getOnDK();
@@ -562,7 +601,7 @@ class Compiler {
             $text[] = $group->getOnLanguageChange();
             $text[] = $group->getOnModeChange();
             $text[] = $group->getOnVersionChange();
-            
+
             $text[] = $group->getClickBack();
             $text[] = $group->getClickNext();
             $text[] = $group->getClickDK();
@@ -709,7 +748,7 @@ class Compiler {
             $text[] = $var->getOnLanguageChange();
             $text[] = $var->getOnModeChange();
             $text[] = $var->getOnVersionChange();
-            
+
             $text[] = $var->getClickBack();
             $text[] = $var->getClickNext();
             $text[] = $var->getClickDK();
@@ -862,7 +901,7 @@ class Compiler {
         $text[] = $this->survey->getOnLanguageChange();
         $text[] = $this->survey->getOnModeChange();
         $text[] = $this->survey->getOnVersionChange();
-        
+
         $text[] = $this->survey->getClickBack();
         $text[] = $this->survey->getClickNext();
         $text[] = $this->survey->getClickDK();
@@ -2810,7 +2849,7 @@ class Compiler {
 
         /* handle 'variable in [1,2]' */
         $find = array();
-        $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . '\[' . PATTERN_ALPHANUMERIC . '\]/';
+        $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . '\[' . PATTERN_ALPHANUMERIC . '\]/i'; // /i for case insensitive
         if (preg_match_all($locate, $rule, $find, PREG_SET_ORDER)) {
             foreach ($find as $found) {
                 $process = splitString("/,/", $found[2]);
@@ -2837,7 +2876,7 @@ class Compiler {
         //echo $locate;
         // handle 1 in variable (set of enumerated reference)
         $find = array();
-        $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . PATTERN_ALPHANUMERIC . '/';
+        $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . PATTERN_ALPHANUMERIC . '/i'; // /i for case insensitive
         //echo $locate . "<hr>";
         if (preg_match_all($locate, $rule, $find, PREG_SET_ORDER)) {
             foreach ($find as $found) {
@@ -2913,6 +2952,13 @@ class Compiler {
         $ifstmt = $this->analyzeIf($rule);
         if (!$ifstmt) {
             return;
+        }
+        
+        $iftype = "";
+        if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+            $iftype = ROUTING_IDENTIFY_IF;
+        } else {
+            $iftype = ROUTING_IDENTIFY_ELSEIF;
         }
 
         /* get next rgid for when if statement is false */
@@ -3192,10 +3238,10 @@ class Compiler {
             $stmt = new PHPParser_Node_Arg($stmts[0]);
             $this->updateVariables($stmt);
             $args[] = $stmt;
-            
+
             // add check assignment statement
             $ifstmt = new PHPParser_Node_Expr_Equal(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_CHECK_ANSWER)), array($stmt)), new PHPParser_Node_Scalar_LNumber(2));
-            $ifnode = new PHPParser_Node_Stmt_If($ifstmt, array('stmts' => array(new PHPParser_Node_Stmt_Return())));            
+            $ifnode = new PHPParser_Node_Stmt_If($ifstmt, array('stmts' => array(new PHPParser_Node_Stmt_Return())));
             $assignfunctionnode->addStmt($ifnode);
 
             /* check if we need to add code for undoing assignment if going back */
@@ -3269,7 +3315,7 @@ class Compiler {
         } else {
 
             // loop action and not fill class or group, then we keep track of where we are
-            if ($this->fillclass != true && sizeof($this->group) == 0) {
+            if ($this->fillclass != true && sizeof($this->groups) == 0) {
                 if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
@@ -5139,7 +5185,7 @@ class Compiler {
             if ($subnode instanceof PHPParser_Node_Name) {
 
                 $name = $subnode->getFirst();
-                
+
                 // restore any brackets!
                 $name = str_replace(TEXT_BRACKET_LEFT, "[", $name);
                 $name = str_replace(TEXT_BRACKET_RIGHT, "]", $name);
@@ -5267,7 +5313,7 @@ class Compiler {
 
             // function call: there could be variables in there
             else if ($subnode instanceof PHPParser_Node_Expr_FuncCall) {
-                
+
                 /* check if function name is actually a question; if yes, then
                  * this is actually a bracket Q1[cnt], which we are processing
                  * as Q1(cnt) so the PHPParser doesn't break
