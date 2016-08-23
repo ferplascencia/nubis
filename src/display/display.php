@@ -2119,7 +2119,7 @@ class Display {
 
     function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {
         $surveys = new Surveys($suid);
-        $surveys = $surveys->getSurveys();
+        $surveys = $surveys->getSurveys(false);
         $returnStr = "<select $onchange $multiple class='selectpicker show-tick' name=$name id=$id>";
         $current = explode("~", $current);
         foreach ($surveys as $survey) {

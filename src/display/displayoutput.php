@@ -2034,6 +2034,10 @@ var chart = new Highcharts.Chart({
                 $headers[] = array('link' => setSessionParamsHref(array('page' => 'translator.output'), Language::headerOutput()), 'label' => Language::headerOutput());
                 $headers[] = array('link' => '', 'label' => Language::headerOutputDocumentation());
                 break;
+            case USER_RESEARCHER:
+                $ut = "researcher";
+                $headers[] = array('link' => '', 'label' => Language::headerOutputDocumentation());
+                break;
             case USER_INTERVIEWER:
                 $ut = "interviewer";
                 break;
@@ -2110,12 +2114,16 @@ var chart = new Highcharts.Chart({
 
         $user = new User($_SESSION['URID']);
         $utype = $user->getUserType();
-        if (inArray($utype, array(USER_SYSADMIN))) {
+        if (inArray($utype, array(USER_SYSADMIN, USER_RESEARCHER))) {
             $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.dictionary')) . '" class="list-group-item">' . Language::labelOutputDocumentationDictionary() . '</a>';
             $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.routing')) . '" class="list-group-item">' . Language::labelOutputDocumentationRouting() . '</a>';
-            $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.routing.dash')) . '" class="list-group-item">' . Language::labelOutputDocumentationRouting() . ' (text only)</a>';
+            if (inArray($utype, array(USER_SYSADMIN))) {
+                $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.routing.dash')) . '" class="list-group-item">' . Language::labelOutputDocumentationRouting() . ' (text only)</a>';
+            }
         }
-        $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.translation')) . '" class="list-group-item">' . Language::labelOutputTranslation() . '</a>';
+        if (inArray($utype, array(USER_SYSADMIN, USER_TRANSLATOR))) {
+            $returnStr .= '<a target="_blank" href="index.php?r=' . setSessionsParamString(array('page' => $ut . '.output.documentation.translation')) . '" class="list-group-item">' . Language::labelOutputTranslation() . '</a>';
+        }
         $returnStr .= '</div>';
         $returnStr .= '</div>';
 
@@ -2449,6 +2457,10 @@ var chart = new Highcharts.Chart({
                 $dt = new DisplayInterviewer();
                 $returnStr = $dt->showHeader(Language::messageSMSTitle(), $extra);
                 break;
+            case USER_RESEARCHER:
+                $dt = new DisplayResearcher();
+                $returnStr = $dt->showResearchHeader(Language::messageSMSTitle(), $extra);
+                break;
             default:
                 $returnStr = $this->showSysAdminHeader(Language::messageSMSTitle(), $extra);
                 break;
@@ -2461,6 +2473,10 @@ var chart = new Highcharts.Chart({
                     break;
                 case USER_INTERVIEWER:
                     $dt = new DisplayInterviewer();
+                    $returnStr .= $dt->showNavBar();
+                    break;
+                case USER_RESEARCHER:
+                    $dt = new DisplayResearcher();
                     $returnStr .= $dt->showNavBar();
                     break;
                 default:

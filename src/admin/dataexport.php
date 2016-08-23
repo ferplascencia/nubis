@@ -902,12 +902,14 @@ class DataExport {
         }
         //}
         //echo $query;
-        $res = $db->selectQuery($query);
+        $res = $this->db->selectQuery($query);
         $codes = array_values(Common::errorCodes());
         if ($res) {
             $oldprimkey = "";
             $arr = array();
             if ($this->db->getNumberOfRows($res) > 0) {
+                $num = $db->getNumberOfRows($res);
+                $cnt = 0;
                 while ($row = $this->db->getRow($res)) {
 
                     // end of primkey, so store
@@ -994,6 +996,32 @@ class DataExport {
                                 }
                             }
                         }
+                    }
+                    
+                    $cnt++;
+                    
+                    // this was last one, so store
+                    if ($cnt == $num) {
+
+                        // k: varname
+                        // a: array of error codes with number of times
+                        //print_r($arr);
+                        foreach ($arr as $k => $a) {
+                            foreach ($a as $error => $times) {
+                                $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
+                                if ($key != "") {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "',aes_encrypt('" . $times . "','" . $key . "')," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                } else {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "','" . $times . "'," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                }
+                                $query .= ")";
+                                $db->executeQuery($query);
+                                //echo $query . "<hr>";
+                            }
+                        }
+
+                        // reset
+                        $arr = array();                        
                     }
                 }
             }

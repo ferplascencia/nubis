@@ -29,11 +29,12 @@ class DisplayResearcher extends Display {
         //respondents mode!
 
         $returnStr .= '<div class="list-group">';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports')) . '" class="list-group-item">' . 'Reports' . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.documentation')) . '" class="list-group-item">' . 'Documentation' . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.data')) . '" class="list-group-item">' . 'Data' . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.households')) . '" class="list-group-item">' . 'Households' . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.sample')) . '" class="list-group-item">' . 'Unassigned Sample' . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports')) . '" class="list-group-item">' . Language::linkReports() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.data')) . '" class="list-group-item">' . Language::linkData() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.output.documentation')) . '" class="list-group-item">' . Language::linkDocumentation() . '</a>';
+        //$returnStr .= '<li>' . setSessionParamsHref(array('page' => 'translator.output.documentation'), '<span class="glyphicon glyphicon-file"></span> ' . Language::linkDocumentation()) . '</li>';
+        //$returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.households')) . '" class="list-group-item">' . 'Households' . '</a>';
+        //$returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.sample')) . '" class="list-group-item">' . 'Unassigned Sample' . '</a>';
         $returnStr .= '</div>';
 
 
@@ -160,16 +161,16 @@ class DisplayResearcher extends Display {
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand">' . Language::messageSMSTitle() . '</a>
+            <a class="navbar-brand" href="' . setSessionParams(array('page' => 'researcher.home')) . '">' . Language::messageSMSTitle() . '</a>
           </div>
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">';
 
 
         $returnStr .= '<li' . $reportsActive . '>' . setSessionParamsHref(array('page' => 'researcher.reports'), Language::linkReports()) . '</li>';
-        $returnStr .= '<li' . $documentationActive . '>' . setSessionParamsHref(array('page' => 'researcher.documentation'), Language::linkDocumentation()) . '</li>';
         $returnStr .= '<li' . $dataActive . '>' . setSessionParamsHref(array('page' => 'researcher.data'), Language::linkData()) . '</li>';
-        $returnStr .= '<li' . $sampleActive . '>' . setSessionParamsHref(array('page' => 'researcher.sample'), Language::linkUnassigned()) . '</li>';
+        $returnStr .= '<li' . $documentationActive . '>' . setSessionParamsHref(array('page' => 'researcher.output.documentation'), Language::linkDocumentation()) . '</li>';
+//        $returnStr .= '<li' . $sampleActive . '>' . setSessionParamsHref(array('page' => 'researcher.sample'), Language::linkUnassigned()) . '</li>';        
         $returnStr .= '</ul>';
         $user = new User($_SESSION['URID']);
         $returnStr .= '<ul class="nav navbar-nav navbar-right">
@@ -209,7 +210,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<div class="list-group">';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.responseoverview')) . '" class="list-group-item">' . Language::labelResearcherResponseOverview() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.aggregates')) . '" class="list-group-item">' . Language::labelResearcherAggregates() . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.paradata')) . '" class="list-group-item">' . Language::labelResearcherParadata() . '</a>';        
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.paradata')) . '" class="list-group-item">' . Language::labelResearcherParadata() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.timings.distribution')) . '" class="list-group-item">' . Language::labelResearcherTimingsDistribution() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.timings.overtime')) . '" class="list-group-item">' . Language::labelResearcherTimingsOverTime() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'researcher.reports.timings.perscreen')) . '" class="list-group-item">' . Language::labelResearcherTimingsPerScreen() . '</a>';
@@ -839,6 +840,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<form method="post">';
         $returnStr .= "<input type=hidden name='sv' id='sv' value=$suid />";
         $returnStr .= "<input type=hidden name='type' id='type' value=1 />";
+        $returnStr .= "<input type=hidden name='" . DATA_OUTPUT_TYPEDATA . "' value=" . loadvar(DATA_OUTPUT_TYPEDATA) . " />";
         $returnStr .= setSessionParamsPost(array('page' => 'researcher.reports.timings.perscreen.res', "cnt" => 0));
 
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
@@ -1405,6 +1407,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<div class="well well-sm">';
         $returnStr .= '<table>';
 
+        $user = new User($_SESSION['URID']);
         $returnStr .= '<tr><td>' . Language::labelOutputDataSurvey() . '</td><td>' . $this->displaySurveys(DATA_OUTPUT_SURVEY, DATA_OUTPUT_SURVEY, $suid, '', "") . '</td></tr>';
         $returnStr .= "<script type='text/javascript'>";
         $returnStr .= '$( document ).ready(function() {
@@ -1414,8 +1417,7 @@ class DisplayResearcher extends Display {
                                                 });
                                                 })';
         $returnStr .= "</script>";
-
-        $user = new User($_SESSION['URID']);
+        
         $modes = $user->getModes($suid);
         $langs = array();
         foreach ($modes as $m) {
@@ -1454,6 +1456,22 @@ class DisplayResearcher extends Display {
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataFileName() . '</td><td>';
         $returnStr .= "<div class='input-group'><input type=text class='form-control' name='" . DATA_OUTPUT_FILENAME . "' ><span class='input-group-addon'>" . Language::labelOutputDataFileNameNoExtension() . "</span></div>";
+        $returnStr .= "</td></tr>";
+        
+        $returnStr .= '<tr><td>' . Language::labelOutputDataFileType() . '</td><td>';
+        $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_FILETYPE . ">";
+        //$returnStr .= "<option></option>";
+        $returnStr .= "<option value=" . FILETYPE_STATA . ">" . Language::optionsFileTypeStata() . "</option>";
+        $returnStr .= "<option value=" . FILETYPE_CSV . ">" . Language::optionsFileTypeCSV() . "</option>";
+        $returnStr .= "</select>";
+        $returnStr .= "</td></tr>";
+
+        $returnStr .= '<tr><td>' . Language::labelOutputDataTypeParadata() . '</td><td>';
+        $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPEPARADATA . ">";
+        //$returnStr .= "<option></option>";
+        $returnStr .= "<option value=" . PARADATA_RAW . ">" . Language::optionsParadataRaw() . "</option>";
+        $returnStr .= "<option value=" . PARADATA_PROCESSED . ">" . Language::optionsParadataProcessed() . "</option>";
+        $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataPrimaryKey() . '</td><td>';
@@ -2509,7 +2527,7 @@ var chart = new Highcharts.Chart({
         $returnStr .= '<li class="active">' . $section->getName() . '</li>';
 
         $returnStr .= '</ol>';
-        
+
         $variables = $survey->getVariableDescriptives($seid);
         foreach ($variables as $variable) {
             if (!inArray($variable->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {

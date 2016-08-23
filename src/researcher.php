@@ -69,12 +69,48 @@ class Researcher {
                  case 'researcher.sample.assign': return $this->showAssignSample(); break;
                  case 'researcher.sample.download': return $this->showSampleDownload(); break;
                  case 'researcher.sample.download.gps': return $this->showSampleDownloadGPS(); break;
+                 
+                 case "researcher.output.documentation": return $this->showOutputDocumentation();
+                    break;                
+                case "researcher.output.documentation.routing": return $this->showOutputRouting();
+                    break;
+                case "researcher.output.documentation.routing.dash": return $this->showOutputRoutingDash();
+                    break;
+                case "researcher.output.documentation.dictionary": return $this->showOutputDictionary();
+                    break;
+                case "researcher.output.documentation.translation": return $this->showOutputTranslation();
+                    break;
              
                  default: return $this->mainPage();
             }
         } else {
             return $this->mainPage();
         }
+    }
+    
+    function showOutputDocumentation() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputDocumentation();
+    }
+    
+    function showOutputRouting() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputRouting();
+    }
+
+    function showOutputRoutingDash() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputRoutingDash();
+    }
+
+    function showOutputTranslation() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputTranslation();
+    }
+
+    function showOutputDictionary() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputDictionary();
     }
 
     function mainPage(){
@@ -265,7 +301,13 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
         $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
         $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
-        $de->generateParadata();
+        if (loadvar(DATA_OUTPUT_TYPEPARADATA) == PARADATA_RAW) {
+            $de->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_CSV);
+            $de->generateParadata();
+        } else {
+            $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
+            $de->generateProcessedParadata();
+        }
         $de->download();
     }    
       

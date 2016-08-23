@@ -5130,6 +5130,8 @@ class SysAdmin {
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
         $de->setProperty(DATA_OUTPUT_SURVEY, loadvar(DATA_OUTPUT_SURVEY));
         $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));
+        $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
         if (loadvar(DATA_OUTPUT_TYPEPARADATA) == PARADATA_RAW) {
             $de->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_CSV);
             $de->generateParadata();
