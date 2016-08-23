@@ -626,13 +626,16 @@ class Data {
             $oldprimkey = "";
             $arr = array();
             if ($db->getNumberOfRows($res) > 0) {
+                $num = $db->getNumberOfRows($res);
+                $cnt = 0;
                 while ($row = $db->getRow($res)) {
 
                     // end of primkey, so store
-                    if ($oldprimkey != "" && $row["primkey"] != $oldprimkey) {
+                    if (($oldprimkey != "" && $row["primkey"] != $oldprimkey)) {
 
                         // k: varname
                         // a: array of error codes with number of times
+                        //print_r($arr);
                         foreach ($arr as $k => $a) {
                             foreach ($a as $error => $times) {
                                 $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
@@ -648,10 +651,10 @@ class Data {
                         }
 
                         // reset
-                        $arr = array();
-                    }
-                    $oldprimkey = $row["primkey"];
+                        $arr = array();                        
+                    }                    
 
+                    $oldprimkey = $row["primkey"];
                     $line = strtoupper($row["displayed"]);
 
                     // if displayed == variable OR displayed contains ~varname~ or displayed starts with varname~, process; otherwise skip
@@ -712,6 +715,31 @@ class Data {
                                 }
                             }
                         }
+                    }
+                    $cnt++;
+                    
+                    // this was last one, so store
+                    if ($cnt == $num) {
+
+                        // k: varname
+                        // a: array of error codes with number of times
+                        //print_r($arr);
+                        foreach ($arr as $k => $a) {
+                            foreach ($a as $error => $times) {
+                                $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
+                                if ($key != "") {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "',aes_encrypt('" . $times . "','" . $key . "')," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                } else {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "','" . $times . "'," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                }
+                                $query .= ")";
+                                $db->executeQuery($query);
+                                //echo $query . "<hr>";
+                            }
+                        }
+
+                        // reset
+                        $arr = array();                        
                     }
                 }
             }
