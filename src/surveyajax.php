@@ -44,7 +44,7 @@ class SurveyAjax {
                 $this->storeParadata();
                 exit;
             case 'capturescreenshot':
-                $this->capturescreenshot();
+                $this->capturescreenshot();           
         }
     }
 
@@ -55,7 +55,7 @@ class SurveyAjax {
         exit;
     }
 
-    function storeRemark() {
+    function storeRemark() {        
         global $db;
         $i = array('/>[^S ]+/s', '/[^S ]+</s', '/(s)+/s');
         $ii = array('>', '<', '1');
@@ -83,7 +83,7 @@ class SurveyAjax {
         $bp->add(MYSQL_BINDING_INTEGER, $dirty);
         $bp->add(MYSQL_BINDING_INTEGER, $m);
         $bp->add(MYSQL_BINDING_INTEGER, $l);
-        $bp->add(MYSQL_BINDING_INTEGER, $v);        
+        $bp->add(MYSQL_BINDING_INTEGER, $v);   
         $key = $this->survey->getDataEncryptionKeyDirectly($m,$l, $this->getParam(POST_PARAM_DEFAULT_MODE), $this->getParam(POST_PARAM_DEFAULT_LANGUAGE));
         if ($key == "") {
             $query = "replace into " . Config::dbSurveyData() . "_observations(suid, primkey, stateid, displayed, remark, dirty, mode, language, version) values (?,?,?,?,?,?,?,?,?)";
@@ -192,7 +192,6 @@ class SurveyAjax {
         $db->executeBoundQuery($query, $bp->get());
         exit;
     }
-
 }
 
 ?>

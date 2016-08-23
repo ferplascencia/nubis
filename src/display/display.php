@@ -59,10 +59,9 @@ class Display {
         }
         $returnStr .= '
     <!-- Bootstrap core CSS -->
-		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.min.css">
 
     <!-- Custom scripts and styles for this template -->';
-
         if ($fastload == false) {
             $returnStr .= '<script type="text/javascript" charset="utf-8" language="javascript" src="bootstrap/assets/js/jquery.js"></script>';
         }
@@ -119,18 +118,19 @@ class Display {
             $returnStr .= '<noscript><meta http-equiv="refresh" content="0; URL=' . getURL() . '/nojavascript.php"></noscript>';
         }
         $returnStr .= '<script type="text/javascript" charset="utf-8" language="javascript" src="bootstrap/assets/js/jquery.js"></script>';
+        $returnStr .= '<link href="css/uscic.css" type="text/css" rel="stylesheet">';
         $returnStr .= '
     <!-- Bootstrap core CSS -->
-		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.min.css">
 
     <!-- Custom scripts and styles for this template -->';
         $returnStr .= '
     ' . $style . '
 
-<script type="text/javascript">
+<script type="text/javascript">' . minifyScript('
     if(typeof window.history.pushState == \'function\') {
         window.history.pushState({}, "Hide", "index.php");
-    }    
+    }') . '    
 </script>
       
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -156,34 +156,35 @@ class Display {
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->';
-        $returnStr .= ' <script src="js/hover-dropdown.js"></script>
+        /*$returnStr .= ' <script src="js/hover-dropdown.js"></script>
                             <script type="text/javascript" src="js/tooltip.js"></script>
                             <script type="text/javascript" src="js/popover.js"></script>    
                             <script type="text/javascript" src="js/modal.js"></script>';
-
+                            */
         $returnStr .= '<script src="bootstrap/dist/js/bootstrap.min.js"></script>'; // needed for bootstrap-select
         $returnStr .= $extra;
         if (dbConfig::defaultDevice() == DEVICE_TABLET) {
 
             $returnStr .= '<script type="text/javascript">';
 
-            $returnStr .= 'if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {';
+            $str = 'if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {';
 
 
-            $returnStr .= '$( ".btn" ).removeClass("btn").addClass("btn-lg");';
-            $returnStr .= '$( "#searchbutton" ).removeClass("btn-lg").addClass("btn");';
+            $str .= '$( ".btn" ).removeClass("btn").addClass("btn-lg");';
+            $str .= '$( "#searchbutton" ).removeClass("btn-lg").addClass("btn");';
 
-            $returnStr .= '$("input[type=radio]").addClass("form-control");';
-            $returnStr .= '$("input[type=radio]").css("width", "50px");';
-            $returnStr .= '$( ".uscic-radio" ).css("font-size", "26px");';
-            $returnStr .= '$( ".uscic-radio" ).css("border", "1px dotted gray");';
+            $str .= '$("input[type=radio]").addClass("form-control");';
+            $str .= '$("input[type=radio]").css("width", "50px");';
+            $str .= '$( ".uscic-radio" ).css("font-size", "26px");';
+            $str .= '$( ".uscic-radio" ).css("border", "1px dotted gray");';
 
-            $returnStr .= '$("input[type=checkbox]").addClass("form-control");';
-            $returnStr .= '$("input[type=checkbox]").css("width", "50px");';
-            $returnStr .= '$( ".uscic-checkbox" ).css("font-size", "26px");';
-            $returnStr .= '$( ".uscic-checkbox" ).css("border", "1px dotted gray");';
+            $str .= '$("input[type=checkbox]").addClass("form-control");';
+            $str .= '$("input[type=checkbox]").css("width", "50px");';
+            $str .= '$( ".uscic-checkbox" ).css("font-size", "26px");';
+            $str .= '$( ".uscic-checkbox" ).css("border", "1px dotted gray");';
 
-            $returnStr .= '}';
+            $str .= '}';
+            $returnStr .= minifyScript($str);
             $returnStr .= '</script>';
         }
 
@@ -210,7 +211,7 @@ class Display {
 
         $returnStr .= '
     <!-- Bootstrap core CSS -->
-		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.min.css">
 
     <!-- Custom styles for this template -->
     ' . $style . '
@@ -221,7 +222,7 @@ class Display {
     }
 
     function displayNoJavascript() {
-        $returnStr = $this->showHeaderNoJavascript("Attention", '<link type="text/css" href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeaderNoJavascript("Attention", '<link type="text/css" href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<div id="wrap">';
         $returnStr .= '<div class="container">';
         $returnStr .= '<div class="panel panel-default">
@@ -265,23 +266,24 @@ class Display {
 
             $returnStr .= '<script type="text/javascript">';
 
-            $returnStr .= 'if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {';
+            $str = 'if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {';
 
 
-            $returnStr .= '$( ".btn" ).removeClass("btn").addClass("btn-lg");';
-            $returnStr .= '$( "#searchbutton" ).removeClass("btn-lg").addClass("btn");';
+            $str .= '$( ".btn" ).removeClass("btn").addClass("btn-lg");';
+            $str .= '$( "#searchbutton" ).removeClass("btn-lg").addClass("btn");';
 
-            $returnStr .= '$("input[type=radio]").addClass("form-control");';
-            $returnStr .= '$("input[type=radio]").css("width", "50px");';
-            $returnStr .= '$( ".uscic-radio" ).css("font-size", "26px");';
-            $returnStr .= '$( ".uscic-radio" ).css("border", "1px dotted gray");';
+            $str .= '$("input[type=radio]").addClass("form-control");';
+            $str .= '$("input[type=radio]").css("width", "50px");';
+            $str .= '$( ".uscic-radio" ).css("font-size", "26px");';
+            $str .= '$( ".uscic-radio" ).css("border", "1px dotted gray");';
 
-            $returnStr .= '$("input[type=checkbox]").addClass("form-control");';
-            $returnStr .= '$("input[type=checkbox]").css("width", "50px");';
-            $returnStr .= '$( ".uscic-checkbox" ).css("font-size", "26px");';
-            $returnStr .= '$( ".uscic-checkbox" ).css("border", "1px dotted gray");';
+            $str .= '$("input[type=checkbox]").addClass("form-control");';
+            $str .= '$("input[type=checkbox]").css("width", "50px");';
+            $str .= '$( ".uscic-checkbox" ).css("font-size", "26px");';
+            $str .= '$( ".uscic-checkbox" ).css("border", "1px dotted gray");';
 
-            $returnStr .= '}';
+            $str .= '}';
+            $returnStr .= minifyScript($str);
             $returnStr .= '</script>';
         }
 
@@ -293,11 +295,11 @@ class Display {
         $returnStr = '';
         if (!isRegisteredScript("js/sidr/jquery.sidr.js")) {
             registerScript('js/sidr/jquery.sidr.js');
-            $returnStr .= '<script type="text/javascript" src="js/sidr/jquery.sidr.js"></script>';
+            $returnStr .= getScript('js/sidr/jquery.sidr.js');
         }
         if (!isRegisteredScript("js/sidr/jquery.sidr.light.css")) {
             registerScript('js/sidr/jquery.sidr.light.css');
-            $returnStr .= '<link rel="stylesheet" href="js/sidr/jquery.sidr.light.css">';
+            $returnStr .= getCSS('js/sidr/jquery.sidr.light.css');
         }
 
         $returnStr .= '<script type="text/javascript" >
@@ -326,17 +328,17 @@ class Display {
         return $returnStr;
     }
 
-    function displayComboBox() {
+    function displayComboBox($css = true) {
         $str = '';
-        if (!isRegisteredScript("js/bootstrap-select.js")) {
-            registerScript('js/bootstrap-select.js');
-            $str .= '<script src="js/bootstrap-select.js"></script>';
+        if (!isRegisteredScript("js/bootstrap-select/bootstrap-select-min.js")) {
+            registerScript('js/bootstrap-select/bootstrap-select-min.js');
+            $str .= getScript("js/bootstrap-select/bootstrap-select.js");
         }
-        if (!isRegisteredScript("css/bootstrap-select.css")) {
-            registerScript('css/bootstrap-select.css');
-            $str .= '<link href="css/bootstrap-select.css" type="text/css" rel="stylesheet">';
+        if ($css && !isRegisteredScript("css/bootstrap-select.min.css")) {
+            registerScript('css/bootstrap-select.min.css');
+            $str .= getCSS("css/bootstrap-select.min.css");
         }
-        $str .= '<script type="text/javascript">
+        $str .= minifyScript('<script type="text/javascript">
                     $(document).ready(function(){
                     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
                       $(".selectpicker").selectpicker({
@@ -350,7 +352,16 @@ class Display {
                         );
                     }
                   });
-                  </script>';
+                  </script>');
+        return $str;
+    }
+    
+    function displayComboBoxCSS() {
+        $str = '';        
+        if (!isRegisteredScript("css/bootstrap-select.min.css")) {
+            registerScript('css/bootstrap-select.min.css');
+            $str .= getCSS("css/bootstrap-select.min.css");
+        }        
         return $str;
     }
 
@@ -358,11 +369,11 @@ class Display {
         $str = '';
         if (!isRegisteredScript("js/colorpicker/bootstrap-colorpicker.js")) {
             registerScript('js/colorpicker/bootstrap-colorpicker.js');
-            $str .= '<script src="js/colorpicker/bootstrap-colorpicker.js"></script>';
+            $str .= getScript("js/colorpicker/bootstrap-colorpicker.js");
         }
         if (!isRegisteredScript("js/colorpicker/bootstrap-colorpicker.css")) {
             registerScript('js/colorpicker/bootstrap-colorpicker.css');
-            $str .= '<link href="js/colorpicker/bootstrap-colorpicker.css" type="text/css" rel="stylesheet">';
+            $str .= getCSS("js/colorpicker/bootstrap-colorpicker.css");
         }
         $str .= '<script>
                     $(document).ready(function(){
@@ -542,12 +553,12 @@ class Display {
                 $rulestringempty = substr(trim($rulestringempty), 0, strlen(trim($rulestringempty)) - 1) . "\r\n}, \r\n";
             }
         }
-
-
-        $str = '<script src="js/validation/jquery.validate.js"></script>
-            <script src="js/validation/jquery.validate.additional.js"></script>';
-
-        $str .= '<script type="text/javascript">';
+        $finalstr = "";
+        if (!isRegisteredScript("js/validation/jquery.validate-min.js")) {
+            $finalstr .= getScript("js/validation/jquery.validate-min.js");
+            $finalstr .= getScript("js/validation/jquery.validate.additional.js");
+        }
+        $str = '<script type="text/javascript">';
 
         // add error mapping if logging paradata
         if ($paradata == true) {
@@ -569,8 +580,9 @@ class Display {
         if ($placement == ERROR_PLACEMENT_AT_TOP || $placement == ERROR_PLACEMENT_AT_BOTTOM) {
             $str .= '$(\'#uscic-errors\').empty();';
         } else {
-            $str .= '$(\'div.form-group\').removeClass(\'has-error\');
-                $(\'div.form-group\').removeClass(\'has-warning\');                
+            $str .= '$(\'div.form-group\').removeClass(\'has-errors\');
+                $(\'div.form-group\').removeClass(\'has-warning\'); 
+                $(\'tr.has-warning\').removeClass(\'has-warning\');
                 $(\'div.form-group\').removeAttr(\'style\');                
                 $(\'tr.form-group\').removeAttr(\'style\');  
                 $(\':input\').removeClass(\'empty-error\');
@@ -614,7 +626,7 @@ class Display {
                                 else if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
                                     error.insertAfter($(element).closest(\'tr\').first().children(\'td\').children(\'div\').first());
                                 }
-                                else {
+                                else {                                
                                    error.insertAfter($(element).closest(\'div.form-group\').children().last());            
                                 }
                            }';
@@ -700,7 +712,6 @@ class Display {
             highlight: function(element) {                            
                 $(element).addClass(\'empty-error\');
                 $(element).closest(\'div.form-group\').addClass(\'has-warning\');
-                
                 if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for multi column setup in a table row                
                     $(element).closest(\'tr\').addClass(\'has-warning\');
                     $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
@@ -892,7 +903,11 @@ class Display {
             // force showing of all error blocks since jquery validator hides the empty ones!
             // find all inputs with empty-error class, get name and show p block that matches in its for attr
             $(document).find(\'.empty-error\').each(function(element) {
-                $(\'p[for="\' + $(this).attr(\'name\') + \'"]\').css(\'display\', \'block\');
+                var name = $(this).attr(\'name\');
+                if($(this).is("select") && $(this).is("[multiple]")) {
+                   name = $(this).attr(\'name\').replace("[","").replace("]",""); 
+                }
+                $(\'p[for="\' + name + \'"]\').css(\'display\', \'block\');
             });
 
             return result;
@@ -902,40 +917,40 @@ class Display {
         }
 
         $str .= '</script>';
-        return $str;
+        return $finalstr . minifyScript($str);
     }
 
-    function displaySlider($variable, $var, $name, $id, $value, $minimum, $maximum, $errors, $qa, $inlineclass, $step = 1, $tooltip = "show", $orientation = "horizontal", $dkrfna = "", $width = "400px", $height = "40px", $formater = 'this.calculateValue()') {
+    function displaySlider($variable, $var, $name, $id, $value, $minimum, $maximum, $errors, $qa, $inlineclass, $step = 1, $tooltip = "show", $orientation = "horizontal", $dkrfna = "", $linkedto = "", $width = "400px", $height = "40px", $formater = 'value') {
 
         $returnStr = '';
         if (!isRegisteredScript("js/modernizr.js")) {
             registerScript('js/modernizr.js');
-            $returnStr = '<script type=text/javascript src="js/modernizr.js"></script>';
+            $returnStr = getScript("js/modernizr.js");
         }
 
-        if (!isRegisteredScript("js/bootstrap-slider/bootstrap-slider.js")) {
-            registerScript('js/bootstrap-slider/bootstrap-slider.js');
-            $returnStr .= '<script type=text/javascript src="js/bootstrap-slider/bootstrap-slider.js"></script>';
+        if (!isRegisteredScript("js/bootstrap-slider/bootstrap-slider.min.js")) {
+            registerScript('js/bootstrap-slider/bootstrap-slider.min.js');
+            $returnStr .= getScript("js/bootstrap-slider/bootstrap-slider.min.js");
         }
 
-        if (!isRegisteredScript("js/bootstrap-slider/bootstrap-slider.css")) {
-            registerScript('js/bootstrap-slider/css/bootstrap-slider.css');
-            $returnStr .= '<link href="js/bootstrap-slider/bootstrap-slider.css" type="text/css" rel="stylesheet">';
+        if (!isRegisteredScript("js/bootstrap-slider/bootstrap-slider.min.css")) {
+            registerScript('js/bootstrap-slider/css/bootstrap-slider.min.css');
+            $returnStr .= getCSS("js/bootstrap-slider/bootstrap-slider.min.css");
         }
 
-        $returnStr .= '<script type="text/javascript">
+        $str = '<script type="text/javascript">
                         $( document ).ready(function() {
                             $(\'#' . $id . '\').slider({ 
-                          formater: function(value) {return ' . $formater . ';} });              
+                          formatter: function(value) {return ' . $formater . ';} });              
                         ';
 
         if ($value == "") {
-            $returnStr .= "$('#" . $id . "').val(''); document.getElementById('" . $id . "').value='';";
+            $str .= "$('#" . $id . "').val(''); document.getElementById('" . $id . "').value='';";
         }
 
-        $returnStr .= '});
+        $str .= '});
                        </script>';
-
+        $returnStr .= minifyScript($str);
         $dkrfnaclass = "";
         if ($dkrfna != "") {
             if ($this->engine->isDKAnswer($variable)) {
@@ -964,22 +979,22 @@ class Display {
                     // <input id="ex13" type="text" data-slider-ticks="[0, 100, 200, 300, 400]" data-slider-ticks-snap-bounds="30" data-slider-ticks-labels='["$0", "$100", "$200", "$300", "$400"]'/>
 
                     $labelStr .= '
-                                <table id="' . $id . '_labels">
+                                <table id="' . $id . '_labels" class="slider_labels">
                                     <tr>';
                     for ($i = 0; $i < sizeof($labels); $i++) {
                         $option = $labels[$i];
                         if ($i == 0) {
-                            $labelStr .= '<td style="width: 20%; text-align: left;">' . $option["label"] . '</td>';
+                            $labelStr .= '<td style="width: 20%; text-align: left;">' . $this->engine->replaceFills($option["label"]) . '</td>';
                         } else if (($i + 1) == sizeof($labels)) {
-                            $labelStr .= '<td style="width: 20%; text-align: right;">' . $option["label"] . '</td>';
+                            $labelStr .= '<td style="width: 20%; text-align: right;">' . $this->engine->replaceFills($option["label"]) . '</td>';
                         } else {
-                            $labelStr .= '<td style="width: 20%; text-align: center;">' . $option["label"] . '</td>';
+                            $labelStr .= '<td style="width: 20%; text-align: center;">' . $this->engine->replaceFills($option["label"]) . '</td>';
                         }
                     }
                     $labelStr .= '</tr>       
                                 </table>
-                           </div>
-                           <script type="text/javascript">
+                           </div>' . minifyScript(
+                           '<script type="text/javascript">
                                         $(document).ready(function() {                                        
                                             $(".slider").css("width", $("#' . $id . '").width());    
                                             $("#' . $id . '_labels").css("width", $("#' . $id . '").width());
@@ -988,10 +1003,10 @@ class Display {
                                                 
                                          $( window ).resize(function() {
                                             $(".slider").css("width", $("#' . $id . '").width());  
-                                            $("#sliderlabels").css("width", $("#' . $id . '").width());
+                                            $("#' . $id . '_labels").css("width", $("#' . $id . '").width());
                                             $(".slider-track").css("width", $("#' . $id . '").width());                
                                          });
-                             </script>';
+                             </script>');
                 }
             }
 
@@ -1001,7 +1016,7 @@ class Display {
 
             $returnStr .= '<div class="uscic-' . $orientation . '-slider' . $inlineclass . ' ' . $qa . '">
                                 <label>
-                                <b>' . $minimum . '</b><input id="' . $id . '" ' . $errors . ' class="bootstrapslider ' . $dkrfnaclass . '" style="width: ' . $width . '; height: ' . $height . ';" type="text" name=' . $name . ' value="' . addslashes($value) . '" data-slider-min="' . $minimum . '" data-slider-max="' . $maximum . '" data-slider-step="' . $step . '" data-slider-value="' . addslashes($value) . '" data-slider-orientation="' . $orientation . '" data-slider-selection="after" data-slider-tooltip="' . $tooltip . '"><b>' . $maximum . '</b><br/>
+                                <span style="font-weight: bold; padding-right: 10px;">' . $minimum . '</span><input ' . $linkedto . ' id="' . $id . '" ' . $errors . ' class="bootstrapslider ' . $dkrfnaclass . '" type="text" name=' . $name . ' value="' . addslashes($value) . '" data-slider-min="' . $minimum . '" data-slider-max="' . $maximum . '" data-slider-step="' . $step . '" data-slider-value="' . addslashes($value) . '" data-slider-orientation="' . $orientation . '" data-slider-selection="after" data-slider-tooltip="' . $tooltip . '"><span style="font-weight: bold; padding-left: 10px;">' . $maximum . '</span><br/>
                                     </label>';
 
             if ($var->getSliderLabelPlacement() == SLIDER_LABEL_PLACEMENT_BOTTOM) {
@@ -1030,27 +1045,52 @@ class Display {
                                     ' . $inputgroupend . '</div>
                                 </div>
                                 ';
-                $returnStr .= "<script type=text/javascript>";
-                $returnStr .= '$("#' . $id . '_textbox").keyup(
+                $str = "<script type=text/javascript>";
+                $str .= '$("#' . $id . '_textbox").keyup(
                                     function(event) {
                                         var x = $("#' . $id . '").slider();
-                                        x.slider(\'setValue\', parseInt($(this).val()));
-                                        
+                                        x.slider(\'setValue\', parseFloat($(this).val()));                                        
                                         if ($(this).val() == "") {
                                             $("#' . $id . '").val(""); document.getElementById("' . $id . '").value="";
                                         }
+                                        $("#' . $id . '_textbox").trigger("slideStopCustom");
                                     });
+                                    
+                                $("#' . $id . '_textbox").change(
+                                    function(event) {
+                                        var x = parseFloat($("#' . $id . '").slider("getAttribute", "max"));                                        
+					var y = parseFloat($("#' . $id . '").slider("getAttribute", "min"));                                        
+                                        if ($(this).val() == "") {
+                                            $("#' . $id . '").val(""); document.getElementById("' . $id . '").value="";
+                                        }
+					else if (parseFloat($(this).val()) > x) {
+                                            $("#' . $id . '").val(x); 
+                                            document.getElementById("' . $id . '").value=x;
+                                            $(this).val(x);
+					}
+					else if (parseFloat($(this).val()) < y) {
+                                            $("#' . $id . '").val(y);
+                                            document.getElementById("' . $id . '").value=y;
+                                            $(this).val(y);
+					}
+					$("#' . $id . '_textbox").trigger("slideStopCustom"); 	
+                                    });
+        
+
                                 $("#' . $id . '").on(\'slideStop\', function(slideEvt) {
                                         $("#' . $id . '_textbox").val(slideEvt.value);
+                                            $("#' . $id . '_textbox").val(slideEvt.value);
+                                            $("#' . $id . '_textbox").trigger("slideStopCustom");
                                 });    
                                 ';
-                $returnStr .= "</script>";
+                $str .= "</script>";
+                $returnStr .= minifyScript($str);
             }
             $returnStr .= $dkrfna;
         } else {
             $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">';
             $returnStr .= '<table class="uscic-' . $orientation . '-slider' . $inlineclass . ' ' . $qa . '"><tr><td align=middle>' . $minimum . '</td></tr><tr><td align=middle>
-                <input class="bootstrapslider ' . $dkrfnaclass . '" id="' . $id . '" ' . $errors . ' style="width: ' . $width . '; height: ' . $height . ';" type="text" name=' . $name . ' value="' . addslashes($value) . '" data-slider-min="' . $minimum . '" data-slider-max="' . $maximum . '" data-slider-step="' . $step . '" data-slider-value="' . addslashes($value) . '" data-slider-orientation="' . $orientation . '" data-slider-selection="after" data-slider-tooltip="' . $tooltip . '"></td></tr><tr><td align=middle><b>' . $maximum . '</b></td></tr></table>';
+                <input ' . $linkedto . ' class="bootstrapslider ' . $dkrfnaclass . '" id="' . $id . '" ' . $errors . ' style="width: ' . $width . '; height: ' . $height . ';" type="text" name=' . $name . ' value="' . addslashes($value) . '" data-slider-min="' . $minimum . '" data-slider-max="' . $maximum . '" data-slider-step="' . $step . '" data-slider-value="' . addslashes($value) . '" data-slider-orientation="' . $orientation . '" data-slider-selection="after" data-slider-tooltip="' . $tooltip . '"></td></tr><tr><td align=middle><b>' . $maximum . '</b></td></tr></table>';
 
             if ($var->isTextbox()) {
                 $pretext = $this->engine->getFill($variable, $var, SETTING_SLIDER_TEXTBOX_LABEL);
@@ -1074,28 +1114,52 @@ class Display {
                                     ' . $inputgroupend . '</div>
                                 </div>
                                 ';
-                $returnStr .= "<script type=text/javascript>";
-                $returnStr .= '$("#' . $id . '_textbox").keyup(
+                $str = "<script type=text/javascript>";
+                $str .= '$("#' . $id . '_textbox").keyup(
                                     function(event) {
                                         var x = $("#' . $id . '").slider();
-                                        x.slider(\'setValue\', parseInt($(this).val()));
+                                        x.slider(\'setValue\', parseFloat($(this).val()));
                                         
                                         if ($(this).val() == "") {
-                                            $("#' . $id . '").val(""); document.getElementById("' . $id . '").value="";
+                                            $("#' . $id . '").val(""); document.getElementById("' . $id . '").value="";                                                
                                         }
                                     });
+                                    
+                                $("#' . $id . '_textbox").change(
+                                    function(event) {
+                                        var x = parseFloat($("#' . $id . '").slider("getAttribute", "max"));                                        
+					var y = parseFloat($("#' . $id . '").slider("getAttribute", "min"));                                        
+                                        if ($(this).val() == "") {
+                                            $("#' . $id . '").val(""); 
+                                            document.getElementById("' . $id . '").value="";
+                                        }
+					else if (parseFloat($(this).val()) > x) {
+                                            $("#' . $id . '").val(x); 
+                                            document.getElementById("' . $id . '").value=x;
+                                            $(this).val(x);
+					}
+					else if (parseFloat($(this).val()) < y) {
+                                            $("#' . $id . '").val(y);
+                                            document.getElementById("' . $id . '").value=y;
+                                            $(this).val(y);
+					}
+					$("#' . $id . '_textbox").trigger("slideStopCustom"); 	
+                                    });
+                                    
                                 $("#' . $id . '").on(\'slideStop\', function(slideEvt) {                                    
                                         $("#' . $id . '_textbox").val(slideEvt.value);
+                                        $("#' . $id . '_textbox").trigger("slideStopCustom");
                                 });    
                                 ';
-                $returnStr .= "</script>";
+                $str .= "</script>";
+                $returnStr .= minifyScript($str);
             }
             $returnStr .= $dkrfna;
         }
         return $returnStr;
     }
 
-    function displayDateTimePicker($name, $id, $default = '', $language = "en", $pickdate = 'true', $picktime = 'true', $ushourformat = "true", $seconds = "true", $minutes = "true", $inlineclass = "", $inlinestyle = "", $inlinejavascript = "", $customformat = "", $errorstring = "", $dkrfna = "", $variable = "") {
+    function displayDateTimePicker($name, $id, $default = '', $language = "en", $pickdate = 'true', $picktime = 'true', $ushourformat = "true", $seconds = "true", $minutes = "true", $inlineclass = "", $inlinestyle = "", $inlinejavascript = "", $customformat = "", $errorstring = "", $dkrfna = "", $variable = "", $linkedto = "") {
 
         if ($language != "en") {
             $language = "en"; // TODO: FIGURE OUT WHICH OTHER ONES ARE SUPPORTED AND HOW TO CALL THEM
@@ -1165,17 +1229,17 @@ class Display {
         }
 
         $returnStr = '';
-        if (!isRegisteredScript("js/datetimepicker/moment.js")) {
-            registerScript('js/datetimepicker/moment.js');
-            $returnStr .= '<script type=text/javascript src="js/datetimepicker/moment.js"></script>';
+        if (!isRegisteredScript("js/datetimepicker/moment-min.js")) {
+            registerScript('js/datetimepicker/moment-min.js');
+            $returnStr .= getScript("js/datetimepicker/moment-min.js");
         }
-        if (!isRegisteredScript("js/datetimepicker/bootstrap-datetimepicker.js")) {
-            registerScript('js/datetimepicker/bootstrap-datetimepicker.js');
-            $returnStr .= '<script type=text/javascript src="js/datetimepicker/bootstrap-datetimepicker.js"></script>';
+        if (!isRegisteredScript("js/datetimepicker/bootstrap-datetimepicker-min.js")) {
+            registerScript('js/datetimepicker/bootstrap-datetimepicker-min.js');
+            $returnStr .= getScript("js/datetimepicker/bootstrap-datetimepicker-min.js");
         }
         if (!isRegisteredScript("css/bootstrap-datetimepicker.min.css")) {
             registerScript('css/bootstrap-datetimepicker.min.css');
-            $returnStr .= '<link href="css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet">';
+            $returnStr .= getCSS("css/bootstrap-datetimepicker.min.css");
         }
 
         /* in survey, then check for input masking */
@@ -1205,24 +1269,26 @@ class Display {
         // bootstrap date/time picker version 4
         $returnStr .= '<div class=\'input-group date ' . $class . '\' id=\'' . $id . 'div\'>
             <div class="input-group uscic-inputgroup-posttext">
-            <input ' . $errorstring . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' autocomplete="off" type=\'text\' class="form-control uscic-form-control ' . $dkrfnaclass . ' ' . $inlineclass . '" value="' . $default . '" id="' . $id . '" name="' . $name . '"/>
+            <input ' . $linkedto . ' ' . $errorstring . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' autocomplete="off" type=\'text\' class="form-control uscic-form-control ' . $dkrfnaclass . ' ' . $inlineclass . '" value="' . $default . '" id="' . $id . '" name="' . $name . '"/>
             <div class="input-group-addon uscic-inputaddon-posttext"><span class="glyphicon ' . $icon . '"></span>
             </div></div>' . $dkrfna . '
         </div>';
 
         if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SURVEY) {
-            $returnStr .= '<script type="text/javascript">
+            $returnStr .= '<script type="text/javascript">' . minifyScript('
                 $(function () {
-                    $(\'#' . $id . '\').datetimepicker({locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                
+                    $(\'#' . $id . '\').datetimepicker({locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                                    
                     $(\'#' . $id . '\').attr("readonly","true");
-                });        
+                });') . '                    
             </script>';
         } else {
             $returnStr .= '<script type="text/javascript">
                 $(function () {
-                    $(\'#' . $id . '\').datetimepicker({locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                
+                    $(\'#' . $id . '\').datetimepicker(locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                
                 });        
             </script>';
+            
+            
         }
         return $returnStr;
     }
@@ -1484,26 +1550,33 @@ class Display {
 
         if (!isRegisteredScript("js/underscore-min.js")) {
             registerScript('js/underscore-min.js');
-            $returnStr .= '<script type="text/javascript" src="js/underscore-min.js"></script>';
+            $returnStr .= getScript("js/underscore-min.js");
         }
         if (!isRegisteredScript("js/jstz.min.js")) {
             registerScript('js/jstz.min.js');
-            $returnStr .= '<script type="text/javascript" src="js/jstz.min.js"></script>';
+            $returnStr .= getScript("js/jstz.min.js");
         }
-        if (!isRegisteredScript("js/calendar.js")) {
-            registerScript('js/calendar.js');
-            $returnStr .= '<script type="text/javascript" src="js/calendar.js"></script>';
+
+        // also in header, but has to be here, otherwise calendar.js fails
+        if (!isRegisteredScript("js/tooltip.js")) {
+            registerScript('js/tooltip.js');
+            $returnStr .= getScript("js/tooltip.js");
+        }
+
+        if (!isRegisteredScript("js/calendar-min.js")) {
+            registerScript('js/calendar-min.js');
+            $returnStr .= getScript("js/calendar-min.js");
         }
 
         if ($type == USCIC_SMS) {
             if (!isRegisteredScript("js/app.js")) {
                 registerScript('js/app.js');
-                $returnStr .= '<script type="text/javascript" src="js/app.js"></script>';
+                $returnStr .= getScript("js/app.js");
             }
         } else {
             if (!isRegisteredScript("js/appsurvey.js")) {
                 registerScript('js/appsurvey.js');
-                $returnStr .= '<script type="text/javascript" src="js/appsurvey.js"></script>';
+                $returnStr .= getScript("js/appsurvey.js");
             }
         }
         return $returnStr;
@@ -1516,17 +1589,17 @@ class Display {
         }
         $header = $this->displayDataTablesScripts();
 
-        if (!isRegisteredScript("css/DT_bootstrap.css")) {
-            registerScript('css/DT_bootstrap.css');
-            $header .= '<link rel="stylesheet" type="text/css" href="css/DT_bootstrap.css">';
+        if (!isRegisteredScript("css/DT_bootstrap.min.css")) {
+            registerScript('css/DT_bootstrap.min.css');
+            $header .= getCSS("css/DT_bootstrap.min.css");
         }
-        if (!isRegisteredScript("bootstrap/css/sticky-footer-navbar.css")) {
-            registerScript('bootstrap/css/sticky-footer-navbar.css');
-            $header .= '<link href="bootstrap/css/sticky-footer-navbar.css" type="text/css" rel="stylesheet">';
+        if (!isRegisteredScript("bootstrap/css/sticky-footer-navbar.min.css")) {
+            registerScript('bootstrap/css/sticky-footer-navbar.min.css');
+            $header .= getCSS("bootstrap/css/sticky-footer-navbar.min.css");
         }
-        if (!isRegisteredScript("js/DT_bootstrap.js")) {
-            registerScript('js/DT_bootstrap.js');
-            $header .= '<script type="text/javascript" charset="utf-8" language="javascript" src="js/DT_bootstrap.js"></script>';
+        if (!isRegisteredScript("js/DT_bootstrap.min.js")) {
+            registerScript('js/DT_bootstrap.min.js');
+            $header .= getScript("js/DT_bootstrap.min.js");
         }
 
         // $.fn.dataTable.moment( "MMM DD, YYYY - HH:mm:ss" ); this line can be used to hook in ordering of date/time columns using momnet.js...
@@ -1546,17 +1619,17 @@ class Display {
         }
         $header = $this->displayDataTablesScripts();
 
-        if (!isRegisteredScript("js/DT_bootstrap.js")) {
-            registerScript('js/DT_bootstrap.js');
-            $header .= '<link rel="stylesheet" type="text/css" href="css/DT_bootstrap.css">';
+        if (!isRegisteredScript("css/DT_bootstrap.min.css")) {
+            registerScript('css/DT_bootstrap.min.css');
+            $header .= getScript("css/DT_bootstrap.min.css");
         }
-        if (!isRegisteredScript("js/DT_bootstrap.js")) {
-            registerScript('js/DT_bootstrap.js');
-            $header .= '<link href="css/uscicadmin.css" rel="stylesheet">';
+        if (!isRegisteredScript("css/uscicadmin.css")) {
+            registerScript('css/uscicadmin.css');
+            $header .= getCSS("css/uscicadmin.css");
         }
-        if (!isRegisteredScript("js/DT_bootstrap.js")) {
-            registerScript('js/DT_bootstrap.js');
-            $header .= '<link href="bootstrap/css/sticky-footer-navbar.css" type="text/css" rel="stylesheet">';
+        if (!isRegisteredScript("bootstrap/css/sticky-footer-navbar.min.css")) {
+            registerScript('bootstrap/css/sticky-footer-navbar.min.css');
+            $header .= getCSS("bootstrap/css/sticky-footer-navbar.min.css");
         }
         $header .= '<script type="text/javascript" charset="utf-8">
 			$(document).ready(function () {
@@ -1565,9 +1638,9 @@ class Display {
 					}
 			});
 			</script>';
-        if (!isRegisteredScript("js/DT_bootstrap.js")) {
-            registerScript('js/DT_bootstrap.js');
-            $header .= '<script type="text/javascript" charset="utf-8" language="javascript" src="js/DT_bootstrap.js"></script>';
+        if (!isRegisteredScript("js/DT_bootstrap.min.js")) {
+            registerScript('js/DT_bootstrap.min.js');
+            $header .= getScript("js/DT_bootstrap.min.js");
         }
         $header .= '<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -2291,7 +2364,7 @@ class Display {
         $returnStr .= "</select>";
         return $returnStr;
     }
-    
+
     function displayValidateAssignment($name, $current, $generic = false) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
         $selected = array(SETTING_FOLLOW_GENERIC => "", VALIDATE_ASSIGNMENT_YES => "", VALIDATE_ASSIGNMENT_NO => "");
@@ -2305,6 +2378,19 @@ class Display {
         return $returnStr;
     }
 
+    function displayApplyChecks($name, $current, $generic = false) {
+        $returnStr = "<select class='selectpicker show-tick' name=$name>";
+        $selected = array(SETTING_FOLLOW_GENERIC => "", APPLY_CHECKS_YES => "", APPLY_CHECKS_NO => "");
+        $selected[$current] = "selected";        
+        if ($generic) {
+            $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
+        }
+        $returnStr .= "<option " . $selected[APPLY_CHECKS_YES] . " value=" . APPLY_CHECKS_YES . ">" . Language::optionsApplyChecksYes() . "</option>";
+        $returnStr .= "<option " . $selected[APPLY_CHECKS_NO] . " value=" . APPLY_CHECKS_NO . ">" . Language::optionsApplyChecksNo() . "</option>";
+        $returnStr .= "</select>";
+        return $returnStr;
+    }
+    
     function displayExclusive($name, $current, $generic = false) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
         $selected = array(SETTING_FOLLOW_GENERIC => "", GROUP_YES => "", GROUP_NO => "");
@@ -2333,6 +2419,19 @@ class Display {
     }
 
     function displayStriped($name, $current, $generic = false) {
+        $returnStr = "<select class='selectpicker show-tick' name=$name>";
+        $selected = array(SETTING_FOLLOW_GENERIC => "", GROUP_YES => "", GROUP_NO => "");
+        $selected[$current] = "selected";
+        if ($generic) {
+            $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
+        }
+        $returnStr .= "<option " . $selected[GROUP_YES] . " value=" . GROUP_YES . ">" . Language::optionsGroupYes() . "</option>";
+        $returnStr .= "<option " . $selected[GROUP_NO] . " value=" . GROUP_NO . ">" . Language::optionsGroupNo() . "</option>";
+        $returnStr .= "</select>";
+        return $returnStr;
+    }
+
+    function displayMobileLabels($name, $current, $generic = false) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
         $selected = array(SETTING_FOLLOW_GENERIC => "", GROUP_YES => "", GROUP_NO => "");
         $selected[$current] = "selected";
@@ -2559,21 +2658,30 @@ class Display {
 
     /* RADIO BUTTON/CHECK BOX SCRIPTS */
 
-    function displayRadioSwitch() {
+    function displayRadioSwitch($css = true) {
         $returnStr = "";
-        if (!isRegisteredScript("js/switch/bootstrap-switch.js")) {
-            registerScript('js/switch/bootstrap-switch.js');
-            $returnStr .= '<script type="text/javascript" src="js/switch/bootstrap-switch.js"></script>';
+        if (!isRegisteredScript("js/switch/bootstrap-switch-min.js")) {
+            registerScript('js/switch/bootstrap-switch-min.js');
+            $returnStr .= getScript("js/switch/bootstrap-switch-min.js");
         }
-        if (!isRegisteredScript("js/switch/bootstrap-switch.css")) {
-            registerScript('js/switch/bootstrap-switch.css');
-            $returnStr .= '<link href="js/switch/bootstrap-switch.css" type="text/css" rel="stylesheet">';
+        if ($css && !isRegisteredScript("js/switch/bootstrap-switch.min.css")) {
+            registerScript('js/switch/bootstrap-switch.min.css');
+            $returnStr .= getCSS("js/switch/bootstrap-switch.min.css");
         }
-        $returnStr .= "<script type='text/javascript'>
+        $returnStr .= minifyScript("<script type='text/javascript'>
                             $( document ).ready(function() {
                                 $('input.bootstrapswitch').bootstrapSwitch();
                             });
-                          </script>";
+                          </script>");
+        return $returnStr;
+    }
+    
+    function displayRadioSwitchCSS() {
+        $returnStr = "";        
+        if (!isRegisteredScript("js/switch/bootstrap-switch.css")) {
+            registerScript('js/switch/bootstrap-switch.css');
+            $returnStr .= getCSS("js/switch/bootstrap-switch.css");
+        }        
         return $returnStr;
     }
 
@@ -2651,7 +2759,7 @@ class Display {
         }
         $returnStr .= '});</script>';
 
-        return $returnStr;
+        return minifyScript($returnStr);
     }
 
     function displayCheckBoxUnchecking($mainid, $invalidsub) {
@@ -2743,16 +2851,16 @@ class Display {
         $returnStr .= "});
             </script>";
         //echo "<textarea rows=10 cols=200>" . $returnStr . "</textarea>";
-        return $returnStr;
+        return minifyScript($returnStr);
     }
 
     /* INLINE SCRIPT FUNCTIONS */
 
     function displayAutoFocusScript($id) {
-        return '<script type=text/javascript>$( document ).ready(function() {$(\'#' . $id . '\').click(function(event) { $(\'#' . $id . '\').trigger("dblclick"); event.preventDefault(); return false;});});</script>';
+        return '<script type=text/javascript>' . minifyScript('$( document ).ready(function() {$(\'#' . $id . '\').click(function(event) { $(\'#' . $id . '\').trigger("dblclick"); event.preventDefault(); return false;});});') . '</script>';
     }
 
-    function displayAutoSelectScript($id, $variable, $targetid, $inputtype, $value) {
+    function displayAutoSelectScript($id, $variable, $targetid, $inputtype, $value, $inlineanswertype) {
         if (!inArray($inputtype, array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
             return "";
         }
@@ -2760,8 +2868,23 @@ class Display {
         if ($inputtype == ANSWER_TYPE_SETOFENUMERATED) {
             $type = "checkbox";
         }
-        $returnStr = "<script type='text/javascript'>";
-        $returnStr .= "$('#" . $id . "').keyup(function(){if (this.value != '')";
+        $returnStr = "";
+        
+        if (inArray($inlineanswertype, array(ANSWER_TYPE_OPEN, ANSWER_TYPE_STRING, ANSWER_TYPE_RANGE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_DOUBLE))) {
+            $returnStr .= "$('#" . $id . "').keyup(function(){if (this.value != '')";
+        }
+        else if (inArray($inlineanswertype, array(ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
+            $returnStr .= "$('#" . $id . "').on(\"dp.change\", function(e) {if (this.value != '')";
+        }
+        else if (inArray($inlineanswertype, array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED))) {
+            // TODO: $returnStr .= "$('#" . $id . "').change(function(){if (this.value != '')";
+        }
+        else if (inArray($inlineanswertype, array(ANSWER_TYPE_SLIDER))) {
+            $returnStr .= "$('#" . $id . "').change(function(){if (this.value != '')";
+        }
+        else {
+            $returnStr .= "$('#" . $id . "').change(function(){if (this.value != '')";
+        }
         $returnStr .= '{$(\'input[type="' . $type . '"][id="' . $targetid . '_' . $value . '"][value="' . $value . '"]\').prop("checked", true);} else { $(\'input[type="' . $type . '"][id="' . $targetid . '_' . $value . '"][value="' . $value . '"]\').prop("checked", false);} $(\'input[type="' . $type . '"][id="' . $targetid . '_' . $value . '"]\').change(); });';
 
         $returnStr .= "$('input[name=\"" . $variable . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
@@ -2781,8 +2904,7 @@ class Display {
                     
                     });';
 
-        $returnStr .= "</script>";
-        return $returnStr;
+        return "<script type='text/javascript'>" . minifyScript($returnStr) . "</script>";
     }
 
     /* PARADATA HANDLING */
@@ -2800,13 +2922,13 @@ class Display {
         }
 
         // http://greensock.com/forums/topic/9059-cross-browser-to-detect-tab-or-window-is-active-so-animations-stay-in-sync-using-html5-visibility-api/
-        if (!isRegisteredScript("js/TabWindowVisibilityManager.js")) {
-            registerScript('js/TabWindowVisibilityManager.js');
-            $returnStr = "<script type=text/javascript src='js/TabWindowVisibilityManager.js'></script>";
+        if (!isRegisteredScript("js/TabWindowVisibilityManager.min.js")) {
+            registerScript('js/TabWindowVisibilityManager.min.js');
+            $returnStr = getScript('js/TabWindowVisibilityManager.min.js');
         }
-        if (!isRegisteredScript("js/datetimepicker/moment.js")) {
-            registerScript('js/datetimepicker/moment.js');
-            $returnStr .= '<script type=text/javascript src="js/datetimepicker/moment.js"></script>';
+        if (!isRegisteredScript("js/datetimepicker/moment-min.js")) {
+            registerScript('js/datetimepicker/moment-min.js');
+            $returnStr .= getScript("js/datetimepicker/moment-min.js");
         }
         //if (!isRegisteredScript("js/zip/lzstring.js")) {
         //    registerScript('js/zip/lzstring.js');
@@ -2814,18 +2936,18 @@ class Display {
         //}        
         $params = array(POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_RGID => $this->engine->getRgid(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), SESSION_PARAM_TEMPLATE => getSurveyTemplate(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_DISPLAYED => urlencode(serialize($this->engine->getDisplayNumbers())), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
         $r = setSessionsParamString($params);
-        $returnStr .= '<script type="text/javascript">
-
+        $returnStr .= '<script type="text/javascript">';
+        $str = '
             // bind listeners
             $(document).ready(function(){  ';
         if (Config::logParadataMouseMovement()) {
 
-            $returnStr .= '$("html").mousemove(function(event) {
+            $str .= '$("html").mousemove(function(event) {
                     window.mousex = event.pageX;
                     window.mousey = event.pageY;
                 });';
         }
-        $returnStr .= '
+        $str .= '
                 $("html").click(function(event){
                     var name = "";
                     if (event.target.name) {
@@ -2834,7 +2956,6 @@ class Display {
                     logParadata("MC:"+event.pageX+":"+event.pageY+":"+event.which+":"+name);
                 });
                 $("html").keyup(function(event){
-                    // filter here to only register keystrokes for actual input elements???
                     var name = "";
                     if (event.target.name) {
                         name = event.target.name;
@@ -2845,7 +2966,7 @@ class Display {
 
         if (Config::logParadataMouseMovement()) {
 
-            $returnStr .= '
+            $str .= '
                 window.mousex = 0;
                 window.mousey = 0;
                 window.lastx = window.mousex;
@@ -2862,7 +2983,7 @@ class Display {
                 ';
         }
 
-        $returnStr .= '
+        $str .= '
             // compress function
             function compress(string) {
                 return string;
@@ -2894,11 +3015,10 @@ class Display {
             var firedin = false;                
             var firedout = false; 
             $(window).TabWindowVisibilityManager({
-
                 onFocusCallback: function(){
                         if (firedin == false) {
                             //document.title="visible";
-                            logParadata("FI");	                
+                            logParadata("FI:");	                
                         }
                         firedin = true;
                         firedout = false;
@@ -2906,13 +3026,14 @@ class Display {
                 onBlurCallback: function(){
                     if (firedout == false) {
                         //document.title="invisible";
-                        logParadata("FO");
+                        logParadata("FO:");
                     }
                     firedout = true;    
                     firedin = false;
                 }
-            });
-                </script>';
+            });';
+        $returnStr .= minifyScript($str);
+        $returnStr .= '</script>';
         return $returnStr;
     }
 
@@ -2921,26 +3042,27 @@ class Display {
     function displayCookieScripts() {
         if (!isRegisteredScript("js/cookie/jquery.cookie.js")) {
             registerScript('js/cookie/jquery.cookie.js');
-            $returnStr = '<script type="text/javascript" src="js/cookie/jquery.cookie.js"></script>';
+            $returnStr = getScript("js/cookie/jquery.cookie.js");
         }
         if (!isRegisteredScript("js/cookie/uscic.cookie.js")) {
             registerScript('js/cookie/uscic.cookie.js');
-            $returnStr .= '<script type="text/javascript" src="js/cookie/uscic.cookie.js"></script>';
+            $returnStr .= getScript("js/cookie/uscic.cookie.js");
         }
         return $returnStr;
     }
-    
+
     /*  TABLE MOBILE HANDLING */
+
     function displayTableSaw() {
         $returnStr = "";
-        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.nubis.js")) {
-            $returnStr .= "<script type='text/javascript' src='js/tablesaw/stackonly/tablesaw.stackonly.nubis.js'></script>";
+        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.nubis.min.js")) {
+            $returnStr .= getScript('js/tablesaw/stackonly/tablesaw.stackonly.nubis.min.js');
         }
-        if (!isRegisteredScript("js/tablesaw/tablesaw-init.js")) {
-            $returnStr .= "<script type='text/javascript' src='js/tablesaw/tablesaw-init.js'></script>";
+        if (!isRegisteredScript("js/tablesaw/tablesaw-init.min.js")) {
+            $returnStr .= getScript('js/tablesaw/tablesaw-init.min.js');
         }
-        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.css")) {
-            $returnStr .= '<link href="js/tablesaw/stackonly/tablesaw.stackonly.css" type="text/css" rel="stylesheet">';
+        if (!isRegisteredScript("js/tablesaw/stackonly/tablesaw.stackonly.min.css")) {
+            $returnStr .= getCSS("js/tablesaw/stackonly/tablesaw.stackonly.min.css");
         }
         return $returnStr;
     }
@@ -2995,16 +3117,16 @@ class Display {
     /* AUTO COMPLETE */
 
     function displayAutoCompleteScripts($delimiters = array()) {
-        if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete.css")) {
-            registerScript('js/jquery-textcomplete/jquery.textcomplete.css');
-            $str .= '<link href="js/jquery-textcomplete/jquery.textcomplete.css" type="text/css" rel="stylesheet">';
+        if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete.min.css")) {
+            registerScript('js/jquery-textcomplete/jquery.textcomplete.min.css');
+            $str .= getCSS("js/jquery-textcomplete/jquery.textcomplete.min.css");
         }
-        if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete.js")) {
-            registerScript('js/jquery-textcomplete/jquery.textcomplete.js');
-            $returnStr = '<script type="text/javascript" src="js/jquery-textcomplete/jquery.textcomplete.js"></script>';
+        if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete-min.js")) {
+            registerScript('js/jquery-textcomplete/jquery.textcomplete-min.js');
+            $returnStr = getScript("js/jquery-textcomplete/jquery.textcomplete-min.js");
         }
 
-        $returnStr .= "<script type=text/javascript>
+        $returnStr .= "<script type=text/javascript>" . minifyScript("
                         var delimiter = '';
                         $(document).ready(function() {
                             var variables = [];
@@ -3067,7 +3189,7 @@ class Display {
                                     maxCount: 20
                                 }
                             ]);
-                        });    
+                        });") . "    
                     </script>";
         return $returnStr;
     }
@@ -3076,11 +3198,11 @@ class Display {
 
     function displayZipScripts() {
         return;
-        if (!isRegisteredScript("js/zip/lzstring.js")) {
-            registerScript('js/zip/lzstring.js');
-            $returnStr = '<script type="text/javascript" src="js/zip/lzstring.js"></script>';
+        if (!isRegisteredScript("js/zip/lzstring.min.js")) {
+            registerScript('js/zip/lzstring.min.js');
+            $returnStr = getScript("js/zip/lzstring.min.js");
         }
-        $returnStr .= '<script type="text/javascript">$(document).ready(function(){
+        $returnStr .= '<script type="text/javascript">' . minifyScript('$(document).ready(function(){
                            unzip();
                         }); 
             
@@ -3100,7 +3222,7 @@ class Display {
                     $(this).val(out);
                     document.getElementById($(this).attr("id")).value=out;
                 });
-            }</script>';
+            }') . '</script>';
         return $returnStr;
     }
 
@@ -3110,9 +3232,9 @@ class Display {
 
         global $survey, $engine;
         $returnStr = "";
-        if (!isRegisteredScript("js/session/timeout.js")) {
-            registerScript('js/session/timeout.js');
-            $returnStr .= '<script type="text/javascript" src="js/session/timeout.js"></script>';
+        if (!isRegisteredScript("js/session/timeout-min.js")) {
+            registerScript('js/session/timeout-min.js');
+            $returnStr .= getScript("js/session/timeout-min.js");
         }
 
         $logouturl = $engine->replaceFills($survey->getTimeoutLogoutURL());
@@ -3123,7 +3245,7 @@ class Display {
         if ($logouturl != "") {
             $logout = "logoutUrl: '" . $logouturl . "',";
         }
-        $aliveurl = Common::sessionAliveURL();
+        $aliveurl = Config::sessionAliveURL();
         $alive = "";
         if ($aliveurl != "") {
             $alive = "keepAliveUrl: '" . $aliveurl . "',";
@@ -3141,8 +3263,8 @@ class Display {
             $redir = "redirUrl: '" . $redirurl . "',";
             $redirafter = "redirAfter: " . $length * 1000;
         }
-        $warnafter = ($length * 1000) * Common::sessionExpiredWarnPoint(); // warn after 60% of the time has passed
-        $timeleft = ($length - ($length * Common::sessionExpiredWarnPoint())) / 60; // in minutes
+        $warnafter = ($length * 1000) * Config::sessionExpiredWarnPoint(); // warn after 60% of the time has passed
+        $timeleft = ($length - ($length * Config::sessionExpiredWarnPoint())) / 60; // in minutes
         $message = Language::sessionExpiredMessage(round($timeleft));
         $alivebutton = $engine->replaceFills($survey->getTimeoutAliveButton());
         if ($alivebutton == "") {
@@ -3158,7 +3280,7 @@ class Display {
         }
         $ping = Config::sessionExpiredPingInterval();
 
-        $returnStr .= "<script type='text/javascript'>
+        $returnStr .= "<script type='text/javascript'>" . minifyScript("
             $(document).ready(function(){
                 $.sessionTimeout({
                     title: '$title',
@@ -3172,7 +3294,7 @@ class Display {
                     warnAfter: $warnafter,
                     $redirafter
                 });
-              });  
+              });") . "  
             </script>";
 
         return $returnStr;
@@ -3181,35 +3303,35 @@ class Display {
     /* INPUT MASKING SCRIPT FUNCTIONS */
 
     function displayMaskingScripts() {
-        if (!isRegisteredScript("js/inputmasking/inputmask.js")) {
-            registerScript('js/inputmasking/inputmask.js');
-            $returnStr = '<script type="text/javascript" src="js/inputmasking/inputmask.js"></script>';
+        if (!isRegisteredScript("js/inputmasking/inputmask-min.js")) {
+            registerScript('js/inputmasking/inputmask-min.js');
+            $returnStr = getScript("js/inputmasking/inputmask-min.js");
         }
-        if (!isRegisteredScript("js/inputmasking/numeric.js")) {
-            registerScript('js/inputmasking/numeric.js');
-            $returnStr .= '<script type="text/javascript" src="js/inputmasking/numeric.js"></script>';
+        if (!isRegisteredScript("js/inputmasking/numeric-min.js")) {
+            registerScript('js/inputmasking/numeric-min.js');
+            $returnStr .= getScript("js/inputmasking/numeric-min.js");
         }
-        if (!isRegisteredScript("js/inputmasking/date.js")) {
-            registerScript('js/inputmasking/date.js');
-            $returnStr .= '<script type="text/javascript" src="js/inputmasking/date.js"></script>';
+        if (!isRegisteredScript("js/inputmasking/date-min.js")) {
+            registerScript('js/inputmasking/date-min.js');
+            $returnStr .= getScript("js/inputmasking/date-min.js");
         }
 
-        if (!isRegisteredScript("js/inputmasking/regex.js")) {
-            registerScript('js/inputmasking/regex.js');
-            $returnStr .= '<script type="text/javascript" src="js/inputmasking/regex.js"></script>';
+        if (!isRegisteredScript("js/inputmasking/regex-min.js")) {
+            registerScript('js/inputmasking/regex-min.js');
+            $returnStr .= getScript("js/inputmasking/regex-min.js");
         }
-        if (!isRegisteredScript("js/inputmasking/uscic.js")) {
-            registerScript('js/inputmasking/uscic.js');
-            $returnStr .= '<script type="text/javascript" src="js/inputmasking/uscic.js"></script>';
+        if (!isRegisteredScript("js/inputmasking/uscic-min.js")) {
+            registerScript('js/inputmasking/uscic-min.js');
+            $returnStr .= getScript("js/inputmasking/uscic-min.js");
         }
-        if (!isRegisteredScript("js/inputmasking/web.js")) {
+        if (!isRegisteredScript("js/inputmasking/web-min.js")) {
             registerScript('js/inputmasking/web.js');
-            $returnStr .= '<script type="text/javascript" src="js/inputmasking/web.js"></script>';
+            $returnStr .= getScript("js/inputmasking/web-min.js");
         }
 
         /* NOTE: DISABLED FOR NOW FOR ANDROID Chrome and Firefox UNTIL RELEASE 38 COMES OUT. THEN ENABLE FOR RELEASE 38 IF WORKING THERE */
         // (user agent example for android: Mozilla/5.0 (Linux; Android 4.4.4; Nexus 5 Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.131 Mobile Safari/537.36 =>)
-        $returnStr .= '<script type="text/javascript">$(document).ready(function(){
+        $returnStr .= minifyScript('<script type="text/javascript">$(document).ready(function(){
                           if(inputMaskingSupported() === true){
                             $(":input").inputmask();                 
                           }  
@@ -3247,55 +3369,55 @@ function inputMaskingSupported() {
     return true;
 }
                         </script>
-                        ';
+                        ');
         return $returnStr;
     }
 
     /* DATA TABLES SCRIPT FUNCTIONS */
-
-    function displayDataTablesScripts($extensions = array()) {
+    
+    function displayDataTablesScripts($extensions = array(), $css = true) {
 
         $returnStr = "";
         if (!isRegisteredScript("js/datatables/datatables.js")) {
             registerScript('js/datatables/datatables.js');
-            $returnStr .= '<script type="text/javascript" src="js/datatables/datatables.js"></script>';
+            $returnStr .= getScript("js/datatables/datatables.js");
         }
 
         if (!isRegisteredScript("js/datatables/extensions/date_sorting.js")) {
             registerScript('js/datatables/extensions/date_sorting.js');
-            $returnStr .= '<script type="text/javascript" src="js/datatables/extensions/date_sorting.js"></script>';
+            $returnStr .= getScript("js/datatables/extensions/date_sorting.js");
         }
 
-        if (!isRegisteredScript("js/datetimepicker/moment.js")) {
-            registerScript('js/datetimepicker/moment.js');
-            $returnStr .= '<script type="text/javascript" src="js/datetimepicker/moment.js"></script>';
+        if (!isRegisteredScript("js/datetimepicker/moment-min.js")) {
+            registerScript('js/datetimepicker/moment-min.js');
+            $returnStr .= getScript("js/datetimepicker/moment-min.js");
         }
 
-        if (!isRegisteredScript("js/datatables/datatables.css")) {
+        if ($css && !isRegisteredScript("js/datatables/datatables.css")) {
             registerScript('js/datatables/datatables.css');
-            $returnStr .= '<link rel="stylesheet" type="text/css" href="js/datatables/datatables.css">';
+            $returnStr .= getCSS("js/datatables/datatables.css");
         }
         foreach ($extensions as $ext) {
             if (!isRegisteredScript("js/datatables/extensions/' . $ext . '.js")) {
                 registerScript('js/datatables/extensions/' . $ext . '.js');
-                $returnStr .= '<script type="text/javascript" src="js/datatables/extensions/' . $ext . '.js"></script>';
+                $returnStr .= getScript("js/datatables/extensions/" . $ext . ".js");
             }
             if (strtoupper($ext) != strtoupper('rowreorder')) { // reorder has no associated css
-                if (!isRegisteredScript("js/datatables/extensions/' . $ext . '.css")) {
+                if ($css && !isRegisteredScript("js/datatables/extensions/' . $ext . '.css")) {
                     registerScript('js/datatables/extensions/' . $ext . '.css');
-                    $returnStr .= '<link rel="stylesheet" type="text/css" href="js/datatables/extensions/' . $ext . '.css">';
+                    $returnStr .= getCSS("js/datatables/extensions/" . $ext . ".css");
                 }
             } else {
                 if (!isRegisteredScript("js/jqueryui/sortable.js")) {
                     registerScript('js/jqueryui/sortable.js');
-                    $returnStr .= '<script type="text/javascript" src="js/jqueryui/sortable.js"></script>';
+                    $returnStr .= getScript("js/jqueryui/sortable.js");
                 }
             }
         }
 
         /* https://datatables.net/forums/discussion/10437/fixedheader-column-headers-not-changing-on-window-resize/p1 */
         /* resize of header on window resize/empty/error */
-        $returnStr .= '<script type="text/javascript">            
+        $returnStr .= '<script type="text/javascript">' . minifyScript('            
                         function resizeDataTables() {
                         $(\'div.dataTables_scrollBody table.dataTable\').each( function( index ) {
                         $(this).dataTable().fnAdjustColumnSizing();
@@ -3304,8 +3426,26 @@ function inputMaskingSupported() {
 
                         $(window).on(\'resize\', function () {
                         resizeDataTables();
-                        } );
+                        } );') . '
                         </script>';
+        return $returnStr;
+    }
+    
+    function displayDataTablesCSS($extensions = array()) {
+
+        $returnStr = "";
+        if (!isRegisteredScript("js/datatables/datatables.css")) {
+            registerScript('js/datatables/datatables.css');
+            $returnStr .= getCSS("js/datatables/datatables.css");
+        }
+        foreach ($extensions as $ext) {
+            if (strtoupper($ext) != strtoupper('rowreorder')) { // reorder has no associated css
+                if (!isRegisteredScript("js/datatables/extensions/' . $ext . '.css")) {
+                    registerScript('js/datatables/extensions/' . $ext . '.css');
+                    $returnStr .= getCSS("js/datatables/extensions/" . $ext . ".css");
+                }
+            }
+        }
         return $returnStr;
     }
 
@@ -3315,7 +3455,7 @@ function inputMaskingSupported() {
         $returnStr = "";
         if (!isRegisteredScript("js/hotkeys.js")) {
             registerScript('js/hotkeys.js');
-            $returnStr = '<script type="text/javascript" src="js/hotkeys.js"></script>';
+            $returnStr = getScript("js/hotkeys.js");
         }
 
         $returnStr .= '<script type="text/javascript">';
@@ -3519,27 +3659,27 @@ function inputMaskingSupported() {
     }
 
     function disableForm() {
-        $returnStr = "<script type='text/javascript'>
+        $returnStr = "<script type='text/javascript'>" . minifyScript("
                             function checkForm() {
                                 $('#sectiondiv :input').attr('disabled', true);
                                 $('input[type=\"submit\"]').attr('disabled',true);                                
                              }  
                              $(document).ready(function(){
                                 checkForm();
-                             });
+                             });") . "
                           </script>";
         return $returnStr;
     }
 
     function displayButtonToggling() {
-        $returnStr = "<script type='text/javascript'>
+        $returnStr = minifyScript("<script type='text/javascript'>
                             function disableButtons() {
                                 $('button').attr('disabled', 'disabled');
                             }
                             function enableButtons() {
                                 $('button').removeAttr('disabled');
                             }
-                          </script>";
+                          </script>");
         return $returnStr;
     }
 
@@ -3651,12 +3791,12 @@ function inputMaskingSupported() {
 
     function displayRoutingErrorModal($section, $text) {
         $returnStr = "<script type='text/javascript' src='js/jqueryui/jquery-ui.js'></script>";
-        $returnStr .= "<script type='text/javascript'>
+        $returnStr .= "<script type='text/javascript'>" . minifyScript("
                         $(document).ready(function() {
                             $('#errorsModal').drags({ 
                                 handle: '.modal-header' 
                             });
-                        });    
+                        });") . "   
                         </script>";
         $returnStr .= '<div class="modal fade" id="errorsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -3847,9 +3987,7 @@ function inputMaskingSupported() {
     }
 
     function showModalForm($id, $text) {
-        $returnStr .= '  
-        
-        <div class="modal fade bs-example-modal-lg" id="' . $id . '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        $returnStr .= '<div class="modal fade bs-example-modal-lg" id="' . $id . '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:1000px;">
     <div class="modal-content">
       <div class="modal-header">
@@ -3942,11 +4080,11 @@ function inputMaskingSupported() {
         $returnStr = '';
         if (!isRegisteredScript("js/tinymce/tinymce.min.js")) {
             registerScript('js/tinymce/tinymce.min.js');
-            $returnStr .= '<script type="text/javascript" src="js/tinymce/tinymce.min.js"></script>';
+            $returnStr .= getScript("js/tinymce/tinymce.min.js");
         }
         if (!isRegisteredScript("js/tinymce/jquery.tinymce.min.js")) {
             registerScript('js/tinymce/jquery.tinymce.min.js');
-            $returnStr .= '<script type="text/javascript" src="js/tinymce/jquery.tinymce.min.js"></script>';
+            $returnStr .= getScript("js/tinymce/jquery.tinymce.min.js");
         }
         $returnStr .= '
             <script type="text/javascript">';
@@ -3973,6 +4111,11 @@ function inputMaskingSupported() {
 
         if ($inline == 1) {
             $returnStr .= '$( document ).ready(function() {
+                
+                $("textarea.tinymce").focusin(function() {
+                    $(this).click();
+                });
+                
                 $("textarea.tinymce").click(function() {
                     var select = "#" + $(this).attr(\'id\');
                     if (tinymce.get($(this).attr(\'id\'))) {
@@ -3994,7 +4137,8 @@ function inputMaskingSupported() {
                                 editor.on("init", function(e) {
                                     tinyMCE.get($(this).attr(\'id\')).focus(); // does not work first time round
                                 });
-                                    
+                
+                                
                             },';
         }
 
@@ -4078,35 +4222,35 @@ function inputMaskingSupported() {
 
         if (!isRegisteredScript("js/codemirror/lib/codemirror.css")) {
             registerScript('js/codemirror/lib/codemirror.css');
-            $returnStr = '<link rel="stylesheet" href="js/codemirror/lib/codemirror.css">';
+            $returnStr = getCSS("js/codemirror/lib/codemirror.css");
         }
         if (!isRegisteredScript("js/codemirror/addon/dialog/dialog.css")) {
             registerScript('js/codemirror/addon/dialog/dialog.css');
-            $returnStr .= '<link rel="stylesheet" href="js/codemirror/addon/dialog/dialog.css">';
+            $returnStr .= getCSS("js/codemirror/addon/dialog/dialog.css");
         }
         if (!isRegisteredScript("js/codemirror/lib/codemirror.js")) {
             registerScript('js/codemirror/lib/codemirror.js');
-            $returnStr .= '<script src="js/codemirror/lib/codemirror.js"></script>';
+            $returnStr .= getScript("js/codemirror/lib/codemirror.js");
         }
         if (!isRegisteredScript("js/codemirror/mode/xml/xml.js")) {
             registerScript('js/codemirror/mode/xml/xml.js');
-            $returnStr .= '<script src="js/codemirror/mode/xml/xml.js"></script>';
+            $returnStr .= getScript("js/codemirror/mode/xml/xml.js");
         }
         if (!isRegisteredScript("js/codemirror/addon/dialog/dialog.js")) {
             registerScript('js/codemirror/addon/dialog/dialog.js');
-            $returnStr .= '<script src="js/codemirror/addon/dialog/dialog.js"></script>';
+            $returnStr .= getScript("js/codemirror/addon/dialog/dialog.js");
         }
         if (!isRegisteredScript("js/codemirror/addon/search/searchcursor.js")) {
             registerScript('js/codemirror/addon/search/searchcursor.js');
-            $returnStr .= '<script src="js/codemirror/addon/search/searchcursor.js"></script>';
+            $returnStr .= getScript("js/codemirror/addon/search/searchcursor.js");
         }
         if (!isRegisteredScript("js/codemirror/addon/search/search.js")) {
             registerScript('js/codemirror/addon/search/search.js');
-            $returnStr .= '<script src="js/codemirror/addon/search/search.js"></script>';
+            $returnStr .= getScript("js/codemirror/addon/search/search.js");
         }
         if (!isRegisteredScript("js/codemirror/mode/nubis/nubis.js")) {
             registerScript('js/codemirror/mode/nubis/nubis.js');
-            $returnStr .= '<script src="js/codemirror/mode/nubis/nubis.js"></script>';
+            $returnStr .= getScript("js/codemirror/mode/nubis/nubis.js");
         }
         $returnStr .= '<style type="text/css">';
         $returnStr .= '    .CodeMirror {' . $style . ' border-top: 1px solid black; border-bottom: 1px solid black;}
@@ -4120,18 +4264,19 @@ function inputMaskingSupported() {
         $returnStr = '';
         if (!isRegisteredScript("js/dirtyform/lib/jquery.dirtyform.min.js")) {
             registerScript('js/dirtyform/jquery.dirtyform.min.js');
-            $returnStr .= '<script src="js/dirtyform/jquery.dirtyform.min.js"></script>';
+            $returnStr .= getScript("js/dirtyform/jquery.dirtyform.min.js");
+            ;
         }
 
         if (!isRegisteredScript("js/dirtyform/lib/jquery.dirtyform.bootstrap.js")) {
             registerScript('js/dirtyform/jquery.dirtyform.bootstrap.js');
-            $returnStr .= '<script src="js/dirtyform/jquery.dirtyform.bootstrap.js"></script>';
+            $returnStr .= getScript("js/dirtyform/jquery.dirtyform.bootstrap.js");
         }
 
         if (isRegisteredScript("js/tinymce/tinymce.min.js")) {
             if (!isRegisteredScript("js/dirtyform/tinymce/jquery.dirtyforms.helpers.tinymce.min.js")) {
                 registerScript('js/dirtyform/tinymce/jquery.dirtyforms.helpers.tinymce.min.js');
-                $returnStr .= '<script src="js/dirtyform/tinymce/jquery.dirtyforms.helpers.tinymce.min.js"></script>';
+                $returnStr .= getScript("js/dirtyform/tinymce/jquery.dirtyforms.helpers.tinymce.min.js");
             }
         }
 
@@ -4165,4 +4310,5 @@ function inputMaskingSupported() {
                 '</div>';
         return $returnStr;
     }
+
 }

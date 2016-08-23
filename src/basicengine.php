@@ -35,6 +35,7 @@ class BasicEngine extends Object {
     var $survey;
     var $getfillclasses;
     var $setfillclasses;
+    var $checkclasses;
     var $setfills; // keeps track of name/rgid pairings for any .FILL calls
     var $inlinefieldclasses;
     var $inlinefields;
@@ -64,6 +65,7 @@ class BasicEngine extends Object {
     var $justassigned;
     private $flooding;
     private $stop;
+    var $firstform;
 
     function __construct($suid, $primkey, $phpid, $version, $seid, $doState = true, $doContext = true) {
 
@@ -113,7 +115,8 @@ class BasicEngine extends Object {
                 $this->previouswhilergid = $this->getWhileRgid();
                 $this->previouswhileaction = $this->getWhileLastAction();
             }
-            /* no state found, then create new state */ else {
+            // no state found, then create new state
+            else {
 
                 $this->state->setSuid($suid);
                 $this->setMainSeid($this->mainseid);
@@ -139,6 +142,7 @@ class BasicEngine extends Object {
         $this->startatbegin = false;
         $this->redofills = false;
         $this->forward = false;
+        $this->firstform = false;
         $this->updateaction = false;
         $this->reset = array();
 
@@ -154,6 +158,10 @@ class BasicEngine extends Object {
     }
 
     /* CONTEXT FUNCTIONS */
+    
+    function setFirstForm($first = false) {
+        $this->firstform = $first;
+    }
 
     function setRedoFills($redofills) {
         $this->redofills = $redofills;
@@ -165,14 +173,18 @@ class BasicEngine extends Object {
 
     function loadContext() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+        if (Config::useUnserialize()) {
+            $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+        } else {
+            $q = "select getfills, inlinefields, setfills from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+        }
         $r = $db->selectQuery($q);
         $this->variabledescriptives = array();
         $this->types = array();
         $this->groups = array();
         $this->sections = array();
         if ($row = $db->getRow($r)) {
-            if (Common::useUnserialize()) {
+            if (Config::useUnserialize()) {
                 if ($row["variables"] != "") {
                     $this->variabledescriptives = unserialize(gzuncompress($row["variables"]));
                 }
@@ -198,6 +210,9 @@ class BasicEngine extends Object {
             if ($row["setfills"] != "") {
                 $this->setfillclasses = unserialize(gzuncompress($row["setfills"]));
             }
+            if ($row["checks"] != "") {
+                $this->checkclasses = unserialize(gzuncompress($row["checks"]));
+            }
             //echo 'loaded';
         }
     }
@@ -211,6 +226,7 @@ class BasicEngine extends Object {
         $this->getfillclasses = null;
         $this->inlinefieldclasses = null;
         $this->setfillclasses = null;
+        $this->checkclasses = null;
         unset($this->variabledescriptives);
         unset($this->functions);
         unset($this->types);
@@ -219,6 +235,14 @@ class BasicEngine extends Object {
         unset($this->getfillclasses);
         unset($this->inlinefieldclasses);
         unset($this->setfillclasses);
+        unset($this->checkclasses);
+    }
+    
+    /* CHECKS FUNCTION */
+    function applyChecks() {
+        if ($this->survey->isApplyChecks() == false) {
+            return;
+        }
     }
 
     /* INLINE FIELD FUNCTIONS */
@@ -370,7 +394,7 @@ class BasicEngine extends Object {
 
                         /* if radio/set of enumerated, then add auto-select script and error check */
                         if ($enumid != "") {
-                            $replacetext .= $this->display->displayAutoSelectScript($id, $varname, $enumid, $enumtype, $enumvalue);
+                            $replacetext .= $this->display->displayAutoSelectScript($id, $varname, $enumid, $enumtype, $enumvalue, $variable->getAnswerType());
                         }
                     }
                     // field not found, then replace with empty
@@ -1415,7 +1439,7 @@ class BasicEngine extends Object {
         }
         $invalidsub = $this->getFill($variable, $var, SETTING_INVALIDSUB_SELECTED);
         if ($invalidsub != "") {
-            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);        
+            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);
             $invalids = explode(SEPARATOR_COMPARISON, $invalidsub);
             foreach ($invalids as $s) {
                 $invalid = explode(",", $s);
@@ -1435,32 +1459,29 @@ class BasicEngine extends Object {
                         }
                         if ($all == true) {
                             $selected[$cnt] = 0;
-                        }
-                        else {
+                        } else {
                             $selected[$cnt] = -1;
                         }
-                    }
-                    else {
+                    } else {
                         $invalidselected[] = $inv;
                         $key = array_search($inv, $indices);
                         if (!$key) {
                             $selected[$cnt] = -1; // returns -1 if not found
-                        }
-                        else {
+                        } else {
                             $selected[$cnt] = $key;
-                        }                    
+                        }
                     }
                 }
 
                 // no -1, then all found
                 if (!inArray(-1, $selected)) {
-                    return INVALID_ASSIGNMENT;                    
+                    return INVALID_ASSIGNMENT;
                 }
             }
         }
         $invalid = $this->getFill($variable, $var, SETTING_INVALID_SELECTED);
         if ($invalid != "") {
-            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);        
+            $indices = explode(SEPARATOR_SETOFENUMERATED, $answer);
             $invalids = explode(SEPARATOR_COMPARISON, $invalidsub);
             foreach ($invalids as $s) {
                 $invalid = explode(",", $s);
@@ -1480,20 +1501,17 @@ class BasicEngine extends Object {
                         }
                         if ($all == true) {
                             $selected[$cnt] = 0;
-                        }
-                        else {
+                        } else {
                             $selected[$cnt] = -1;
                         }
-                    }
-                    else {
+                    } else {
                         $invalidselected[] = $inv;
                         $key = array_search($inv, $indices);
                         if (!$key) {
                             $selected[$cnt] = -1; // returns -1 if not found
-                        }
-                        else {
+                        } else {
                             $selected[$cnt] = $key;
-                        }                    
+                        }
                     }
                 }
 
@@ -1602,6 +1620,11 @@ class BasicEngine extends Object {
         return $ans;
     }
 
+    function getDirty($variablename) {
+        $variablename = $this->prefixVariableName($variablename);
+        return $this->state->getDirty($variablename);
+    }
+
     function processAnswer($variablename) {
         $ans = $this->getAnswer($variablename);
         if (strtoupper($ans) == ANSWER_DK) {
@@ -1657,6 +1680,9 @@ class BasicEngine extends Object {
     function addAssignment($variablename, $oldvalue, $rgid) {
 //echo "<hr>adding" . $variablename;
         $vardesc = $this->getVariableDescriptive($variablename);
+        if ($vardesc->isKeep()) {
+            return; // skip if keep is set to yes
+        }
         /* if ($vardesc->getSeid() == $this->getSeid()) {
           $full = $this->getParentPrefix() . $this->getPrefix();
           if (contains($full, "[")) {
@@ -1874,6 +1900,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 // remove last action from most inner loop
                 $this->removeForLoopLastAction();
+
+                // remove last action from outer loop if we are returning to loop before this loop
+                if ($nextrgid < $looprgid) {
+                    $this->removeForLoopLastAction();
+                }
 
                 // reset loop action for outer loop IF NOT last loop action
                 if ($this->reset[$nextrgid] == true) {
@@ -2412,7 +2443,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $this->stop = true;
             return;
         }
-        exit;
+        doExit();
     }
 
     function addSubDisplay($variables, $template) {
@@ -2451,13 +2482,17 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function isLocked() {
+        if (Config::useLocking() == false) {
+            return false;
+        }
+
         if (isset($this->locked)) {
             return $this->locked;
         }
         $this->locked = false;
         $this->firsttimelock = true;
         global $db;
-        $query = "select status from " . Config::dbSurvey() . "_interviewstatus where suid = " . $this->getSuid() . " and primkey='" . $this->getPrimaryKey() . "'";
+        $query = "select status from " . Config::dbSurveyData() . "_interviewstatus where suid = " . $this->getSuid() . " and primkey='" . $this->getPrimaryKey() . "'";
         //echo $query;
         $res = $db->selectQuery($query);
         if ($res) {
@@ -2487,6 +2522,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function lock() {
+        if (Config::useLocking() == false) {
+            return;
+        }
         global $db;
         if ($this->firsttimelock == true) {
             $this->firsttimelock = false;
@@ -2499,6 +2537,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function unlock() {
+        $_SESSION['REQUEST_IN_PROGRESS'] = null;
+        unset($_SESSION['REQUEST_IN_PROGRESS']);
+        if (Config::useLocking() == false) {
+            return;
+        }
         global $db;
         if ($this->firsttimelock == true) {
             $this->firsttimelock = false;
@@ -2618,7 +2661,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     $this->stop = true;
                     return;
                 }
-                exit;
+                doExit();
             }
         }
     }
@@ -2634,17 +2677,27 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         // no entries yet or something went wrong, then we are starting survey
         if ($currentlast <= 0) {
-            return false;
+            //return true;
         }
 
         // get last action in form (is empty if we just started)
         $lastform = getFromSessionParams(SESSION_PARAM_LASTACTION);
-        //echo 'NONONO: current last: ' . $currentlast . '----' . $lastform;
+        //echo 'current last: ' . $currentlast . '----' . $lastform;
         if ($lastform != "") {
             if ($lastform != $currentlast) { // submitted action is not the last action in the _actions table, then this is an old form!
                 //echo 'NONONO: current last: ' . $currentlast . '----' . $lastform;
                 return true;
             }
+        }
+        // lastform can be empty with F5 resubmit, leading to multiple scripts running at the same time
+        else {
+            if ($this->firstform == false) {
+                //echo 'gggg';
+                return true;
+            }
+            //else {
+                //echo 'hhhh';
+            //}
         }
 
         //echo 'OK: current last: ' . $currentlast . '----' . $lastform;
@@ -2669,10 +2722,17 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             require_once('language_en.php'); // fall back on english language  file
         }
 
-        // check if locked
-        if ($this->isLocked()) {
+        // check if session request already in progress
+        if ((isset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS']) && $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] == 1)) {
+            doCommit();
+            echo $this->display->showInProgressSurvey();
+            doExit();
+        }
+        // check if database locked
+        else if ($this->isLocked()) {
+            doCommit();
             echo $this->display->showLockedSurvey();
-            exit;
+            doExit();
         }
 
         // lock (we unlock in showQuestion OR doEnd if end of survey
@@ -2682,7 +2742,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $oldform = $this->isOldFormSubmit();
         //echo 'rgid: ' . getFromSessionParams(SESSION_PARAM_RGID) . '----';
         if (getFromSessionParams(SESSION_PARAM_RGID) == '' || $oldform) {
-            //echo 'nono';
+            
             // returning to the survey
             if ($this->getDisplayed() != "") {
 
@@ -2714,8 +2774,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                     if ($reentry == AFTER_COMPLETION_NO_REENTRY) {
                         $this->unlock();
+                        doCommit();
                         echo $this->display->showCompletedSurvey();
-                        exit;
+                        doExit();
                     }
                     // allow re-entry
                     else {
@@ -2784,7 +2845,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $rgid = $this->getRgid();
                             $variablenames = $this->getDisplayed();
                             $this->showQuestion($variablenames, $rgid, $groupname);
-                            exit;
+                            doExit();
                         }
                         // start from the beginning (includes doing any assignments again)
                         else if ($where == AFTER_COMPLETION_FROM_START) {
@@ -2805,7 +2866,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $this->doSection("", 0, $this->getMainSeid(), true);
 
                             /* stop */
-                            exit;
+                            doExit();
                         }
                         // show last question(s) of survey
                         else if (inArray($where, array(AFTER_COMPLETION_LAST_SCREEN, AFTER_COMPLETION_LAST_SCREEN_REDO))) {
@@ -2825,7 +2886,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             // not redoing anything
                             if ($where == AFTER_COMPLETION_LAST_SCREEN) {
                                 $this->showQuestion($variablenames, $rgid, $groupname);
-                                exit;
+                                doExit();
                             }
                             // redo last action (e.g. to perform assignment or re-evaluate if condition
                             else {
@@ -2858,7 +2919,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                                     return;
                                 }
                             }
-                            exit;
+                            doExit();
                         }
                     }
                 }
@@ -2890,8 +2951,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     /* no re-entry allowed */
                     if ($action == REENTRY_NO_REENTRY) {
                         $this->unlock();
+                        doCommit();
                         echo $this->display->showCompletedSurvey();
-                        exit;
+                        doExit();
                     } else {
 
                         // set current action to reentry
@@ -2953,7 +3015,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $rgid = $this->getRgid();
                             $variablenames = $this->getDisplayed();
                             $this->showQuestion($variablenames, $rgid, $groupname);
-                            exit;
+                            doExit();
                         }
                         // start from the beginning (includes doing any assignments again)
                         else if ($action == REENTRY_FROM_START) {
@@ -2974,7 +3036,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $this->doSection("", 0, $this->getMainSeid(), true);
 
                             /* stop */
-                            exit;
+                            doExit();
                         }
                         // show last question(s)
                         else if (inArray($action, array(REENTRY_SAME_SCREEN, REENTRY_SAME_SCREEN_REDO_ACTION))) {
@@ -2990,7 +3052,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             // not redoing anything
                             if ($action == REENTRY_SAME_SCREEN) {
                                 $this->showQuestion($variablenames, $rgid, $groupname);
-                                exit;
+                                doExit();
                             }
                             // redo last action (e.g. to perform assignment or re-evaluate if condition
                             else {
@@ -3077,7 +3139,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     }
 
                     /* stop */
-                    exit;
+                    doExit();
                 }
             }
             // starting with the survey
@@ -3143,7 +3205,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* show last question(s) and stop */
                 $this->showQuestion($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
-                exit;
+                doExit();
             }
 
             /* handle timings */
@@ -3210,7 +3272,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 $this->doBackState($lastrgid, $dkrfnacheck);
                 $cnt = 0;
-                
+                $currentseid = $this->getSeid();
+
                 // this was a section call, so we need to go back one more state
                 while ($this->getDisplayed() == "") {
                     $this->setSeid($this->getParentSeid());
@@ -3223,11 +3286,25 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
 
                 /* if (language different from state AND update) OR (mode different from state AND update) OR (version different from state), then wipe fill texts */
+                $redo = false;
                 if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage() == LANGUAGE_BACK_YES) || ($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() == MODE_BACK_YES) || $this->state->getVersion() != getSurveyVersion()) {
                     $this->setFillTexts(array());
 
                     /* indicate to redo any fills */
                     $this->setRedoFills(true);
+                    $redo = true;
+                }
+
+                /* if language different, but keeping from state, then update language */
+                if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage() != LANGUAGE_BACK_YES)) {
+                    setSurveyLanguage($this->state->getLanguage());
+                }
+
+                if (($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() != MODE_BACK_YES)) {
+                    setSurveyMode($this->state->getMode());
+                }
+                if ($this->state->getVersion() != getSurveyVersion()) {
+                    setSurveyVersion($this->state->getVersion());
                 }
 
                 /* check for on submit function */
@@ -3256,7 +3333,54 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* show previous question(s) from the stored state */
                 if ($this->getRgid() != "") {
-                    $this->showQuestion($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
+
+                    // no language/mode/version change, so no need to redo anything
+                    if ($redo == false) {
+                        $this->showQuestion($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
+                    }
+                    // we need to redo in case of fills since we changed language/moe/version
+                    else {
+
+                        /* we have a rgid */
+                        if ($this->getRgid() > 0) {
+                            //$this->updateaction = true;  
+                            // we are going back to different section, so we need to load another engine
+                            if ($currentseid != $this->getSeid()) {
+                                global $engine;
+                                $engine = loadEngine($this->getSuid(), $this->primkey, $this->phpid, $this->version, $this->getSeid(), false, true);
+
+                                /* set state as current state */
+                                $engine->setState($this->state);
+
+                                /* update state properties */
+                                $engine->setSeid($this->getSeid());
+                                $engine->setMainSeid($this->getMainSeid());
+                                $engine->setPrefix($this->getPrefix());
+                                $engine->setParentSeid($this->getParentSeid());
+                                $engine->setParentRgid($this->getParentRgid());
+                                $engine->setParentPrefix($this->getParentPrefix());
+                                $engine->setForward($this->getForward());
+                                $engine->setFlooding($this->getFlooding());
+
+                                // do the action in the correct engine
+                                $engine->doAction($this->getRgid());
+
+                                // stop
+                                return;
+                            }
+                            // we are still in the same section, so we can redo the action using the current engine
+                            else {
+
+                                $this->doAction($this->getRgid());
+                                /* we finished everything and are showing a question if all went well 
+                                 * so this is the moment to update the state
+                                 */
+                                $this->saveState(false);
+                            }
+                        } else {
+                            $this->showQuestion($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
+                        }
+                    }
                 } else {
                     // this should not happen
                     $this->showQuestion(VARIABLE_INTRODUCTION, "");
@@ -3331,8 +3455,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     $cnt++;
                 }
 
-                /* if language OR mode OR version now different from state, then wipe fill texts */
-                if (($_POST['navigation'] == NAVIGATION_LANGUAGE_CHANGE && $this->state->getLanguage() != getSurveyLanguage()) || ($_POST['navigation'] == NAVIGATION_MODE_CHANGE && $this->state->getMode() != getSurveyMode()) || ($_POST['navigation'] == NAVIGATION_VERSION_CHANGE && $this->state->getVersion() != getSurveyVersion())) {
+                /* if update button OR language OR mode OR version now different from state, then wipe fill texts */
+                if ($this->currentaction == ACTION_EXIT_UPDATE || ($_POST['navigation'] == NAVIGATION_LANGUAGE_CHANGE && $this->state->getLanguage() != getSurveyLanguage()) || ($_POST['navigation'] == NAVIGATION_MODE_CHANGE && $this->state->getMode() != getSurveyMode()) || ($_POST['navigation'] == NAVIGATION_VERSION_CHANGE && $this->state->getVersion() != getSurveyVersion())) {
                     $this->setFillTexts(array());
 
                     /* indicate to redo any fills */
@@ -3584,7 +3708,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     $this->stop = true;
                     return;
                 }
-                exit;
+                doExit();
             }
         }
     }
@@ -3662,6 +3786,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             /* store answers in db and previous state */
             if ($update == true) {
+                $defaultcleanvariables = getDefaultCleanVariables();
                 $cnt = 1;
                 foreach ($vars as $var) {
 
@@ -3681,7 +3806,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $answer = implode(SEPARATOR_SETOFENUMERATED, $answer);
                         }
 
-                        if (inArray($var, $cleanvariables)) {
+                        if (inArray($var, $cleanvariables) || inArray($var, $defaultcleanvariables)) {
                             $dirty = DATA_CLEAN;
                         } else {
                             $dirty = DATA_DIRTY;
@@ -3702,7 +3827,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             }
 
                             $dirty = DATA_DIRTY;
-                            if (inArray($var, $cleanvariables)) {
+                            if (inArray($var, $cleanvariables) || inArray($var, $defaultcleanvariables)) {
                                 $dirty = DATA_CLEAN;
                             }
                             $this->setAnswer($var, $answer, $dirty);
@@ -3731,6 +3856,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $this->endofsurvey = true;
         $this->setAnswer(VARIABLE_END, date("Y-m-d H:i:s", time()));
 
+        doCommit();
+
         /* save data record */
         $this->getDataRecord()->saveRecord();
 
@@ -3750,7 +3877,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         /* show end and exit */
         echo $this->display->showEndSurvey();
-        exit;
+        doExit();
     }
 
     function doEnd($savestate = false) {
@@ -3775,6 +3902,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     }
                 }
             }
+
+            doCommit();
 
             /* save data record */
             $this->getDataRecord()->saveRecord();
@@ -3814,7 +3943,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             /* show end and exit */
             echo $this->display->showEndSurvey();
-            exit;
+            doExit();
         } else {
 
             /* get current state */
@@ -3846,7 +3975,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $this->stop = true;
                 return;
             }
-            exit;
+            doExit();
         }
     }
 
@@ -3890,7 +4019,15 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             return;
         }
 
-        global $survey, $db;
+        global $survey;
+        $localdb = null;
+        if (Config::useTransactions() == true) {
+            global $transdb;
+            $localdb = $transdb;
+        } else {
+            global $db;
+            $localdb = $db;
+        }
 
         $l = getSurveyLanguage();
         $m = getSurveyMode();
@@ -3926,7 +4063,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         }
         //echo $query;
         //print_r($bp->get());
-        $db->executeBoundQuery($query, $bp->get());
+        $localdb->executeBoundQuery($query, $bp->get());
         return "";
     }
 
@@ -3936,10 +4073,24 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             return;
         }
 
-        global $db;
+        $localdb = null;
+        if (Config::useTransactions() == true) {
+            global $transdb;
+            $localdb = $transdb;
+        } else {
+            global $db;
+            $localdb = $db;
+        }
         $pardata = loadvar(POST_PARAM_PARADATA);
         //echo $pardata;
-        $displayed = $this->getDisplayed();
+        //$displayed = $this->getDisplayed();
+        $display = array();
+        $vars = splitString("/~/", getFromSessionParams(SESSION_PARAM_VARIABLES));
+        foreach ($vars as $variablename) {
+            $variablename = $this->prefixVariableName($variablename);
+            $display[] = $variablename;
+        }
+        $displayed = implode("~", $display);
         $stateid = $this->getStateId();
         $primkey = $this->getPrimaryKey();
         $suid = $this->getSuid();
@@ -3968,7 +4119,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         }
         //echo $query;
         //print_r($bp->get());
-        $db->executeBoundQuery($query, $bp->get());
+        $localdb->executeBoundQuery($query, $bp->get());
     }
 
     function addTimings($lastrgid, $laststateid) {
@@ -3976,7 +4127,14 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         if (Config::logSurveyTimings() == false) {
             return;
         }
-        global $db;
+        $localdb = null;
+        if (Config::useTransactions() == true) {
+            global $transdb;
+            $localdb = $transdb;
+        } else {
+            global $db;
+            $localdb = $db;
+        }
         $vars = splitString("/~/", getFromSessionParams(SESSION_PARAM_VARIABLES));
         $begin = date("Y-m-d H:i:s", getFromSessionParams(SESSION_PARAM_TIMESTAMP));
         $end = time();
@@ -3985,6 +4143,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $version = getSurveyVersion();
         $time = time();
         foreach ($vars as $var) {
+            $var = $this->prefixVariableName($var);
             $query = "insert into " . Config::dbSurveyData() . '_times (suid, primkey, stateid, rgid, variable, begintime, endtime, timespent, language, mode, version) values (';
             $query .= prepareDatabaseString($this->getSuid()) . ",";
             $query .= "'" . prepareDatabaseString($this->primkey) . "',";
@@ -3998,7 +4157,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $query .= prepareDatabaseString($mode) . ",";
             $query .= prepareDatabaseString($version) . ")";
             //echo$query . "<br/>";
-            $db->executeQuery($query);
+            $localdb->executeQuery($query);
         }
     }
 
@@ -4006,7 +4165,14 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         if (Config::logSurveyActions() == false) {
             return;
         }
-        global $db;
+        $localdb = null;
+        if (Config::useTransactions() == true) {
+            global $transdb;
+            $localdb = $transdb;
+        } else {
+            global $db;
+            $localdb = $db;
+        }
         $ans = $answer;
         if ($ans == "") {
             $ans = null;
@@ -4021,14 +4187,15 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $language = getSurveyLanguage();
         $mode = getSurveyMode();
 
-        if (Common::prepareDataQueries() == false) {
+        if (Config::prepareDataQueries() == false) {
             global $survey;
             $key = $survey->getDataEncryptionKey();
             $answer = '"' . prepareDatabaseString($ans) . '"';
             if ($key != "") {
                 $answer = "aes_encrypt('" . prepareDatabaseString($ans) . "', '" . $key . "')";
             }
-            $db->executeQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')');
+            $localdb->executeQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')');
+            //echo 'INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')<br/>';
         } else {
 
             $bp = new BindParam();
@@ -4047,7 +4214,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             if ($key != "") {
                 $answer = "aes_encrypt(?, '" . $key . "')";
             }
-            $db->executeBoundQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (?,?,?,' . $answer . ',?,?,?,?,?)', $bp->get());
+            $localdb->executeBoundQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (?,?,?,' . $answer . ',?,?,?,?,?)', $bp->get());
         }
     }
 
@@ -4106,13 +4273,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         //flush();
         header("X-XSS-Protection: 0"); // for chrome xx protection feature
         echo $this->display->showQuestion($variablename, $rgid, $template);
-        //ob_flush();
-        //flush();
-        /* testing stuff */
-        //global $queries;
-        //echo "Number of queries: " . sizeof($queries) . "<br/><br/>";
-        //echo "<textarea rows=50 style='width: 100%'>" . implode("\r\n", $queries) . "</textarea>";
-        //echo 'number of queries performed:'  .$querycount;
+
+        // using transactions, then commit now after we started outputting
+        if (Config::useTransactions() == true) {
+            doCommit();
+        }
     }
 
     function deleteLastScreenshot() {
@@ -4146,12 +4311,13 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $inlinestyle = $this->replaceFills($var->getInlineStyle(), true);
         $pagestyle = $this->replaceFills($var->getPageStyle(), true);
         $filltext = $this->replaceFills($var->getFillText(), true);
+        $checktext = $this->replaceFills($var->getCheckText(), true);
         $placeholder = $this->replaceFills($var->getPlaceholder(), true);
         $pageheader = $this->replaceFills($var->getPageHeader(), true);
         $pagefooter = $this->replaceFills($var->getPageFooter(), true);
         $extra = array();
 
-        if (!inArray($t, array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED))) {
+        if (!inArray($t, array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
             $eq = $this->replaceFills($var->getComparisonEqualTo(), true);
             $neq = $this->replaceFills($var->getComparisonNotEqualTo(), true);
             $geq = $this->replaceFills($var->getComparisonGreaterEqualTo(), true);
@@ -4233,7 +4399,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $minwordswarning = replacePlaceHolders(array(PLACEHOLDER_MINIMUM_WORDS => $minwords), $this->replaceFills($var->getErrorMessageMinimumWords(), true));
                 $maxwordswarning = replacePlaceHolders(array(PLACEHOLDER_MAXIMUM_WORDS => $maxwords), $this->replaceFills($var->getErrorMessageMaximumWords(), true));
                 $patternwarning = replacePlaceHolders(array(PLACEHOLDER_PATTERN => $pattern), $this->replaceFills($var->getErrorMessagePattern(), true));
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_LENGTH => $minlength, SETTING_MAXIMUM_LENGTH => $maxlength, SETTING_MINIMUM_WORDS => $minwords, SETTING_MAXIMUM_WORDS => $maxwords, SETTING_PATTERN => $pattern, SETTING_ERROR_MESSAGE_MINIMUM_LENGTH => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH => $maxwarning, SETTING_ERROR_MESSAGE_MINIMUM_WORDS => $minwordswarning, SETTING_ERROR_MESSAGE_MAXIMUM_WORDS => $maxwordswarning, SETTING_ERROR_MESSAGE_PATTERN => $patternwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle);
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_LENGTH => $minlength, SETTING_MAXIMUM_LENGTH => $maxlength, SETTING_MINIMUM_WORDS => $minwords, SETTING_MAXIMUM_WORDS => $maxwords, SETTING_PATTERN => $pattern, SETTING_ERROR_MESSAGE_MINIMUM_LENGTH => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH => $maxwarning, SETTING_ERROR_MESSAGE_MINIMUM_WORDS => $minwordswarning, SETTING_ERROR_MESSAGE_MAXIMUM_WORDS => $maxwordswarning, SETTING_ERROR_MESSAGE_PATTERN => $patternwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_RANGE:
                 $inputmask = $this->replaceFills($var->getInputMask(), true);
@@ -4243,28 +4409,28 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $maximumrange = $this->replaceFills($var->getMaximum(), true);
                 $otherrange = $this->replaceFills($var->getOtherValues(), true);
                 $rangewarning = replacePlaceHolders(array(PLACEHOLDER_MINIMUM => $minimumrange, PLACEHOLDER_MAXIMUM => $maximumrange, PLACEHOLDER_OTHERVALUES => $otherrange), $this->replaceFills($var->getErrorMessageRange(), true));
-                $arr = array(SETTING_OTHER_RANGE => $otherrange, SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_RANGE => $minimumrange, SETTING_MAXIMUM_RANGE => $maximumrange, SETTING_ERROR_MESSAGE_RANGE => $rangewarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle);
+                $arr = array(SETTING_OTHER_RANGE => $otherrange, SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_RANGE => $minimumrange, SETTING_MAXIMUM_RANGE => $maximumrange, SETTING_ERROR_MESSAGE_RANGE => $rangewarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_DOUBLE:
                 $inputmask = $this->replaceFills($var->getInputMask(), true);
                 $inputmaskcustom = $this->replaceFills($var->getInputMaskCustom(), true);
                 $inputmaskplaceholder = $this->replaceFills($var->getInputMaskPlaceholder(), true);
                 $doublewarning = $this->replaceFills($var->getErrorMessageDouble(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_DOUBLE => $doublewarning, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle);
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_DOUBLE => $doublewarning, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_INTEGER:
                 $inputmask = $this->replaceFills($var->getInputMask(), true);
                 $inputmaskcustom = $this->replaceFills($var->getInputMaskCustom(), true);
                 $inputmaskplaceholder = $this->replaceFills($var->getInputMaskPlaceholder(), true);
                 $intwarning = $this->replaceFills($var->getErrorMessageInteger(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INTEGER => $intwarning, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle);
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_INPUT_MASK_CUSTOM => $inputmaskcustom, SETTING_INPUT_MASK => $inputmask, SETTING_INPUT_MASK_PLACEHOLDER => $inputmaskplaceholder, SETTING_ERROR_MESSAGE_INTEGER => $intwarning, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_SLIDER:
                 $textlabel = $this->replaceFills($var->getTextBoxLabel(), true);
                 $minimumrange = $this->replaceFills($var->getMinimum(), true);
                 $maximumrange = $this->replaceFills($var->getMaximum(), true);
                 $rangewarning = replacePlaceHolders(array(PLACEHOLDER_MINIMUM => $minimumrange, PLACEHOLDER_MAXIMUM => $maximumrange), $this->replaceFills($var->getErrorMessageRange(), true));
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_SLIDER_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_RANGE => $minimumrange, SETTING_MAXIMUM_RANGE => $maximumrange, SETTING_ERROR_MESSAGE_RANGE => $rangewarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle);
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_SLIDER_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MINIMUM_RANGE => $minimumrange, SETTING_MAXIMUM_RANGE => $maximumrange, SETTING_ERROR_MESSAGE_RANGE => $rangewarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_ENUMERATED:
                 $textlabel = $this->replaceFills($var->getEnumeratedTextBoxLabel(), true);
@@ -4293,11 +4459,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $custom = $this->replaceFills($var->getEnumeratedCustom(), true);
                 $random = $this->replaceFills($var->getEnumeratedRandomizer(), true);
                 $enteredwarning = $this->replaceFills($var->getErrorMessageEnumeratedEntered(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_ENUMERATED_ENTERED => $enteredwarning, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_ENUMERATED_CUSTOM => $custom, SETTING_ENUMERATED_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED => $exactinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED => $maxinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED => $mininlinewarning, SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE => $exclusiveinlinewarning, SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE => $inclusiveinlinewarning, SETTING_INLINE_MINIMUM_REQUIRED => $mininline, SETTING_INLINE_MAXIMUM_REQUIRED => $maxinline, SETTING_INLINE_EXACT_REQUIRED => $exactinline, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_ENUMERATED_ENTERED => $enteredwarning, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_ENUMERATED_CUSTOM => $custom, SETTING_ENUMERATED_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED => $exactinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED => $maxinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED => $mininlinewarning, SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE => $exclusiveinlinewarning, SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE => $inclusiveinlinewarning, SETTING_INLINE_MINIMUM_REQUIRED => $mininline, SETTING_INLINE_MAXIMUM_REQUIRED => $maxinline, SETTING_INLINE_EXACT_REQUIRED => $exactinline, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_DROPDOWN:
                 $random = $this->replaceFills($var->getEnumeratedRandomizer(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_SETOFENUMERATED:
                 $textlabel = $this->replaceFills($var->getEnumeratedTextBoxLabel(), true);
@@ -4354,7 +4520,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 $custom = $this->replaceFills($var->getEnumeratedCustom(), true);
                 $random = $this->replaceFills($var->getEnumeratedRandomizer(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_SETOFENUMERATED_ENTERED => $enteredwarning, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_ENUMERATED_CUSTOM => $custom, SETTING_ENUMERATED_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED => $exactinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED => $maxinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED => $mininlinewarning, SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE => $exclusiveinlinewarning, SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE => $inclusiveinlinewarning, SETTING_INLINE_MINIMUM_REQUIRED => $mininline, SETTING_INLINE_MAXIMUM_REQUIRED => $maxinline, SETTING_INLINE_EXACT_REQUIRED => $exactinline, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_MINIMUM_SELECTED => $minselect, SETTING_EXACT_SELECTED => $exactselect, SETTING_MAXIMUM_SELECTED => $maxselect, SETTING_INVALID_SELECTED => $invalid, SETTING_INVALIDSUB_SELECTED => $invalidsub, SETTING_ERROR_MESSAGE_MINIMUM_SELECT => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_SELECT => $maxwarning, SETTING_ERROR_MESSAGE_EXACT_SELECT => $exactwarning, SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT => $invalidsubwarning, SETTING_ERROR_MESSAGE_INVALID_SELECT => $invalidwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_SETOFENUMERATED_ENTERED => $enteredwarning, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_ENUMERATED_CUSTOM => $custom, SETTING_ENUMERATED_TEXTBOX_LABEL => $textlabel, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED => $exactinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED => $maxinlinewarning, SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED => $mininlinewarning, SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE => $exclusiveinlinewarning, SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE => $inclusiveinlinewarning, SETTING_INLINE_MINIMUM_REQUIRED => $mininline, SETTING_INLINE_MAXIMUM_REQUIRED => $maxinline, SETTING_INLINE_EXACT_REQUIRED => $exactinline, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_MINIMUM_SELECTED => $minselect, SETTING_EXACT_SELECTED => $exactselect, SETTING_MAXIMUM_SELECTED => $maxselect, SETTING_INVALID_SELECTED => $invalid, SETTING_INVALIDSUB_SELECTED => $invalidsub, SETTING_ERROR_MESSAGE_MINIMUM_SELECT => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_SELECT => $maxwarning, SETTING_ERROR_MESSAGE_EXACT_SELECT => $exactwarning, SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT => $invalidsubwarning, SETTING_ERROR_MESSAGE_INVALID_SELECT => $invalidwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_MULTIDROPDOWN:
                 $minselect = $this->replaceFills($var->getMinimumSelected(), true);
@@ -4385,31 +4551,31 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
 
                 $random = $this->replaceFills($var->getEnumeratedRandomizer(), true);
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_MINIMUM_SELECTED => $minselect, SETTING_EXACT_SELECTED => $exactselect, SETTING_MAXIMUM_SELECTED => $maxselect, SETTING_INVALID_SELECTED => $invalid, SETTING_INVALIDSUB_SELECTED => $invalidsub, SETTING_ERROR_MESSAGE_MINIMUM_SELECT => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_SELECT => $maxwarning, SETTING_ERROR_MESSAGE_EXACT_SELECT => $exactwarning, SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT => $invalidsubwarning, SETTING_ERROR_MESSAGE_INVALID_SELECT => $invalidwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ENUMERATED_RANDOMIZER => $random, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_PRETEXT => $this->replaceFills($var->getPreText(), true), SETTING_POSTTEXT => $this->replaceFills($var->getPostText(), true), SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_OPTIONS => $options, SETTING_MINIMUM_SELECTED => $minselect, SETTING_EXACT_SELECTED => $exactselect, SETTING_MAXIMUM_SELECTED => $maxselect, SETTING_INVALID_SELECTED => $invalid, SETTING_INVALIDSUB_SELECTED => $invalidsub, SETTING_ERROR_MESSAGE_MINIMUM_SELECT => $minwarning, SETTING_ERROR_MESSAGE_MAXIMUM_SELECT => $maxwarning, SETTING_ERROR_MESSAGE_EXACT_SELECT => $exactwarning, SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT => $invalidsubwarning, SETTING_ERROR_MESSAGE_INVALID_SELECT => $invalidwarning, SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_CALENDAR:
                 $dateswarning = replacePlaceHolders(array(PLACEHOLDER_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true)), $this->replaceFills($var->getErrorMessageMaximumCalendar(), true));
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_CUSTOM:
                 $custom = $this->replaceFills($var->getAnswerTypeCustom(), true);
                 //echo $custom . '---';
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ANSWERTYPE_CUSTOM => $custom, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ANSWERTYPE_CUSTOM => $custom, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_SLIDER:
-                $arr = array(SETTING_SLIDER_LABELS => $this->replaceFills($var->getSliderLabels(), true), SETTING_SLIDER_INCREMENT => $this->replaceFills($var->getIncrement(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_SLIDER_LABELS => $this->replaceFills($var->getSliderLabels(), true), SETTING_SLIDER_INCREMENT => $this->replaceFills($var->getIncrement(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_DATE:
-                $arr = array(SETTING_DATE_FORMAT => $this->replaceFills($var->getDateFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_DATE_FORMAT => $this->replaceFills($var->getDateFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_DATETIME:
-                $arr = array(SETTING_DATETIME_FORMAT => $this->replaceFills($var->getDateTimeFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_DATETIME_FORMAT => $this->replaceFills($var->getDateTimeFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_TIME:
-                $arr = array(SETTING_TIME_FORMAT => $this->replaceFills($var->getTimeFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_TIME_FORMAT => $this->replaceFills($var->getTimeFormat(), true), SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             default:
-                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true));
+                $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
         }
 
@@ -4420,8 +4586,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     function getFill($variable, $vardescriptive, $texttype = "question") {
         //echo 'returning for' . $variable . "<br/>";
         $array = $this->state->getFillText($variable);
-        //print_r($array);
-        if ($array != null && $this->forward == true) { // only from memory if going forward, otherwise redo to ensure we get latest fills
+        //print_r($array);        
+        //use text array if text array (if group statement)
+        if ($array != null && sizeof($array) > 0) {
             switch ($texttype) {
                 case SETTING_OPTIONS:
                     $options = $array[$texttype];
@@ -4622,6 +4789,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 break;
             case SETTING_FILLTEXT:
                 $text = $this->replaceFills($vardescriptive->getFillText());
+                break;
+            case SETTING_CHECKTEXT:
+                $text = $this->replaceFills($vardescriptive->getCheckText());
                 break;
             case SETTING_SLIDER_TEXTBOX_LABEL:
                 $text = $this->replaceFills($vardescriptive->getTextBoxLabel());

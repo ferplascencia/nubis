@@ -112,6 +112,10 @@ class SysAdmin {
                     break;
                 case "sysadmin.survey.editvariablelayout": return $this->showEditVariable();
                     break;
+                case "sysadmin.survey.editvariablecheck": return $this->showEditVariable();
+                    break;
+                case "sysadmin.survey.editvariablefill": return $this->showEditVariable();
+                    break;
                 case "sysadmin.survey.editvariableoutput": return $this->showEditVariable();
                     break;
                 case "sysadmin.survey.editvariableinteractive": return $this->showEditVariable();
@@ -127,6 +131,8 @@ class SysAdmin {
                 case "sysadmin.survey.editvariableaccessres": return $this->showEditVariableAccessRes();
                     break;
                 case "sysadmin.survey.editvariablefillres": return $this->showEditVariableFillRes();
+                    break;
+                case "sysadmin.survey.editvariablecheckres": return $this->showEditVariableCheckRes();
                     break;
                 case "sysadmin.survey.editvariableoutputres": return $this->showEditVariableOutputRes();
                     break;
@@ -374,6 +380,12 @@ class SysAdmin {
                     break;
                 case "sysadmin.output.statistics.aggregates.variable": return $this->showOutputStatisticsAggregatesVariable();
                     break;
+                case "sysadmin.output.statistics.paradata": return $this->showOutputStatisticsParadata();
+                    break;
+                case "sysadmin.output.statistics.paradata.section": return $this->showOutputStatisticsParadataSection();
+                    break;
+                case "sysadmin.output.statistics.paradata.variable": return $this->showOutputStatisticsParadataVariable();
+                    break;
                 case "sysadmin.output.statistics.contacts.graphs": return $this->showOutputStaticsContactsGraphs();
                     break;
                 case "sysadmin.output.statistics.timings.distribution": return $this->showOutputStatisticsTimings();
@@ -411,6 +423,10 @@ class SysAdmin {
                 case "sysadmin.tools.compile": return $this->showCompile();
                     break;
                 case "sysadmin.tools.compileres": return $this->showCompileRes();
+                    break;
+                case "sysadmin.tools.xicompile": return $this->showXiCompile();
+                    break;
+                case "sysadmin.tools.xicompileres": return $this->showXiCompileRes();
                     break;
                 case "sysadmin.tools.test": return $this->showTest();
                     break;
@@ -1061,9 +1077,30 @@ class SysAdmin {
                 $var->setTyd(-1);
                 $var->setPosition(13);
                 $var->save();
-
+                
                 $var = new VariableDescriptive();
                 $var->setVsid(14);
+                $var->setName(VARIABLE_IN_PROGRESS);
+                $var->setAnswerType(ANSWER_TYPE_NONE);
+                $var->setSeid(1);
+                $var->setSuid($newsuid);
+                $var->setDescription('IN PROGRESS SCREEN');
+                $var->setQuestion(Language::errorInProgress());
+                $var->setShowBackButton(BUTTON_NO);
+                $var->setShowNextButton(BUTTON_NO);
+                $var->setShowRFButton(BUTTON_NO);
+                $var->setShowDKButton(BUTTON_NO);
+                $var->setShowNAButton(BUTTON_NO);
+                $var->setShowUpdateButton(BUTTON_NO);
+                $var->setShowRemarkButton(BUTTON_NO);
+                $var->setShowProgressBar(PROGRESSBAR_NO);
+                $var->setHidden(HIDDEN_YES);
+                $var->setTyd(-1);
+                $var->setPosition(14);
+                $var->save();
+
+                $var = new VariableDescriptive();
+                $var->setVsid(15);
                 $var->setName(VARIABLE_LOGIN);
                 $var->setAnswerType(ANSWER_TYPE_STRING);
                 $var->setSeid(1);
@@ -1080,11 +1117,11 @@ class SysAdmin {
                 $var->setShowProgressBar(PROGRESSBAR_NO);
                 $var->setHidden(HIDDEN_YES);
                 $var->setTyd(-1);
-                $var->setPosition(14);
+                $var->setPosition(15);
                 $var->save();
 
                 $var = new VariableDescriptive();
-                $var->setVsid(15);
+                $var->setVsid(16);
                 $var->setName(VARIABLE_CLOSED);
                 $var->setAnswerType(ANSWER_TYPE_NONE);
                 $var->setSeid(1);
@@ -1101,11 +1138,11 @@ class SysAdmin {
                 $var->setShowProgressBar(PROGRESSBAR_NO);
                 $var->setHidden(HIDDEN_YES);
                 $var->setTyd(-1);
-                $var->setPosition(15);
+                $var->setPosition(16);
                 $var->save();
 
                 $var = new VariableDescriptive();
-                $var->setVsid(16);
+                $var->setVsid(17);
                 $var->setName(VARIABLE_EXECUTION_MODE);
                 $var->setAnswerType(ANSWER_TYPE_ENUMERATED);
                 $var->setSeid(1);
@@ -1122,7 +1159,7 @@ class SysAdmin {
                 $var->setShowProgressBar(PROGRESSBAR_NO);
                 $var->setHidden(HIDDEN_YES);
                 $var->setTyd(-1);
-                $var->setPosition(16);
+                $var->setPosition(17);
                 $var->save();
 
                 /* update current user for access */
@@ -1188,9 +1225,15 @@ class SysAdmin {
             $survey = new Survey($_SESSION['SUID']);
             $survey->copy();
             $_SESSION['SUID'] = $survey->getSuid();
+            $user = new User($_SESSION['URID']);
+            $modes = explode("~", $survey->getAllowedModes());
+            foreach ($modes as $m) {
+                $user->addMode($_SESSION['SUID'], $m, $survey->getAllowedLanguages(m));
+            }
+            $user->saveChanges();
             $displaySysAdmin = new DisplaySysAdmin();
             $content = $displaySysAdmin->displaySuccess(Language::messageSurveyCopied($survey->getName()));
-            return $displaySysAdmin->showSurvey($_SESSION['SUID'], $content);
+            return $displaySysAdmin->showSurvey($content);
         } else {
             $content = $displaySysAdmin->displayError(Language::messageSurveyNotCopied($survey->getName()));
             return $displaySysAdmin->showSurveys($content);
@@ -1311,19 +1354,21 @@ class SysAdmin {
     }
 
     function showClickRouting() {
-        $action = loadvar("action");
-        $_SESSION['LASTPAGE'] = 'sysadmin.survey.section';
+        $action = loadvar("action");        
         $survey = new Survey($_SESSION['SUID']);
         $var = $survey->getVariableDescriptiveByName($action);
         if ($var->getVsid() != "") {
+            $_SESSION['LASTPAGE'] = 'sysadmin.survey.variable';
             return $this->showEditVariable($var->getVsid());
         }
         $section = $survey->getSectionByName($action);
         if ($section->getSeid() != "") {
+            $_SESSION['LASTPAGE'] = 'sysadmin.survey.section';
             return $this->showSection("", $section->getSeid());
         }
         $group = $survey->getGroupByName($action);
         if ($group->getGid() != "") {
+            $_SESSION['LASTPAGE'] = 'sysadmin.survey.group';
             return $this->showEditGroup($group->getGid());
         }
 
@@ -1440,7 +1485,7 @@ class SysAdmin {
         if ($seid != '' || loadvar(SETTING_NAME) != "") {
             $section->setName(trim(loadvar(SETTING_NAME)));
             $section->setDescription(loadvar(SETTING_DESCRIPTION));
-            //$section->setHidden(loadvar(SETTING_HIDDEN));
+            $section->setHidden(loadvar(SETTING_HIDDEN));
             $section->setHeader(loadvarAllowHTML(SETTING_SECTION_HEADER));
             $section->setFooter(loadvarAllowHTML(SETTING_SECTION_FOOTER));
             $section->save();
@@ -2267,6 +2312,7 @@ class SysAdmin {
             $var->setEnumeratedTextboxLabel(loadvar(SETTING_ENUMERATED_TEXTBOX_LABEL));
             $var->setEnumeratedLabel(loadvar(SETTING_ENUMERATED_LABEL));
             $var->setEnumeratedRandomizer(loadvar(SETTING_ENUMERATED_RANDOMIZER));
+            $var->setEnumeratedColumns(loadvar(SETTING_ENUMERATED_COLUMNS));
             $var->setHeaderAlignment(loadvar(SETTING_HEADER_ALIGNMENT));
             $ans = loadvar(SETTING_HEADER_FORMATTING);
             if (!is_array($ans)) {
@@ -2275,12 +2321,19 @@ class SysAdmin {
             $var->setHeaderFormatting(implode("~", $ans));
             $var->setEnumeratedOrder(loadvar(SETTING_ENUMERATED_ORDER));
             $var->setEnumeratedCustom(loadvarAllowHTML(SETTING_ENUMERATED_CUSTOM));
+            $var->setTableMobile(loadvar(SETTING_TABLE_MOBILE));
+            $var->setTableMobileLabels(loadvar(SETTING_TABLE_MOBILE_LABELS));
         }
 
         $content = $displaySysAdmin->displaySuccess(Language::messageVariableChanged($var->getName()));
 
         $var->setShowSectionHeader(loadvar(SETTING_SHOW_SECTION_HEADER));
         $var->setShowSectionFooter(loadvar(SETTING_SHOW_SECTION_FOOTER));
+
+        if (Config::xiExtension()) {
+            $var->setXiTemplate(loadvar(SETTING_GROUP_XI_TEMPLATE));
+        }
+
         $var->save();
 
         $checker = new Checker($_SESSION['SUID']);
@@ -2482,6 +2535,52 @@ class SysAdmin {
         return $displaySysAdmin->showEditVariable($_SESSION['VSID'], $content);
     }
 
+    function showEditVariableCheckRes() {
+        $displaySysAdmin = new DisplaySysAdmin();
+        $survey = new Survey($_SESSION['SUID']);
+        $vsid = getFromSessionParams('vsid');
+        $var = $survey->getVariableDescriptive($vsid);
+        $_SESSION['VSID'] = $vsid;        
+        $var->setCheckText(loadvarAllowHTML(SETTING_CHECKTEXT));
+        $var->setCheckCode(loadvarAllowHTML(SETTING_CHECKCODE));
+        $content = $displaySysAdmin->displaySuccess(Language::messageVariableChanged($var->getName()));
+        $var->save();
+
+        $checker = new Checker($_SESSION['SUID']);
+        $checks = $checker->checkVariable($var);
+        if (sizeof($checks) > 0) {
+            $content .= $displaySysAdmin->displayError(implode("<br/>", $checks));
+        }
+
+        /* compile */
+        $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
+        $mess = $compiler->generateVariableDescriptives(array($var));
+        $messages = $compiler->generateChecks(array($var));
+
+        /* update last page */
+        $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
+
+        if (sizeof($messages) > 0) {
+            //print_r($messages);
+            $m = '<a data-keyboard="false" data-toggle="modal" data-target="#errorsModal">Show errors</a>';
+            $content .= $displaySysAdmin->displayError(Language::messageCheckRoutingNeedsFix() . " " . $m);
+            $text = "";
+            foreach ($messages as $rgid => $m) {
+                foreach ($m as $s) {
+                    if (trim($s) != "") {
+                        $text .= $displaySysAdmin->displayError(Language::errorRoutingLine() . " " . $rgid . ": " . $s);
+                    }
+                }
+            }
+            $content .= $displaySysAdmin->displayRoutingErrorModal($var, $text);
+            //$content .= implode('<br/>', $messages);
+            //$content .= '</div>';
+        }
+
+        /* return result */
+        return $displaySysAdmin->showEditVariable($_SESSION['VSID'], $content);
+    }
+    
     function showEditVariableNavigationRes() {
         $displaySysAdmin = new DisplaySysAdmin();
         $survey = new Survey($_SESSION['SUID']);
@@ -3083,6 +3182,11 @@ class SysAdmin {
             } else {
                 $group->setCustomTemplate("");
             }
+
+            if (Config::xiExtension()) {
+                $group->setXiTemplate(loadvar(SETTING_GROUP_XI_TEMPLATE));
+            }
+
             $group->save();
 
             $checker = new Checker($_SESSION['SUID']);
@@ -3289,6 +3393,8 @@ class SysAdmin {
             $group->setTableHovered(loadvar(SETTING_GROUP_TABLE_HOVERED));
             $group->setTableStriped(loadvar(SETTING_GROUP_TABLE_STRIPED));
             $group->setTableWidth(loadvar(SETTING_TABLE_WIDTH));
+            $group->setTableMobile(loadvar(SETTING_TABLE_MOBILE));
+            $group->setTableMobileLabels(loadvar(SETTING_TABLE_MOBILE_LABELS));
             $group->setQuestionColumnWidth(loadvar(SETTING_QUESTION_COLUMN_WIDTH));
             //}        
             //if ($group->getTemplate() == TABLE_TEMPLATE_ENUMERATED) {
@@ -3618,6 +3724,7 @@ class SysAdmin {
         $survey->setUniqueRequired(loadvar(SETTING_GROUP_UNIQUE_REQUIRED));
         $survey->setSameRequired(loadvar(SETTING_GROUP_SAME_REQUIRED));
         $survey->setValidateAssignment(loadvar(SETTING_VALIDATE_ASSIGNMENT));
+        $survey->setApplyChecks(loadvar(SETTING_APPLY_CHECKS));
         $survey->save();
 
         $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
@@ -3936,6 +4043,8 @@ class SysAdmin {
         $survey->setTableCondensed(loadvar(SETTING_GROUP_TABLE_CONDENSED));
         $survey->setTableHovered(loadvar(SETTING_GROUP_TABLE_HOVERED));
         $survey->setTableStriped(loadvar(SETTING_GROUP_TABLE_STRIPED));
+        $survey->setTableMobile(loadvar(SETTING_TABLE_MOBILE));
+        $survey->setTableMobileLabels(loadvar(SETTING_TABLE_MOBILE_LABELS));
 
         $survey->setEnumeratedDisplay(loadvar(SETTING_ENUMERATED_ORIENTATION));
         $survey->setEnumeratedBordered(loadvar(SETTING_ENUMERATED_BORDERED));
@@ -3950,6 +4059,14 @@ class SysAdmin {
         }
         $survey->setHeaderFormatting(implode("~", $ans));
         $survey->setEnumeratedOrder(loadvar(SETTING_ENUMERATED_ORDER));
+
+        $survey->setSliderOrientation(loadvar(SETTING_SLIDER_ORIENTATION));
+        $survey->setIncrement(loadvar(SETTING_SLIDER_INCREMENT));
+        $survey->setTooltip(loadvar(SETTING_SLIDER_TOOLTIP));
+        $survey->setTextbox(loadvar(SETTING_SLIDER_TEXTBOX));
+        $survey->setTextboxLabel(loadvar(SETTING_SLIDER_TEXTBOX_LABEL));
+
+        $survey->setSliderLabelPlacement(loadvar(SETTING_SLIDER_LABEL_PLACEMENT));
 
         $survey->setShowSectionHeader(loadvar(SETTING_SHOW_SECTION_HEADER));
         $survey->setShowSectionFooter(loadvar(SETTING_SHOW_SECTION_FOOTER));
@@ -4442,6 +4559,7 @@ class SysAdmin {
             $type->setEnumeratedTextbox(loadvar(SETTING_ENUMERATED_TEXTBOX));
             $type->setEnumeratedTextboxLabel(loadvar(SETTING_ENUMERATED_TEXTBOX_LABEL));
             $type->setEnumeratedLabel(loadvar(SETTING_ENUMERATED_LABEL));
+            $type->setEnumeratedColumns(loadvar(SETTING_ENUMERATED_COLUMNS));
             $type->setHeaderAlignment(loadvar(SETTING_HEADER_ALIGNMENT));
             $ans = loadvar(SETTING_HEADER_FORMATTING);
             if (!is_array($ans)) {
@@ -4451,11 +4569,16 @@ class SysAdmin {
             $type->setEnumeratedOrder(loadvar(SETTING_ENUMERATED_ORDER));
             $type->setEnumeratedCustom(loadvarAllowHTML(SETTING_ENUMERATED_CUSTOM));
             $type->setEnumeratedRandomizer(loadvar(SETTING_ENUMERATED_RANDOMIZER));
+            $type->setTableMobile(loadvar(SETTING_TABLE_MOBILE));
+            $type->setTableMobileLabels(loadvar(SETTING_TABLE_MOBILE_LABELS));
         }
 
         $type->setShowSectionHeader(loadvar(SETTING_SHOW_SECTION_HEADER));
         $type->setShowSectionFooter(loadvar(SETTING_SHOW_SECTION_FOOTER));
 
+        if (Config::xiExtension()) {
+            $type->setXiTemplate(loadvar(SETTING_GROUP_XI_TEMPLATE));
+        }
         $type->save();
 
         $content = $displaySysAdmin->displaySuccess(Language::messageTypeChanged($type->getName()));
@@ -4975,6 +5098,8 @@ class SysAdmin {
         $de = new DataExport(loadvar('survey'));
         if (loadvar(DATA_OUTPUT_FILENAME) != "") {
             $de->setProperty(DATA_OUTPUT_FILENAME, loadvar(DATA_OUTPUT_FILENAME));
+        } else {
+            $de->setProperty(DATA_OUTPUT_FILENAME, Config::dbSurveyData() . "_paradata");
         }
         $cookievars = "";
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -5000,12 +5125,18 @@ class SysAdmin {
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
 
         $this->determineModeLanguage($de);
+        $de->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATA_TABLE);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
         $de->setProperty(DATA_OUTPUT_SURVEY, loadvar(DATA_OUTPUT_SURVEY));
         $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));
-        $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
-        $de->generateParadata();
+        if (loadvar(DATA_OUTPUT_TYPEPARADATA) == PARADATA_RAW) {
+            $de->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_CSV);
+            $de->generateParadata();
+        } else {
+            $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
+            $de->generateProcessedParadata();
+        }
         $de->download();
     }
 
@@ -5152,6 +5283,30 @@ class SysAdmin {
         }
         $displayOutput = new DisplayOutput();
         return $displayOutput->showOutputStatisticsAggregatesVariable($_SESSION['SEID'], $_SESSION['VSID']);
+    }
+
+    function showOutputStatisticsParadata() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputStatisticsParadata();
+    }
+
+    function showOutputStatisticsParadataSection() {
+        if (getFromSessionParams('seid') != "") {
+            $_SESSION['SEID'] = getFromSessionParams('seid');
+        }
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputStatisticsParadataSection($_SESSION['SEID']);
+    }
+
+    function showOutputStatisticsParadataVariable() {
+        if (getFromSessionParams('seid') != "") {
+            $_SESSION['SEID'] = getFromSessionParams('seid');
+        }
+        if (getFromSessionParams('vsid') != "") {
+            $_SESSION['VSID'] = getFromSessionParams('vsid');
+        }
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputStatisticsParadataVariable($_SESSION['SEID'], $_SESSION['VSID']);
     }
 
     function showOutputStaticsContactsGraphs() {
@@ -6188,6 +6343,10 @@ class SysAdmin {
                     $db->executeQuery($query);
                     $query = "delete from " . $table . "_loopdata where suid=" . $cl . $tsquery;
                     $db->executeQuery($query);
+                    $query = "delete from " . $table . "_consolidated_times where suid=" . $cl . $tsquery;
+                    $db->executeQuery($query);
+                    $query = "delete from " . $table . "_processed_paradata where suid=" . $cl . $tsquery;
+                    $db->executeQuery($query);
                 }
             }
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsCleanOk());
@@ -6421,9 +6580,27 @@ class SysAdmin {
         if (sizeof($messages) == 0) {
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsCompileOk());
         } else {
-            $content = $displaySysAdmin->displayError(Language::messageToolsCompileNotOk());            
+            $content = $displaySysAdmin->displayError(Language::messageToolsCompileNotOk());
         }
         return $displaySysAdmin->showCompile($content);
+    }
+
+    function showXiCompile() {
+        $displaySysAdmin = new DisplaySysAdmin();
+        return $displaySysAdmin->showXiCompile();
+    }
+
+    function showXiCompileRes() {
+
+        /* update last page */
+        $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
+
+        $displaySysAdmin = new DisplaySysAdmin();
+        $compile = loadvar("compile");
+        if ($compile == "") {
+            return $displaySysAdmin->showXiCompile($displaySysAdmin->displayWarning(Language::messageToolsCompileSelectSurvey()));
+        }
+        return $displaySysAdmin->showXiCompileRes();
     }
 
     function showExport() {
@@ -6459,7 +6636,7 @@ class SysAdmin {
         if ($result == "") {
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsImportOk());
         } else {
-            $content = $displaySysAdmin->displayError(Language::messageToolsImportNotOk($result));            
+            $content = $displaySysAdmin->displayError(Language::messageToolsImportNotOk($result));
         }
 
         return $displaySysAdmin->showImport($content);

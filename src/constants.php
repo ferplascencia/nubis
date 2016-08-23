@@ -59,8 +59,8 @@ define('ACTION_SURVEY_ENTRY', 13);
 define('ACTION_SURVEY_REENTRY', 14);
 define('ACTION_SURVEY_END', 15);
 define('ACTION_SURVEY_RETURN', 16);
-//define('ACTION_WINDOW_OUT', 17);
-//define('ACTION_WINDOW_IN', 18);
+define('ACTION_WINDOW_OUT', 17);
+define('ACTION_WINDOW_IN', 18);
 
 /* post parameters admin */
 define('SMS_POST_LANGUAGE', 'surveylanguage');
@@ -138,6 +138,7 @@ define('VARIABLE_PRIMKEY', "prim_key");
 define('VARIABLE_INTRODUCTION', 'introduction');
 define('VARIABLE_THANKS', 'thanks');
 define('VARIABLE_LOCKED', 'locked');
+define('VARIABLE_IN_PROGRESS', 'inprogress');
 define('VARIABLE_COMPLETED', 'completed');
 define('VARIABLE_LANGUAGE', "language");
 define('VARIABLE_EXECUTION_MODE', 'execution_mode');
@@ -197,6 +198,8 @@ define('DATA_NOTHIDDEN', 1);
 define('DATA_HIDDEN', 0);
 define('DATA_TEST', 1);
 define('DATA_REAL', 2);
+define('PARADATA_RAW', 1);
+define('PARADATA_PROCESSED', 2);
 define('SUBDATA_YES', 1);
 define('SUBDATA_NO', 2);
 define('VALUELABEL_YES', 1);
@@ -245,6 +248,7 @@ define('DATA_OUTPUT_CLEAN', 'cleandata');
 define('DATA_OUTPUT_COMPLETED', 'completedinterviews');
 define('DATA_OUTPUT_TYPEDATA', 'typedata');
 define('DATA_OUTPUT_SUBDATA', 'subdata');
+define('DATA_OUTPUT_TYPEPARADATA', 'typeparadata');
 define('DATA_OUTPUT_VARLIST', 'varlist');
 define('DATA_OUTPUT_LANGUAGES', 'languages');
 define('DATA_OUTPUT_VERSIONS', 'versions');
@@ -289,6 +293,8 @@ define('CLASS_GETFILL', "GetFill");
 define('CLASS_SETFILL', "SetFill");
 define('CLASS_BASICINLINEFIELD', 'BasicInlineField');
 define('CLASS_INLINEFIELD', 'InlineField');
+define('CLASS_BASICCHECK', 'BasicCheck');
+define('CLASS_CHECK', "Check");
 
 define('LOOP_MAXIMUM_IF_UNDEFINED', 20); // is 20 a reasonable number to assume (not likely to have loops constituting more than 20 times)
 define('LOOP_MINIMUM_IF_UNDEFINED', 1); // is 1 a reasonable number to assume (not likely to have reverse loops going below 1)
@@ -336,9 +342,10 @@ define('FUNCTION_ADD_FILL_VALUE', 'addFillValue');
 define('FUNCTION_ADD_SUB_DISPLAY', 'addSubDisplay');
 define('FUNCTION_ADD_SUB_GROUP', 'addSubGroup');
 define('FUNCTION_SHOW', 'show');
-
-
-
+define('FUNCTION_GET_ERROR_TEXT_BY_LINE', 'getCheckTextByLine');
+define('FUNCTION_DO_CHECK_RETURN', 'returnCheck');
+define('FUNCTION_SET_CHECK_LEVEL', 'setCheckLevel');
+define('FUNCTION_CHECK_ERROR_RETURN', 'RETURN');
 define('VARIABLE_THIS', "this");
 
 define('VARIABLE_VALUE_NULL', "NULL");
@@ -352,7 +359,8 @@ define('VARIABLE_VALUE_INARRAY', "INARRAY");
 define('VARIABLE_VALUE_EMPTY', 'EMPTY');
 
 define('VARIABLE_VALUE_FILL', 'FILL');
-
+define('VARIABLE_VALUE_SOFT_ERROR', 'SOFTERROR');
+define('VARIABLE_VALUE_HARD_ERROR', 'HARDERROR');
 define('VARIABLE_VALUE_RESPONSE', 'RESPONSE');
 
 define('VARIABLE_HIDDEN', 1);
@@ -532,6 +540,8 @@ define('TABLE_TEMPLATE_FOURCOLUMN', 'fourcolumntable');
 define('TABLE_TEMPLATE_FIVECOLUMN', 'fivecolumntable');
 define('TABLE_TEMPLATE_SIXCOLUMN', 'sixcolumntable');
 define('TABLE_TEMPLATE_SEVENCOLUMN', 'sevencolumntable');
+define('TABLE_TEMPLATE_EIGHTCOLUMN', 'eightcolumntable');
+define('TABLE_TEMPLATE_NINECOLUMN', 'ninecolumntable');
 define('TABLE_TEMPLATE_ENUMERATED', 'enumeratedtable');
 define('TABLE_TEMPLATE_ENUMERATED_REVERSE', 'reverseenumeratedtable');
 define('TABLE_TEMPLATE_CUSTOM', 'custom');
@@ -572,6 +582,7 @@ define('SETTING_ENUMERATED_TEXTBOX', 'enumeratedtextbox');
 define('SETTING_ENUMERATED_TEXTBOX_LABEL', 'enumeratedtextboxlabel');
 define('SETTING_ENUMERATED_LABEL', 'enumeratedlabel');
 define('SETTING_ENUMERATED_RANDOMIZER', 'enumeratedrandomizer');
+define('SETTING_ENUMERATED_COLUMNS', 'enumeratedcolumns');
 define('ENUMERATED_LABEL_LABEL_ONLY', 1);
 define('ENUMERATED_LABEL_LABEL_CODE', 2);
 define('ENUMERATED_LABEL_LABEL_CODE_VALUELABEL', 3);
@@ -693,17 +704,14 @@ define('SETTING_BUTTON_FORMATTING', 'buttonformatting');
 define('SETTING_PROGRESSBAR_SHOW', 'progressbarshow');
 define('SETTING_PROGRESSBAR_TYPE', 'progressbartype');
 define('SETTING_PROGRESSBAR_FILLED_COLOR', 'progressbarfilledcolor');
-
 define('SETTING_PROGRESSBAR_REMAIN_COLOR', 'progressbarremaincolor');
-
 define('SETTING_PROGRESSBAR_VALUE', 'progressbarvalue');
-
 define('SETTING_PROGRESSBAR_WIDTH', 'progressbarwidth');
 
 define('SETTING_FILLTEXT', 'filltext');
-
 define('SETTING_FILLCODE', 'fillcode');
-
+define('SETTING_CHECKTEXT', 'checktext');
+define('SETTING_CHECKCODE', 'checkcode');
 
 
 define('SETTING_SLIDER_INCREMENT', 'sliderincrement');
@@ -795,6 +803,7 @@ define('SETTING_SURVEY_TEMPLATE', 'surveytemplate');
 define('SETTING_SURVEY_CHANGE_TEMPLATE', 'surveytemplatechange');
 define('SETTING_GROUP_NAME', 'groupname');
 define('SETTING_GROUP_TEMPLATE', "template");
+define('SETTING_GROUP_XI_TEMPLATE', "xitemplate");
 define('SETTING_GROUP_CUSTOM_TEMPLATE', 'customtemplate');
 define('SETTING_GROUP_EXCLUSIVE', "exclusive");
 define('SETTING_GROUP_INCLUSIVE', "inclusive");
@@ -810,8 +819,9 @@ define('SETTING_GROUP_TABLE_STRIPED', 'tablestriped');
 define('SETTING_GROUP_TABLE_BORDERED', 'tablebordered');
 
 define('SETTING_GROUP_TABLE_CONDENSED', 'tablecondensed');
-
 define('SETTING_GROUP_TABLE_HOVERED', 'tablehovered');
+define('SETTING_TABLE_MOBILE', 'tablemobile');
+define('SETTING_TABLE_MOBILE_LABELS', 'tablemobilelabels');
 
 
 define('SETTING_INLINE_EXCLUSIVE', "inlineexclusive");
@@ -831,6 +841,10 @@ define('VALIDATE_ASSIGNMENT_YES', 1);
 define('VALIDATE_ASSIGNMENT_NO', 2);
 define('VALID_ASSIGNMENT', 1);
 define('INVALID_ASSIGNMENT', 2);
+
+define('SETTING_APPLY_CHECKS', 'applychecks');
+define('APPLY_CHECKS_YES', 1);
+define('APPLY_CHECKS_NO', 2);
 
 /* placeholders */
 define('PLACEHOLDER_TEXTFIELD', '$textfield$');
@@ -1050,6 +1064,9 @@ define('ERROR_CHECK_COMPARISON_GREATER_TIME', 'time_greater');
 define('ERROR_CHECK_COMPARISON_SMALLER_EQUAL_TO_TIME', 'time_smallerequalto');
 define('ERROR_CHECK_COMPARISON_SMALLER_TIME', 'time_smaller');
 
+define('ERROR_HARD', '1');
+define('ERROR_SOFT', '2');
+
 /* variable */
 
 define('ANSWER_TYPE_STRING', '1');
@@ -1185,6 +1202,8 @@ define('TOOLTIP_NO', 2);
 define('TEXTBOX_YES', 1);
 define('TEXTBOX_NO', 2);
 define('DEFAULT_INCREMENT', 1);
+define('SPLIT_COLUMNS_YES', 1);
+define('SPLIT_COLUMNS_NO', 2);
 
 define('ERROR_PLACEMENT_WITH_QUESTION', 1);
 define('ERROR_PLACEMENT_AT_TOP', 2);
@@ -1202,6 +1221,7 @@ define('TRANSLATION_TYPE', 2);
 /* database */
 
 define('DB_MYSQL', 1);
+define('DB_SQLITE', 2);
 
 define('MYSQL_BINDING_INTEGER', "i");
 
@@ -1343,6 +1363,14 @@ define('CONFIGURATION_SESSION_LOGOUT', 'sessionlogout');
 define('CONFIGURATION_SESSION_REDIRECT', 'sessionredirect');
 define('CONFIGURATION_SESSION_PING', 'sessionping');
 
+define('CONFIGURATION_PERFORMANCE', 'performance');
+define('CONFIGURATION_PERFORMANCE_PREPARE_QUERIES', 'performancepreparequeries');
+define('CONFIGURATION_PERFORMANCE_UNSERIALIZE', 'performanceunserialize');
+define('CONFIGURATION_PERFORMANCE_DATA_FROM_STATE', 'performancedatafromstate');
+define('CONFIGURATION_PERFORMANCE_USE_DATARECORDS', 'performanceusedatarecords');
+define('CONFIGURATION_PERFORMANCE_USE_LOCKING', 'performanceuselocking');
+define('CONFIGURATION_PERFORMANCE_USE_DYNAMIC_MINIFY', 'performanceusedynamicminify');
+define('CONFIGURATION_PERFORMANCE_USE_TRANSACTIONS', 'performanceusetransactions');
 
 /* export settings */
 define('SETTING_EXPORT_TYPE', 'exporttype');

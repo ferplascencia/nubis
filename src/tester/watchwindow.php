@@ -66,7 +66,7 @@ class Watcher {
                         "; //
 
             $returnStr .= "<br/><table id='issuetable' class='table table-bordered table-striped'><thead>";
-            $returnStr .= "<th>" . Language::labelWatchVariable() . "</th><th>" . Language::labelWatchValue() . "</th><th>" . Language::labelWatchMode() . "</th><th>" . Language::labelWatchLanguage() . "</th><th>" . Language::labelWatchTime() . "</th></tr>";
+            $returnStr .= "<th>" . Language::labelWatchVariable() . "</th><th>" . Language::labelWatchValue() . "</th><th>" . Language::labelWatchClean() . "</th><th>" . Language::labelWatchMode() . "</th><th>" . Language::labelWatchLanguage() . "</th><th>" . Language::labelWatchTime() . "</th></tr>";
             $returnStr .= "</thead><tbody>";
             $modes = Common::surveyModes();
             $languages = Language::getLanguagesArray();
@@ -81,6 +81,7 @@ class Watcher {
                 $returnStr .= "<tr>";
                 $returnStr .= "<td>" . $is["variablename"] . "</td>";
                 $returnStr .= "<td>" . $this->getDisplayValue($survey->getVariableDescriptiveByName($is["variablename"]), $is["answer_dec"]) . "</td>";
+                $returnStr .= "<td>" . $this->displayDirty([$is["dirty"]]) . "</td>";
                 $returnStr .= "<td>" . $modes[$is["mode"]] . "</td>";
                 $returnStr .= "<td>" . $languages[str_replace("_","",getSurveyLanguagePostFix($is["language"]))]['name'] . "</td>";
                 $returnStr .= "<td>" . $is["ts"] . "</td>";
@@ -98,6 +99,13 @@ class Watcher {
 
         $returnStr .= $this->showFooter(false);
         echo $returnStr;
+    }
+    
+    function displayDirty($value) {
+        if ($value == DATA_DIRTY) {
+            return Language::labelDirty();
+        }
+        return Language::labelClean();
     }
 
     function getDisplayValue($var, $value) {
@@ -165,7 +173,7 @@ class Watcher {
         }
         $returnStr .= '
     <!-- Bootstrap core CSS -->
-		<link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/bootstrap.min.css">
 
     <!-- Custom scripts and styles for this template -->';
 
@@ -201,37 +209,37 @@ class Watcher {
         $returnStr = "";        
         if (!isRegisteredScript("../js/datatables/datatables.js")) {
             registerScript('../js/datatables/datatables.js');
-            $returnStr .= '<script type="text/javascript" src="../js/datatables/datatables.js"></script>';
+            $returnStr .= getScript("../js/datatables/datatables.js");
         }
         
         if (!isRegisteredScript("../js/datatables/extensions/date_sorting.js")) {
             registerScript('../js/datatables/extensions/date_sorting.js');
-            $returnStr .= '<script type="text/javascript" src="../js/datatables/extensions/date_sorting.js"></script>';
+            $returnStr .= getScript("../js/datatables/extensions/date_sorting.js");
         }
         
-        if (!isRegisteredScript("../js/datetimepicker/moment.js")) {
-            registerScript('../js/datetimepicker/moment.js');
-            $returnStr .= '<script type="text/javascript" src="../js/datetimepicker/moment.js"></script>';
+        if (!isRegisteredScript("../js/datetimepicker/moment-min.js")) {
+            registerScript('../js/datetimepicker/moment-min.js');
+            $returnStr .= getScript("../js/datetimepicker/moment-min.js");
         }
         
         if (!isRegisteredScript("../js/datatables/datatables.css")) {
             registerScript('../js/datatables/datatables.css');
-            $returnStr .= '<link rel="stylesheet" type="text/css" href="../js/datatables/datatables.css">';
+            $returnStr .= getCSS("../js/datatables/datatables.css");
         }
         foreach ($extensions as $ext) {
             if (!isRegisteredScript("../js/datatables/extensions/' . $ext . '.js")) {
                 registerScript('../js/datatables/extensions/' . $ext . '.js');
-                $returnStr .= '<script type="text/javascript" src="../js/datatables/extensions/' . $ext . '.js"></script>';
+                $returnStr .= getScript("../js/datatables/extensions/' . $ext . '.js");
             }
             if (strtoupper($ext) != strtoupper('rowreorder')) { // reorder has no associated css
                 if (!isRegisteredScript("../js/datatables/extensions/' . $ext . '.css")) {
                     registerScript('../js/datatables/extensions/' . $ext . '.css');
-                    $returnStr .= '<link rel="stylesheet" type="text/css" href="../js/datatables/extensions/' . $ext . '.css">';
+                    $returnStr .= getCSS("../js/datatables/extensions/' . $ext . '.css");
                 }
             } else {
                 if (!isRegisteredScript("../js/jqueryui/sortable.js")) {
                     registerScript('../js/jqueryui/sortable.js');
-                    $returnStr .= '<script type="text/javascript" src="../js/jqueryui/sortable.js"></script>';
+                    $returnStr .= getScript("../js/jqueryui/sortable.js");
                 }
             }
         }
@@ -253,7 +261,7 @@ class Watcher {
     }
 
     function displayComboBox() {
-        $str = '<script src="../js/bootstrap-select.js"></script>';
+        $str = '<script src="../js/bootstrap-select/bootstrap-select-min.js"></script>';
         $str .= '<link href="../css/bootstrap-select.css" type="text/css" rel="stylesheet">';
         $str .= '<script type="text/javascript">
                     $(document).ready(function(){

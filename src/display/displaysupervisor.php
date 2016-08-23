@@ -19,7 +19,7 @@ class DisplaySupervisor extends DisplayRespondent {
     }
 
     public function showMain() {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
 
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
         $returnStr .= $this->showNavBar();
@@ -42,7 +42,7 @@ class DisplaySupervisor extends DisplayRespondent {
     }
 
     public function displayInterviewers($interviewers, $message = '') {
-//        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+//        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
 
         $returnStr .= '<div id="wrap">';
@@ -207,7 +207,7 @@ class DisplaySupervisor extends DisplayRespondent {
 
     /*
       function displayInterviewer(User $interviewer) {
-      //        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+      //        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
       $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
 
       $returnStr .= '<div id="wrap">';
@@ -394,7 +394,7 @@ class DisplaySupervisor extends DisplayRespondent {
     }
 
     function showSupervisorPageWithSideBar($content, $breadcrumps, $sideBar) {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">
                      <link href="css/uscicadmin.css" rel="stylesheet">
 <script type="text/javascript" charset="utf-8">
 $(document).ready(function () {
@@ -1128,7 +1128,7 @@ var chart = new Highcharts.Chart({
     }
 
     function showRespondentPageWithSideBar($respondent, $content, $label) {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">
 <link href="css/uscicadmin.css" rel="stylesheet">
 <script type="text/javascript" charset="utf-8">
 
@@ -1289,7 +1289,7 @@ $(document).ready(function () {
 
     function showPreferences($user) {
 
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
 
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
 
@@ -1555,7 +1555,7 @@ if ($(\'#testmode\').val() == "1"){
     }
 
     function showSendReceive($message) {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
         $returnStr .= $this->showNavBar();
         $returnStr .= '<div class="container"><p>';
@@ -1574,7 +1574,7 @@ if ($(\'#testmode\').val() == "1"){
     }
 
     function showSample($message = '') {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
         $returnStr .= $this->showNavBar();
         $returnStr .= '<div class="container"><p>';
@@ -1594,7 +1594,7 @@ if ($(\'#testmode\').val() == "1"){
     }
 
     function showUnassignedSample($message = '') {
-        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
         $returnStr .= $this->showNavBar();
         $returnStr .= '<div class="container"><p>';
@@ -1637,7 +1637,7 @@ if ($(\'#testmode\').val() == "1"){
 
     function showSearchRes($respondentsOrHouseholds) {
 
-//        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+//        $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
 
         $returnStr .= '<div id="wrap">';

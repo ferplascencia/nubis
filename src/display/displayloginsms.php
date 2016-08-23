@@ -21,7 +21,7 @@ class DisplayLoginSMS extends Display {
     public function showLogin($message) {
         $extra2 = '<link href="js/formpickers/css/bootstrap-formhelpers.min.css" rel="stylesheet">
                   <link href="css/uscicadmin.css" rel="stylesheet">
-                  <link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">';                  
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">';                  
         $returnStr = $this->showHeader(Language::messageSMSTitle(), $extra2);
         $returnStr .= '<div id = "wrap">';
         $returnStr .= '<div class = "container"><p>';

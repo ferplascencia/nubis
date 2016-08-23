@@ -937,7 +937,7 @@ body
         $respondents = new Respondents();
         $respondents = $respondents->getRespondentsByUrid($_SESSION['URID']);
         foreach ($respondents as $respondent) {
-            $data = 'UPDATE ' . Config::dbSurveyData() . '_lab set status = ' . $respondent->getStatus() . ' where primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"' . ";\n";
+            $data = 'UPDATE ' . Config::dbSurveyData() . '_lab set status = ' . $respondent->getStatus() . ' where primkey = \'' . prepareDatabaseString($respondent->getPrimkey()) . '\'' . ";\n";
         }
 
         if ($communication->sendToServerAsFile($data, $this->user->getUrid())) { //success sending data to server

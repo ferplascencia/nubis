@@ -166,7 +166,7 @@ class DisplayNurse extends Display {
 
         $extra2 = '<link href="js/formpickers/css/bootstrap-formhelpers.min.css" rel="stylesheet">
                   <link href="css/uscicadmin.css" rel="stylesheet">
-                  <link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">                  
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">                  
                     ';
         $returnStr = $this->showHeader(Language::messageSMSTitle(), $extra . $extra2);
         $returnStr .= $this->displayOptionsSidebar("optionssidebarbutton", "optionssidebar");

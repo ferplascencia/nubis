@@ -34,7 +34,7 @@ class Survey extends Component {
                 $this->setObjectName($this->getSuid());
 
                 /* add settings */
-                $this->addSettings($this->getSettings());
+                $this->addSettings($this->getSettings());                
             }
         }
         $this->defaults = null;
@@ -267,7 +267,7 @@ class Survey extends Component {
     function getSectionIdentifiers() {
         global $db;
         $ids = array();
-        $result = $db->selectQuery('select seid from ' . Config::dbSurvey() . '_surveys where suid  = ' . prepareDatabaseString($this->getSuid()));
+        $result = $db->selectQuery('select seid from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()));
         while ($row = $db->getRow($result)) {
             $ids[] = $row["seid"];
         }
@@ -443,21 +443,23 @@ class Survey extends Component {
 
         $this->setObjectName($suid);
         $this->setSuid($suid);
-        $this->setName($this->getName() . "_c");
+        $this->setName($this->getName() . "_cl");
         $this->save();
 
         /* copy sections */
         foreach ($sections as $section) {
-            $section->copy($this->getSuid(), 1); // no suffix
+            $section->copy($this->getSuid(), 1, false); // no suffix
         }
 
         /* copy types */
         foreach ($types as $type) {
+            $old = $type->getTyd();
             $type->copy($this->getSuid(), 1); // no suffix
             
             // update variables with type!
-            $query = "update " . Config::dbSurvey() . "_variables set tyd=" . $tyd . " where suid=" . $this->getSuid() . " and tyd=" . $old;
+            $query = "update " . Config::dbSurvey() . "_variables set tyd=" . $type->getTyd() . " where suid=" . $this->getSuid() . " and tyd=" . $old;
             $db->executeQuery($query);
+            //echo $query . "<hr>";
         }
 
         /* copy groups */
@@ -1178,7 +1180,7 @@ class Survey extends Component {
             SETTING_GROUP_INCLUSIVE => GROUP_NO,
             SETTING_GROUP_SAME_REQUIRED => GROUP_NO,
             SETTING_GROUP_UNIQUE_REQUIRED => GROUP_NO,
-            SETTING_INPUT_MASK_ENABLED => INPUT_MASK_YES,
+            SETTING_INPUT_MASK_ENABLED => INPUT_MASK_NO,
             SETTING_INPUT_MASK_PLACEHOLDER => "",
             SETTING_HEADER_SCROLL_DISPLAY => TABLE_SCROLL,
             SETTING_HEADER_FIXED => TABLE_NO,
@@ -1227,7 +1229,10 @@ class Survey extends Component {
             SETTING_TIMEOUT_ALIVE_BUTTON => Language::sessionExpiredKeepAliveButton(),
             SETTING_TIMEOUT_LOGOUT_BUTTON => Language::sessionExpiredLogoutButton(),
             SETTING_TIMEOUT_TITLE => Language::sessionExpiredTitle(),
-            SETTING_VALIDATE_ASSIGNMENT => VALIDATE_ASSIGNMENT_NO
+            SETTING_VALIDATE_ASSIGNMENT => VALIDATE_ASSIGNMENT_NO, 
+            SETTING_APPLY_CHECKS => APPLY_CHECKS_NO,
+            SETTING_TABLE_MOBILE => GROUP_YES,
+            SETTING_TABLE_MOBILE_LABELS => GROUP_YES
         );
     }
 
@@ -1630,6 +1635,28 @@ class Survey extends Component {
 
     function setTableWidth($value) {
         $this->setSettingValue(SETTING_TABLE_WIDTH, $value);
+    }
+    
+    function getTableMobile($default = true) {
+        if ($this->getSettingValue(SETTING_TABLE_MOBILE, $default) != "") {
+            return $this->getSettingValue(SETTING_TABLE_MOBILE, $default);
+        }
+        return $this->getDefaultValue(SETTING_TABLE_MOBILE);
+    }
+
+    function setTableMobile($value) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE, $value);
+    }
+    
+    function getTableMobileLabels($default = true) {
+        if ($this->getSettingValue(SETTING_TABLE_MOBILE_LABELS, $default) != "") {
+            return $this->getSettingValue(SETTING_TABLE_MOBILE_LABELS, $default);
+        }
+        return $this->getDefaultValue(SETTING_TABLE_MOBILE_LABELS);
+    }
+
+    function setTableMobileLabels($value) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE_LABELS, $value);
     }
 
     function getButtonAlignment($default = true) {
@@ -2794,6 +2821,25 @@ class Survey extends Component {
     function setValidateAssignment($value) {
         $this->setSettingValue(SETTING_VALIDATE_ASSIGNMENT, $value);
     }
+    
+    function getApplyChecks($default = true) {
+        if ($this->getSettingValue(SETTING_APPLY_CHECKS, $default) != "") {
+            return $this->getSettingValue(SETTING_APPLY_CHECKS, $default);
+        }
+        return $this->getDefaultValue(SETTING_APPLY_CHECKS);
+    }
+    
+    function isApplyChecks() {
+        if ($this->getApplyChecks() == APPLY_CHECKS_YES) {
+            return true;
+        }
+        return false;
+    }
+    
+    function setApplyChecks($value) {
+        $this->setSettingValue(SETTING_APPLY_CHECKS, $value);
+    }
+    
 
     /* date time picker functions */
 
@@ -3389,7 +3435,7 @@ class Survey extends Component {
         $mode = getSurveyMode();
         $default = $this->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -3432,7 +3478,7 @@ class Survey extends Component {
         $mode = getSurveyMode();
         $default = $this->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;

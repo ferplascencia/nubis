@@ -29,7 +29,7 @@
   position: relative;
 }
 .slider.slider-horizontal {
-  width: 210px;
+  width: 400px;
   height: 20px;
 }
 .slider.slider-horizontal .slider-track {
@@ -50,6 +50,7 @@
 .slider.slider-horizontal .slider-handle {
   margin-left: -10px;
   margin-top: -5px;
+  height: 20px;
 }
 .slider.slider-horizontal .slider-tick.triangle,
 .slider.slider-horizontal .slider-handle.triangle {
@@ -124,6 +125,7 @@
 }
 .slider .tooltip.top {
   margin-top: -36px;
+  min-height: 30px;
 }
 .slider .tooltip-inner {
   white-space: nowrap;

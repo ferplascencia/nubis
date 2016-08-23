@@ -19,7 +19,7 @@ class DisplayTranslator extends Display {
     }
 
     public function showMain() {
-        $returnStr = $this->showTranslatorHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showTranslatorHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
 
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
@@ -44,7 +44,7 @@ class DisplayTranslator extends Display {
 
         $extra2 = '<link href="js/formpickers/css/bootstrap-formhelpers.min.css" rel="stylesheet">
                   <link href="css/uscicadmin.css" rel="stylesheet">
-                  <link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">                  
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">                  
                     ';
         $returnStr = $this->showHeader(Language::messageSMSTitle(), $extra . $extra2);
         $returnStr .= $this->displayOptionsSidebar("optionssidebarbutton", "optionssidebar", "translator.search");
@@ -187,9 +187,9 @@ class DisplayTranslator extends Display {
                 }
             }
             if ($show) {
-                $returnStr .= '<tr><th></th><th width=15px>Status</th><th>Name</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th></th><th width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th>' . Language::labelTypeEditGeneralName() . '</th><th>' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th></th><th>Name</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th></th><th>' . Language::labelTypeEditGeneralName(). '</th><th>' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             }
 
             foreach ($surveys as $survey) {
@@ -578,9 +578,9 @@ class DisplayTranslator extends Display {
                 $show = true;
             }
             if ($show) {
-                $returnStr .= '<tr><th width=15px></th><th width=15px>Status</th><th>Name</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;" width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th width=15px></th><th>Name</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             }
 
             foreach ($sections as $section) {
@@ -1031,9 +1031,9 @@ class DisplayTranslator extends Display {
 
             $survey = new Survey($_SESSION['SUID']);
             if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
-                $returnStr .= '<tr><th width=15px></th><th width=15px>Status</th><th>Name</th><th>Categories</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;" width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralCategories() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th width=15px></th><th>Name</th><th>Categories</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralCategories() . '</th></tr>';
             }
             foreach ($types as $type) {
 
@@ -1824,9 +1824,9 @@ class DisplayTranslator extends Display {
 
             $survey = new Survey($_SESSION['SUID']);
             if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
-                $returnStr .= '<tr><th></th><th width=15px>Status</th><th>Name</th><th>Questiontext</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th></th><th style="cursor: default;" width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralQuestion() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th></th><th>Name</th><th>Questiontext</th><th>Description</th></tr>';
+                $returnStr .= '<tr><th></th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralQuestion() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             }
             foreach ($variables as $variable) {
 
@@ -1974,9 +1974,6 @@ class DisplayTranslator extends Display {
         $returnStr .= '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'translator.survey.translatevariablefillres', 'vsid' => $variable->getVsid()));
         $returnStr .= $this->getVariableTopTab(4);
-
-
-        $returnStr .= setSessionParamsPost(array('page' => 'translator.survey.translatesettingslayoutres'));
         $survey = new Survey($_SESSION['SUID']);
         $returnStr .= '<div class="well" style="background-color:white;">';
         $returnStr .= $message;
@@ -2471,9 +2468,9 @@ class DisplayTranslator extends Display {
 
             $survey = new Survey($_SESSION['SUID']);
             if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
-                $returnStr .= '<tr><th width=15px></th><th width=15px>Status</th><th>Name</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;" width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th width=15px></th><th>Name</th></tr>';
+                $returnStr .= '<tr><th width=15px></th><th style="cursor: default;">' . Language::labelTypeEditGeneralName() . '</th></tr>';
             }
             foreach ($groups as $group) {
 

@@ -165,6 +165,20 @@ function isJavascriptEnabled() {
 
 $registeredscripts = array();
 
+function getScript($script) {
+    if (contains(getURL(), "/tester")) {
+        return '<script type="text/javascript" src="../' . $script . '"></script>';
+    }
+    return '<script type="text/javascript" src="' . $script . '"></script>';
+}
+
+function getCss($css) {
+    if (contains(getURL(), "/tester")) {
+        return '<link type="text/css" rel="stylesheet" href="../' . $css . '">';
+    }
+    return '<link type="text/css" rel="stylesheet" href="' . $css . '">';
+}
+
 function registerScript($script) {
     global $registeredscripts;
     $registeredscripts[] = strtoupper($script);
@@ -178,7 +192,19 @@ function isRegisteredScript($script) {
     return false;
 }
 
+function minifyScript($str) {
+    if (Config::useDynamicMinify() == false) {
+        return $str;
+    }
+    return \JShrink\Minifier::minify($str);
+}
+
 /* survey functions */
+
+function doCommit() {
+    global $transdb;
+    $transdb->commitTransaction();
+}
 
 function loadProgressBar($suid, $seid, $version) {
 
@@ -237,10 +263,6 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
         
     }
 
-
-
-
-
     $q = "select engine from " . Config::dbSurvey() . "_engines where suid=" . $suid . " and seid=" . $seid . " and version=" . $version;
     $r = $db->selectQuery($q);
 
@@ -261,7 +283,7 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
 
                 echo Language::messageSurveyUnavailable();
 
-                exit;
+                doExit();
             }
         }
 
@@ -285,7 +307,7 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
 
     echo Language::messageSurveyUnavailable();
 
-    exit;
+    doExit();
 }
 
 /* version functions */
@@ -334,16 +356,19 @@ function getDefaultSurveyMode() {
     }
 
     global $survey;
-    $defaultmode = $survey->getDefaultMode(); //getSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_DEFAULT_MODE)->getValue();
+    $defaultmode = $survey->getSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_DEFAULT_MODE)->getValue(); // $survey->getDefaultMode(); //
     return $defaultmode;
 }
 
 function isSurveyMode($l) {
-    if (trim($l) == "") {
+
+    if (trim($l) == "" || !is_numeric($l)) {
         return false;
     }
-    if (!is_numeric($l)) {
-        return false;
+
+    /* forego checks below */
+    if (Config::checkComponents() == false) {
+        return true;
     }
 
     global $mode;
@@ -372,9 +397,12 @@ function getSurveyModeAllowChange() {
 }
 
 function setSurveyMode($l, $flooding = false) {
+    global $mode;
+    if ($mode == $l) {
+        return;
+    }
     if (getSurveyModeAllowChange() != MODE_CHANGE_NOTALLOWED || $flooding) {
         if (isSurveyMode($l)) {
-            global $mode;
             $mode = $l;
         }
     }
@@ -472,35 +500,27 @@ function getSurveyMode() {
 
 function isSurvey($l) {
 
-    if (trim($l) == "") {
-
+    if (trim($l) == "" || !is_numeric($l)) {
         return false;
     }
 
-
-
-    // if equal to current suid, then no need to check
-    // (we already did so before, otherwise suid would not have been set)
-
-    global $suid;
-
-    if ($l == $suid) {
-
+    /* forego checks below */
+    if (Config::checkComponents() == false) {
         return true;
     }
 
-
+    // if equal to current suid, then no need to check
+    // (we already did so before, otherwise suid would not have been set)
+    global $suid;
+    if ($l == $suid) {
+        return true;
+    }
 
     // check if real survey
-
     $sv = new Surveys();
-
     $surveys = $sv->getSurveyIdentifiers();
-
     foreach ($surveys as $surv) {
-
         if ($surv == $l) {
-
             return true;
         }
     }
@@ -509,11 +529,8 @@ function isSurvey($l) {
 }
 
 function getDefaultSurvey() {
-
     global $defaultsurvey;
-
     if ($defaultsurvey != null) {
-
         return $defaultsurvey;
     }
 
@@ -534,8 +551,11 @@ function getDefaultSurvey() {
 }
 
 function setSurvey($l) {
+    global $suid, $survey;
+    if ($suid == $l && $survey->getSuid() == $l) {
+        return;
+    }
     if (isSurvey($l)) {
-        global $suid, $survey;
         $suid = $l;
         $survey = new Survey($suid);
     }
@@ -566,86 +586,55 @@ function getSurvey() {
     /* SURVEY */
 
     // check for new survey  
-
     global $engine, $suid;
 
 
-
     /* get from loadvar */
-
     $l = loadvarSurvey(POST_PARAM_SUID);
-
     if (isSurvey($l)) {
-
         $suid = $l;
         $_SESSION["PARAMS"][SESSION_PARAM_SURVEY] = $l;
         return $suid;
     }
-
-
 
     $l = getFromSessionParams(SESSION_PARAM_NEWSURVEY);
-
     if (isSurvey($l)) {
-
         $_SESSION["PARAMS"][SESSION_PARAM_SURVEY] = $l;
         unset($_SESSION["PARAMS"][SESSION_PARAM_NEWSURVEY]);
-
         $suid = $l;
-
         return $suid;
     }
-
-
 
     // check for old survey
-
     $l = getFromSessionParams(SESSION_PARAM_SURVEY);
-
     if (isSurvey($l)) {
         $suid = $l;
         $_SESSION["PARAMS"][SESSION_PARAM_SURVEY] = $l;
         return $suid;
     }
-
-
 
     /* global suid has been set (via setting below, so no need to repeat) */
-
     if (isSurvey($suid)) {
-
         return $suid;
     }
 
-
-
     /* check for default survey */
-
     $l = getDefaultSurvey();
-
     if (isSurvey($l)) {
-
         $suid = $l;
         $_SESSION["PARAMS"][SESSION_PARAM_SURVEY] = $l;
         return $suid;
     }
 
-
-
     /* everything else failed */
-
     $surveys = new Surveys();
-
     $suid = $surveys->getFirstSurvey(true);
-
     if ($suid == "") {
-
         $display = new Display();
-
         echo $display->displayError(Language::messageSurveyUnavailable());
-
-        exit;
+        doExit();
     }
+
     $_SESSION["PARAMS"][SESSION_PARAM_SURVEY] = $suid;
     return $suid;
 }
@@ -733,37 +722,29 @@ function getSMSLanguagePostFix($l) {
 
 function isSurveyLanguage($l) {
 
-    if (trim($l) == "") {
-
+    if (trim($l) == "" || !is_numeric($l)) {
         return false;
     }
 
-    if (!is_numeric($l)) {
-        return false;
-    }
-
-    global $language;
-
-    if ($l == $language) {
-
+    /* forego checks below */
+    if (Config::checkComponents() == false) {
         return true;
     }
 
-
+    global $language;
+    if ($l == $language) {
+        return true;
+    }
 
     // check in languages array
-
     $langs = LanguageBase::getLanguagesArray();
-
     foreach ($langs as $lang) {
-
         if ($lang["value"] == $l) {
             //if (file_exists("/languages/language" . getSurveyLanguagePostFix($l) . ".php")) {
             return true;
             //}
         }
     }
-
     return false;
 }
 
@@ -809,9 +790,12 @@ function getSurveyLanguageAllowChange() {
 }
 
 function setSurveyLanguage($l, $flooding = false) {
+    global $language;
+    if ($language == $l) {
+        return;
+    }
     if (getSurveyLanguageAllowChange() != LANGUAGE_CHANGE_NOTALLOWED || $flooding == true) {
         if (isSurveyLanguage($l)) {
-            global $language;
             $language = $l;
         }
     }
@@ -943,12 +927,17 @@ function getSurveyTemplateAllowChange() {
 }
 
 function isSurveyTemplate($t) {
-    if (trim($t) == "") {
+
+    // forgo any checks if existing section
+    if (trim($t) == "" || !is_numeric($t)) {
         return false;
     }
-    if (!is_numeric($t)) {
-        return false;
+
+    /* forego checks below */
+    if (Config::checkComponents() == false) {
+        return true;
     }
+
     global $template;
     if ($t == $template) {
         return true;
@@ -1015,9 +1004,12 @@ function getSurveyTemplate() {
 }
 
 function setSurveyTemplate($l) {
+    global $template;
+    if ($template == $l) {
+        return;
+    }
     if (getSurveyTemplateAllowChange() != TEMPLATE_CHANGE_NOTALLOWED) {
         if (isSurveyTemplate($l)) {
-            global $template;
             $template = $l;
         }
     }
@@ -1233,17 +1225,20 @@ function getSurveyMainSection($suid, $primkey) {
 
 function isSurveySection($seid) {
 
-    if ($seid == "" || !is_numeric($seid)) {
+    // forgo any checks if existing section
+    if (trim($seid) == "" || !is_numeric($seid)) {
         return false;
+    }
+
+    /* forego checks below */
+    if (Config::checkComponents() == false) {
+        return true;
     }
 
     global $currentseid;
     if ($seid == $currentseid) {
         return true;
     }
-    return true;
-
-    // forgo any checks if existing section
 
     global $survey;
     $secs = $survey->getSectionIdentifiers();
@@ -1929,6 +1924,18 @@ function isArrayReference($name) {
 
 /* session functions */
 
+function deleteAllCookies() {
+    if (isset($_SERVER['HTTP_COOKIE'])) {
+        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+        foreach ($cookies as $cookie) {
+            $parts = explode('=', $cookie);
+            $name = trim($parts[0]);
+            setcookie($name, '', time() - 1000);
+            setcookie($name, '', time() - 1000, '/');
+        }
+    }
+}
+
 function getSessionPath() {
     $script = dirname($_SERVER['SCRIPT_NAME']);
     if ($script != "") {
@@ -1939,6 +1946,7 @@ function getSessionPath() {
 
 function endSession() {
 
+    //deleteAllCookies();
     session_unset();
 
     session_destroy();
@@ -1946,9 +1954,8 @@ function endSession() {
     $_SESSION = array();
 
     session_write_close();
-
-    setcookie(session_name(), '', 0, getSessionPath());
-    setcookie(session_name(), false, 0, getSessionPath());
+    setcookie(session_name(), '', time() - 1000, getSessionPath());
+    setcookie(session_name(), false, time() - 1000, getSessionPath());
     unset($_COOKIE[session_name()]);
 
     session_regenerate_id(true);
@@ -2009,6 +2016,9 @@ function getFromSessionParams($param, $ignorer = false) {
         if (!inArray($param, array(SESSION_PARAM_LANGUAGE, SESSION_PARAM_MODE, SESSION_PARAM_VERSION, SESSION_PARAM_MAINSEID, SESSION_PARAM_SEID))) {
             return ''; // no submitted session post, so ignore anything in session from before (excluding language, mode)
         }
+        //if (loadvarSurvey(POST_PARAM_NEW_PRIMKEY) == '1') { // interview start, then ignore everything!
+        //     return '';
+        //}
     }
 
     if (isset($_SESSION['PARAMS']) && isset($_SESSION['PARAMS'][$param])) {
@@ -2024,23 +2034,19 @@ function setSessionParameter($param, $value) {
 
 /* script functions */
 
-// TODO: REPLACE WITH BOOTSTRAP FUNCTION (SEE PHPPARSER SETUP)
-
 function getBase() {
-
     return substr(__FILE__, 0, strrpos(__FILE__, DIRECTORY_SEPARATOR));
 }
 
 function getURL() {
-
-    if (isset($_SERVER['PATH_INFO'])) {
-
+    $info = null;
+    if (isset($_SERVER['PATH_INFO']) && sizeof($_SERVER['PATH_INFO']) > 0) {
         $info = pathinfo($_SERVER['PATH_INFO']);
-    } else {
-
-        $info = pathinfo($_SERVER['REQUEST_URI']);
     }
 
+    if ($info == null || ($info != null && isset($_SERVER['PATH_INFO']))) {
+        $info = pathinfo($_SERVER['REQUEST_URI']);
+    }
     return $info["dirname"];
 }
 
@@ -2121,6 +2127,42 @@ function decryptC($text, $salt) {
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
 }
 
+// http://www.eatyourvariables.com/php/mysql-compatible-aes-encryption-and-decryption
+function aes_encrypt($val, $key) {
+    return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, makeMySQLCompatible($key), $val, MCRYPT_MODE_ECB);
+}
+
+// http://www.eatyourvariables.com/php/mysql-compatible-aes-encryption-and-decryption
+function aes_decrypt($val, $key) {
+    return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, makeMySQLCompatible($key), $val, MCRYPT_MODE_ECB);
+}
+
+// http://www.eatyourvariables.com/php/mysql-compatible-aes-encryption-and-decryption
+function makeMySQLCompatible($paymentAesKey) {
+    $finalKey = array();
+    $i = 128 / 8;
+
+    while ($i != 0) {
+        $finalKey[] = 0x00;
+        $i--;
+    }
+
+    for ($i = 0, $d = 0; $i < strlen($paymentAesKey); $i++, $d++) {
+        if ($d == count($finalKey)) {
+            $d = 0; //reset location of final key to 0
+        }
+
+        $finalKey[$d] ^= ord($paymentAesKey[$i]);
+    }
+
+    $output = '';
+    foreach ($finalKey as $char) {
+        $output .= chr($char);
+    }
+
+    return $output;
+}
+
 //http://stackoverflow.com/questions/12864582/javascript-prompt-cancel-button-to-terminate-the-function
 function confirmAction($message, $key) {
     $returnStr = ' onclick="';
@@ -2146,6 +2188,9 @@ function calculateAge($year, $month, $day) {
 function cardinal($answer) {
     if (startsWith($answer, SEPARATOR_SETOFENUMERATED)) {
         $answer = substr($answer, 1);
+    }
+    if (trim($answer) == "") {
+	return 0;
     }
     return sizeof(explode(SEPARATOR_SETOFENUMERATED, $answer));
 }
@@ -2391,6 +2436,23 @@ function gen_password($length = 8) {
         $password .= $chars{$x};
     }
     return $password;
+}
+
+function tempdebug() {
+    $time = microtime(true);
+    $dFormat = "l jS F, Y - H:i:s";
+    $mSecs = $time - floor($time);
+    $mSecs = substr($mSecs, 1);
+    $return = '$time ==' . $time;
+    return $return . "<hr>";
+}
+
+function doExit() {
+    if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
+        $_SESSION['REQUEST_IN_PROGRESS'] = null;
+        unset($_SESSION['REQUEST_IN_PROGRESS']);
+    }
+    exit;
 }
 
 ?>

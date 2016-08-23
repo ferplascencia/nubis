@@ -49,6 +49,11 @@ class Researcher {
                  case 'researcher.reports.aggregates': return $this->showReportsAggregates(); break;
                  case "researcher.reports.aggregates.section": return $this->showReportsAggregatesSection(); break;
                  case "researcher.reports.aggregates.variable": return $this->showReportsAggregatesVariable(); break;
+                 
+                 case 'researcher.reports.paradata': return $this->showReportsParadata(); break;
+                 case "researcher.reports.paradata.section": return $this->showReportsParadataSection(); break;
+                 case "researcher.reports.paradata.variable": return $this->showReportsParadataVariable(); break;
+                 
                  case "researcher.reports.contact.graphs": return $this->showReportsContactGraphs(); break;
                  case "researcher.reports.timings.distribution": return $this->showReportsTimingsDistribution(); break;
                  case "researcher.reports.timings.overtime": return $this->showReportsTimingsOverTime(); break;
@@ -400,6 +405,30 @@ class Researcher {
         }
         $displayResearcher = new displayResearcher();
         return $displayResearcher->showReportsAggregatesVariable($_SESSION['SEID'], $_SESSION['VSID']);
+    }
+    
+    function showReportsParadata() {
+        $displayResearcher = new DisplayResearcher();
+        return $displayResearcher->showReportsParadata();
+    }
+
+    function showReportsParadataSection() {
+        if (getFromSessionParams('seid') != "") {
+            $_SESSION['SEID'] = getFromSessionParams('seid');   
+        }      
+        $displayResearcher = new displayResearcher();
+        return $displayResearcher->showReportsParadataSection($_SESSION['SEID']);
+    }
+
+    function showReportsParadataVariable() {
+        if (getFromSessionParams('seid') != "") {
+            $_SESSION['SEID'] = getFromSessionParams('seid');   
+        }
+        if (getFromSessionParams('vsid') != "") {
+            $_SESSION['VSID'] = getFromSessionParams('vsid');
+        }
+        $displayResearcher = new displayResearcher();
+        return $displayResearcher->showReportsParadataVariable($_SESSION['SEID'], $_SESSION['VSID']);
     }
     
     function showReportsContactGraphs() {

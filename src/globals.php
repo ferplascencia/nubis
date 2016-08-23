@@ -19,7 +19,7 @@ isJavascriptEnabled();
 setPath();
 
 /* database */
-require_once('database.php');
+require('database.php');
 global $loaded;
 $db = new Database();
 if ($db->getDb() == null) { //no connection with DB.. Errormessage!     
@@ -32,15 +32,15 @@ if ($db->getDb() == null) { //no connection with DB.. Errormessage!
             }
         }
         echo "<html><body><font face=arial>System not available!</font></body></html>";
-        exit;
+        doExit();
     }
     else {
         
         // in SMS mode and no correct config, then we run install        
         if ($loaded == 2) {
-            require_once('install.php');        
+            require('install.php');        
             $install = new Install(loadvar('p'));
-            exit;
+            doExit();
         }
         else if ($loaded == 1) {
             $contents = file_get_contents("errorsms.html");
@@ -49,133 +49,137 @@ if ($db->getDb() == null) { //no connection with DB.. Errormessage!
                 exit;
             }
             echo "<html><body><font face=arial>NubiS could not locate its configuration file (conf.php).</font></body></html>";
-            exit;
+            doExit();
         }
         else {
             $contents = file_get_contents("errorsms.html");
             if ($contents != "") {
                 echo str_replace('$Error$', 'NubiS could not access the database. <br/>Please verify your configuration settings in the conf.php file.', $contents);
-                exit;
+                doExit();
             }
             echo "<html><body><font face=arial>NubiS could not access the database. Please verify your configuration settings in the conf.php file.</font></body></html>";
-            exit;
+            doExit();
         }
     }
+}
+
+if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS && Config::useTransactions() == true) {
+    $transdb = new Database();
+    $transdb->beginTransaction();
 }
 
 ini_set("error_reporting", "ALL");
 
 /* startup */
-require_once('action.php');
-require_once('login.php');
+require('action.php');
+require('login.php');
 
 /* SMS admin extensions */
 if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
-    require_once('sms.php');
-    require_once('sysadmin.php');
-    require_once("compiler.php");
-    require_once("checker.php");
-    require_once("track.php");
-    require_once('supervisor.php');
-    require_once('lab.php');
-    require_once('nurse.php');
-    require_once('translator.php');
-    require_once('researcher.php');    
+    require('sms.php');
+    require('sysadmin.php');
+    require("compiler.php");
+    require("checker.php");
+    require("track.php");
+    require('supervisor.php');
+    require('lab.php');
+    require('nurse.php');
+    require('translator.php');
+    require('researcher.php');    
 }
 
 /* SMS admin and survey extensions */
-if (Common::smsUsage()) {
-    require_once('interviewer.php');
-    require_once('remarks.php');    
+if (Config::smsUsage()) {
+    require('interviewer.php');
+    require('remarks.php');    
 }
 
-if (isTestmode() || Common::smsUsage()) {
-    require_once('user.php');
-    require_once('users.php');
-    require_once('tester.php');
+if (isTestmode() || Config::smsUsage()) {
+    require('user.php');
+    require('users.php');
+    require('tester.php');
 }
 
 /* core objects */
-require_once('object.php');
-require_once('component.php');
-require_once('basicengine.php');
-require_once('basicfill.php');
-require_once('basicinlinefield.php');
-require_once('variable.php');
-require_once('variabledescriptive.php');
-require_once('setting.php');
-require_once('progressbar.php');
-require_once('section.php');
-require_once('type.php');
-require_once('group.php');
-require_once('state.php');
-require_once('logaction.php');
-require_once('logactions.php');
-require_once('datarecord.php');
-require_once('survey.php');
-require_once('surveys.php');
-require_once("languagebase.php");
+require('object.php');
+require('component.php');
+require('basicengine.php');
+require('basicfill.php');
+require('basicinlinefield.php');
+require('basiccheck.php');
+require('variable.php');
+require('variabledescriptive.php');
+require('setting.php');
+require('progressbar.php');
+require('section.php');
+require('type.php');
+require('group.php');
+require('state.php');
+require('logaction.php');
+require('logactions.php');
+require('datarecord.php');
+require('survey.php');
+require('surveys.php');
+require("languagebase.php");
 
 /* SMS admin and survey extensions */
-if (Common::smsUsage()) {
-    require_once('households.php');
-    require_once('household.php');
-    require_once('respondents.php');
-    require_once('respondent.php');
+if (Config::smsUsage()) {
+    require('households.php');
+    require('household.php');
+    require('respondents.php');
+    require('respondent.php');
 }
-
 
 /* core display */
-require_once('display/display.php');
-require_once('display/displaylogin.php');
-require_once('display/displayquestion.php');
-require_once('templates/default.php');
-require_once('templates/tabletemplate.php');
-require_once('templates/multicolumntable.php');
+require('display/display.php');
+require('display/displaylogin.php');
+require('display/displayquestion.php');
+require('templates/default.php');
+require('templates/tabletemplate.php');
+require('templates/multicolumntable.php');
 
 /* core SMS in survey display */
-require_once('display/displayrespondent.php'); // only core if SMS is used
-require_once('display/displayinterviewer.php'); // only core if SMS is used
-require_once('display/displaytester.php'); // only core if SMS is used
+require('display/displayrespondent.php'); // only core if SMS is used
+require('display/displayinterviewer.php'); // only core if SMS is used
+require('display/displaytester.php'); // only core if SMS is used
 
 /* error checking */
-require_once("errorcheck.php");
-require_once("errorchecks.php");
+require("errorcheck.php");
+require("errorchecks.php");
 
 /* answer type add-ons */
-require_once('gps.php');
-require_once('customfunctions.php');
-require_once('customanswertypes.php');
+require('gps.php');
+require('customfunctions.php');
+require('customanswertypes.php');
 
 /* SMS extensions */
-if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
-    require_once('display/displayloginsms.php');
-    require_once('display/displaysysadmin.php');
-    require_once('display/displayoutput.php');
-    require_once('display/displayusers.php');
-    require_once('display/displaysupervisor.php');
-    require_once('display/displaytranslator.php');
-    require_once('display/displaysearch.php');
-    require_once('display/displaysms.php');
-    //require_once('display/displaynurse.php');
-    require_once('display/displayresearcher.php');    
-    require_once("data.php");
-    require_once('dataexport.php');
-    require_once('communication.php');
+if (Config::smsUsage()) {
+    require('display/displayloginsms.php');
+    require('display/displaysysadmin.php');
+    require('display/displayoutput.php');
+    require('display/displayusers.php');
+    require('display/displaysupervisor.php');
+    require('display/displaytranslator.php');
+    require('display/displaysearch.php');
+    require('display/displaysms.php');
+    //require('display/displaynurse.php');
+    require('display/displayresearcher.php');    
+    require("data.php");
+    require('dataexport.php');
+    require('communication.php');
 }
 
 /* SMS admin and survey extensions */
-if (Common::smsUsage()) {
-    require_once('psu.php');
-    require_once('psus.php');
-    require_once('proxypermission.php');    
+if (Config::smsUsage()) {
+    require('psu.php');
+    require('psus.php');
+    require('proxypermission.php');    
 }
 
-if (isTestmode() || Common::smsUsage()) {
-    require_once('contact.php');
-    require_once('contacts.php');    
+if (isTestmode() || Config::smsUsage()) {
+    require('contact.php');
+    require('contacts.php');    
 }
-
 
 /* check for execution mode */
 if (inArray(loadvar(POST_PARAM_SURVEY_EXECUTION_MODE), array(SURVEY_EXECUTION_MODE_NORMAL, SURVEY_EXECUTION_MODE_TEST))) {
@@ -195,10 +199,14 @@ $suid = getSurvey();
 $survey = new Survey($suid);
 
 /* set the template for the questions display */
-require_once('displayquestionsms.php');
-require_once('displayquestiontest.php');
-require_once('displayquestionnurse.php');
+require('displayquestionsms.php');
+require('displayquestiontest.php');
+require('displayquestionnurse.php');
 
+/* js shrinker */
+if (Config::useDynamicMinify()) {
+    require('jshrink/minifier.php');
+}
 
 $mode = null; // wait with calling this until later!
 $modechange = null;

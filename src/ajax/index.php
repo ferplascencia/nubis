@@ -25,6 +25,8 @@ require_once("../constants.php");
 
 require_once("../functions.php");
 require_once("../dbConfig.php");
+//$_SESSION['SYSTEM_ENTRY'] = USCIC_SMS;
+$loaded = dbConfig::load("../conf.php");
 require_once("../config.php");
 require_once("../object.php");
 require_once("../component.php");

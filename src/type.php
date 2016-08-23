@@ -1613,6 +1613,22 @@ class Type extends Component {
     function setEnumeratedCustom($value) {
         $this->setSettingValue(SETTING_ENUMERATED_CUSTOM, $value);
     }
+    
+    function getEnumeratedColumns($default = true) {
+
+        /* type level setting */
+        $val = $this->getSettingValue(SETTING_ENUMERATED_COLUMNS, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* no survey level setting */
+        return "";
+    }
+
+    function setEnumeratedColumns($value) {
+        $this->setSettingValue(SETTING_ENUMERATED_COLUMNS, $value);
+    }
 
     function getEnumeratedRandomizer($default = true) {
 
@@ -1784,6 +1800,11 @@ class Type extends Component {
         $this->setOptions();
         return $this->options;
     }
+    
+    function clearOptions() {
+        $this->options = null;
+        unset($this->options);
+    }
 
     function getOptionCodeByAcronym($acronym) {
         $this->setOptions();
@@ -1849,6 +1870,59 @@ class Type extends Component {
 
     function setEnumeratedLabel($value) {
         $this->setSettingValue(SETTING_ENUMERATED_LABEL, $value);
+    }
+    
+    
+    function getTableMobile($default = true) {
+
+        /* group level setting */
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobile($default);
+    }
+    
+    function isTableMobile() {
+        if ($this->getTableMobile() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobile($text) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE, $text);
+    }  
+    
+    function getTableMobileLabels($default = true) {
+
+        /* group level setting */
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE_LABELS, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobileLabels($default);
+    }
+    
+    function isTableMobileLabels() {
+        if ($this->getTableMobileLabels() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobileLabels($text) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE_LABELS, $text);
     }
 
     /* comparison functions */
@@ -2994,6 +3068,14 @@ class Type extends Component {
     function setLabelCloseButton($value) {
         $this->setSettingValue(SETTING_CLOSE_BUTTON_LABEL, $value);
     }
+    
+    function getXiTemplate($default = true) {
+        return $this->getSettingValue(SETTING_GROUP_XI_TEMPLATE, $default);
+    }
+
+    function setXiTemplate($text) {
+        $this->setSettingValue(SETTING_GROUP_XI_TEMPLATE, $text);
+    }
 
     /* slider functions */
 
@@ -3503,7 +3585,7 @@ class Type extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -3528,7 +3610,7 @@ class Type extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -3572,7 +3654,7 @@ class Type extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;

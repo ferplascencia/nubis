@@ -19,15 +19,15 @@ class Common {
     }
 
     static function surveyTemplates() {
-        return array(TABLE_TEMPLATE_DEFAULT => "One after another", TABLE_TEMPLATE_SIMPLE => "Row by row in table", TABLE_TEMPLATE_SINGLEROW => "Single row in table", TABLE_TEMPLATE_SINGLECOLUMN => "Single column in table", TABLE_TEMPLATE_TWOCOLUMN => "Two columns in table", TABLE_TEMPLATE_THREECOLUMN => 'Three column table', TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table', TABLE_TEMPLATE_ENUMERATED => "Enumerated table rows", TABLE_TEMPLATE_CUSTOM => "Custom", TABLE_TEMPLATE_ENUMERATED_REVERSE => "Reverse enumerated table rows");
+        return array(TABLE_TEMPLATE_DEFAULT => "One after another", TABLE_TEMPLATE_SIMPLE => "Row by row in table", TABLE_TEMPLATE_SINGLEROW => "Single row in table", TABLE_TEMPLATE_SINGLECOLUMN => "Single column in table", TABLE_TEMPLATE_TWOCOLUMN => "Two columns in table", TABLE_TEMPLATE_THREECOLUMN => 'Three column table', TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table', TABLE_TEMPLATE_EIGHTCOLUMN => 'Eight column table', TABLE_TEMPLATE_NINECOLUMN => 'Nine column table', TABLE_TEMPLATE_ENUMERATED => "Enumerated table rows", TABLE_TEMPLATE_CUSTOM => "Custom", TABLE_TEMPLATE_ENUMERATED_REVERSE => "Reverse enumerated table rows");
     }
 
     static function surveyTableTemplates() {
-        return array(TABLE_TEMPLATE_SIMPLE => "Row by row in table", TABLE_TEMPLATE_SINGLEROW => "Single row in table", TABLE_TEMPLATE_SINGLECOLUMN => "Single column in table", TABLE_TEMPLATE_TWOCOLUMN => "Two columns in table", TABLE_TEMPLATE_THREECOLUMN => 'Three column table', TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table', TABLE_TEMPLATE_ENUMERATED => "Enumerated table rows", TABLE_TEMPLATE_ENUMERATED_REVERSE => "Reverse enumerated table rows");
+        return array(TABLE_TEMPLATE_SIMPLE => "Row by row in table", TABLE_TEMPLATE_SINGLEROW => "Single row in table", TABLE_TEMPLATE_SINGLECOLUMN => "Single column in table", TABLE_TEMPLATE_TWOCOLUMN => "Two columns in table", TABLE_TEMPLATE_THREECOLUMN => 'Three column table', TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table', TABLE_TEMPLATE_EIGHTCOLUMN => 'Eight column table', TABLE_TEMPLATE_NINECOLUMN => 'Nine column table', TABLE_TEMPLATE_ENUMERATED => "Enumerated table rows", TABLE_TEMPLATE_ENUMERATED_REVERSE => "Reverse enumerated table rows");
     }
 
     static function surveyTableMultiColumnTables() {
-        return array(TABLE_TEMPLATE_TWOCOLUMN => "Two column table", TABLE_TEMPLATE_THREECOLUMN => "Three column table", TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table');
+        return array(TABLE_TEMPLATE_TWOCOLUMN => "Two column table", TABLE_TEMPLATE_THREECOLUMN => "Three column table", TABLE_TEMPLATE_FOURCOLUMN => 'Four column table', TABLE_TEMPLATE_FIVECOLUMN => 'Five column table', TABLE_TEMPLATE_SIXCOLUMN => 'Six column table', TABLE_TEMPLATE_SEVENCOLUMN => 'Seven column table', TABLE_TEMPLATE_EIGHTCOLUMN => 'Eight column table', TABLE_TEMPLATE_NINECOLUMN => 'Nine column table');
     }
 
     static function surveyInputMasks() {
@@ -39,11 +39,11 @@ class Common {
     }
 
     static function surveyDataTables() {
-        return array("_actions", "_data", "_screendumps", "_states", "_times", "_paradata", "_logs", "_loopdata");
+        return array("_actions", "_data", "_screendumps", "_states", "_times", "_paradata", "_logs", "_loopdata", "_consolidated_times", "_processed_paradata");
     }
 
     static function surveyTestDataTables() {
-        return array("_test_actions", "_test_data", "_test_screendumps", "_test_states", "_test_times", "_test_loopdata");
+        return array("_test_actions", "_test_data", "_test_screendumps", "_test_states", "_test_times", "_test_loopdata", "_test_consolidated_times", "_test_processed_paradata");
     }
     
     static function surveyExportTables() {
@@ -51,26 +51,17 @@ class Common {
     }
     
     static function allTables() {
-        return array("_actions", "_communication", "_context","_consolidated_times","_data", "_datarecords","_engines","_files","_groups","_households","_interviewstatus","_issues","_lab","_logs","_loopdata","_next","_observations","_paradata","_pictures","_progressbars","_psus","_remarks","_respondents","_routing","_screendumps","_screens","_sections","_settings","_states","_surveys","_test_actions","_test_data","_test_datarecords","_test_files","_test_interviewstatus","_test_lab","_test_logs","_test_loopdata","_test_observations","_test_paradata","_test_pictures","_test_screendumps","_test_states","_test_consolidated_times","_test_times","_times","_tracks","_types","_users","_variables","_versions");
+        return array("_actions", "_communication", "_context","_consolidated_times","_data", "_datarecords","_engines","_files","_groups","_households","_interviewstatus","_issues","_lab","_logs","_loopdata","_next","_observations","_paradata","_processed_paradata","_pictures","_progressbars","_psus","_remarks","_respondents","_routing","_screendumps","_screens","_sections","_settings","_states","_surveys","_test_actions","_test_data","_test_datarecords","_test_files","_test_interviewstatus","_test_lab","_test_logs","_test_loopdata","_test_observations","_test_paradata","_test_processed_paradata", "_test_pictures","_test_screendumps","_test_states","_test_consolidated_times","_test_times","_times","_tracks","_types","_users","_variables","_versions");
     }
 
     static function surveyCoreVariables() {
-        return array(VARIABLE_BEGIN, VARIABLE_COMPLETED, VARIABLE_DIRECT, VARIABLE_END, VARIABLE_EXECUTION_MODE, VARIABLE_INTRODUCTION, VARIABLE_LANGUAGE, VARIABLE_LOCKED, VARIABLE_MODE, VARIABLE_PLATFORM, VARIABLE_PRIMKEY, VARIABLE_THANKS, VARIABLE_VERSION);
+        return array(VARIABLE_BEGIN, VARIABLE_CLOSED, VARIABLE_COMPLETED, VARIABLE_DIRECT, VARIABLE_END, VARIABLE_EXECUTION_MODE, VARIABLE_IN_PROGRESS, VARIABLE_INTRODUCTION, VARIABLE_LANGUAGE, VARIABLE_LOCKED, VARIABLE_LOGIN, VARIABLE_MODE, VARIABLE_PLATFORM, VARIABLE_PRIMKEY, VARIABLE_TEMPLATE, VARIABLE_THANKS, VARIABLE_VERSION);
     }
 
     static function surveyCoreSections() {
         return array(SECTION_BASE);
     }
-    
-    /* NUBIS SMS integration */
-
-    static function smsUsage() {
-        if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
-            return true;
-        }
-        return true; // change to false to not include PHP files related to SMS survey extensions
-    }
-
+        
     static function surveyOverallTemplates() {
         return array(0 => "Basic", 1 => "UAS", 2 => "MTeens", 3 => "Minimal");
     }
@@ -157,26 +148,8 @@ class Common {
             ERROR_CHECK_COMPARISON_SMALLER_EQUAL_TO_TIME => "ER78",
             ERROR_CHECK_COMPARISON_SMALLER_TIME => "ER79"
         );
-    }
+    }    
     
-    static function sessionAliveURL() {
-        return 'ajax/index.php?p=keepalive';
-    }
-
-    static function sessionExpiredWarnPoint() {
-        return 6 / 10; // warn after 60% of time has passed
-    }
-    
-    
-    /* PERFORMANCE */
-    
-    static function prepareDataQueries() { // determines if data and log entries are inserted using prepared statements
-        return false; // true=prepared statements, false=prepareDatabaseString escaping
-    }
-
-    static function useUnserialize() {
-        return false;
-    }
 }
 
 ?>

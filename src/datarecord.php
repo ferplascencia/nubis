@@ -29,6 +29,10 @@ class DataRecord {
             $this->loadRecord();
         }
     }
+    
+    function getSuid() {
+        return $this->suid;
+    }
 
     function getPrimaryKey() {
         return $this->primkey;
@@ -40,8 +44,8 @@ class DataRecord {
         }
         return array();
     }
-    
-    function getCleanDataNames() {        
+
+    function getCleanDataNames() {
         if (is_array($this->data)) {
             $arr = array();
             foreach ($this->data as $k => $v) {//figure out why this seems empty!
@@ -81,10 +85,23 @@ class DataRecord {
     }
 
     function isCompleted() {
+        if (Config::useDataRecords() == false) {
+            global $db;
+            $q = "select completed from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString($this->suid) . "  and primkey='" . prepareDatabaseString($this->primkey) . "' and variablename='prim_key'";
+            $r = $db->selectQuery($q);
+            if ($db->getNumberOfRows($r) > 0) {
+                $row = $db->getRow($r);
+                return $row["completed"] == INTERVIEW_COMPLETED;
+            }
+        }
         return $this->completed == INTERVIEW_COMPLETED;
     }
 
     function loadRecord() {
+
+        if (Config::useDataRecords() == false) {
+            return;
+        }
         global $db, $survey;
         $key = $survey->getDataEncryptionKey();
         $data = "data as data_dec";
@@ -116,23 +133,32 @@ class DataRecord {
 
     function setToComplete() {
         global $db;
-        $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_COMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
-        $db->executeQuery($query);
-        
+        if (Config::useDataRecords() == true) {
+            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_COMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+            $db->executeQuery($query);
+        }
+
         $query = "update " . Config::dbSurveyData() . "_data set completed=" . INTERVIEW_COMPLETED . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
         $db->executeQuery($query);
     }
 
     function setToIncomplete() {
         global $db;
-        $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_NOTCOMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
-        $db->executeQuery($query);
-        
+        if (Config::useDataRecords() == true) {
+            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_NOTCOMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+            $db->executeQuery($query);
+        }
+
         $query = "update " . Config::dbSurveyData() . "_data set completed=" . INTERVIEW_NOTCOMPLETED . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
         $db->executeQuery($query);
     }
 
     function saveRecord() {
+
+        if (Config::useDataRecords() == false) {
+            return;
+        }
+
         global $db, $survey;
         $key = $survey->getDataEncryptionKey();
         $data = "?";
@@ -147,21 +173,20 @@ class DataRecord {
             $names = implode("~", $datanames);
         }
         //echo implode("~", $datanames) . '----';
-            
+
         if ($this->newrecord == true) {
             $query = "insert into " . Config::dbSurveyData() . "_datarecords (suid, primkey, datanames, data) values (?,?,?,$data)";
             $bp = new BindParam();
             $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
-            $bp->add(MYSQL_BINDING_STRING, $this->primkey);            
+            $bp->add(MYSQL_BINDING_STRING, $this->primkey);
             $bp->add(MYSQL_BINDING_STRING, gzcompress($names, 9));
             $data = gzcompress(serialize($this->data), 9);
             $bp->add(MYSQL_BINDING_STRING, $data);
             $db->executeBoundQuery($query, $bp->get());
             //echo 'new<br/>';
-        }
-        else {
+        } else {
             $query = "update " . Config::dbSurveyData() . "_datarecords set datanames=?, data=$data where suid=? and primkey=?";
-            $bp = new BindParam();            
+            $bp = new BindParam();
             $bp->add(MYSQL_BINDING_STRING, gzcompress(implode("~", $datanames), 9));
             $data = gzcompress(serialize($this->data), 9);
             $bp->add(MYSQL_BINDING_STRING, $data);

@@ -16,21 +16,21 @@ class Respondents {
 
     static function getDeIdentified() {
 
-        $query = 'aes_decrypt(firstname, "' . Config::smsPersonalInfoKey() . '") as firstname_dec, ';
-        $query .= 'aes_decrypt(lastname, "' . Config::smsPersonalInfoKey() . '") as lastname_dec, ';
-        $query .= 'aes_decrypt(age, "' . Config::smsPersonalInfoKey() . '") as age_dec, ';
-        $query .= 'aes_decrypt(sex, "' . Config::smsPersonalInfoKey() . '") as sex_dec, ';
-        $query .= 'aes_decrypt(birthdate, "' . Config::smsPersonalInfoKey() . '") as birthdate_dec, ';
-        $query .= 'aes_decrypt(address1, "' . Config::smsPersonalInfoKey() . '") as address1_dec, ';
-        $query .= 'aes_decrypt(address2, "' . Config::smsPersonalInfoKey() . '") as address2_dec, ';
-        $query .= 'aes_decrypt(zip, "' . Config::smsPersonalInfoKey() . '") as zip_dec, ';
-        $query .= 'aes_decrypt(city, "' . Config::smsPersonalInfoKey() . '") as city_dec, ';
-        $query .= 'aes_decrypt(longitude, "' . Config::smsPersonalInfoKey() . '") as longitude_dec, ';
-        $query .= 'aes_decrypt(latitude, "' . Config::smsPersonalInfoKey() . '") as latitude_dec, ';
-        $query .= 'aes_decrypt(email, "' . Config::smsPersonalInfoKey() . '") as email_dec, ';
-        $query .= 'aes_decrypt(telephone1, "' . Config::smsPersonalInfoKey() . '") as telephone1_dec, ';
-        $query .= 'aes_decrypt(telephone2, "' . Config::smsPersonalInfoKey() . '") as telephone2_dec, ';
-        $query .= 'aes_decrypt(logincode, "' . Config::loginCodeKey() . '") as logincode_dec ';
+        $query = 'aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname_dec, ';
+        $query .= 'aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') as lastname_dec, ';
+        $query .= 'aes_decrypt(age, \'' . Config::smsPersonalInfoKey() . '\') as age_dec, ';
+        $query .= 'aes_decrypt(sex, \'' . Config::smsPersonalInfoKey() . '\') as sex_dec, ';
+        $query .= 'aes_decrypt(birthdate, \'' . Config::smsPersonalInfoKey() . '\') as birthdate_dec, ';
+        $query .= 'aes_decrypt(address1, \'' . Config::smsPersonalInfoKey() . '\') as address1_dec, ';
+        $query .= 'aes_decrypt(address2, \'' . Config::smsPersonalInfoKey() . '\') as address2_dec, ';
+        $query .= 'aes_decrypt(zip, \'' . Config::smsPersonalInfoKey() . '\') as zip_dec, ';
+        $query .= 'aes_decrypt(city, \'' . Config::smsPersonalInfoKey() . '\') as city_dec, ';
+        $query .= 'aes_decrypt(longitude, \'' . Config::smsPersonalInfoKey() . '\') as longitude_dec, ';
+        $query .= 'aes_decrypt(latitude, \'' . Config::smsPersonalInfoKey() . '\') as latitude_dec, ';
+        $query .= 'aes_decrypt(email, \'' . Config::smsPersonalInfoKey() . '\') as email_dec, ';
+        $query .= 'aes_decrypt(telephone1, \'' . Config::smsPersonalInfoKey() . '\') as telephone1_dec, ';
+        $query .= 'aes_decrypt(telephone2, \'' . Config::smsPersonalInfoKey() . '\') as telephone2_dec, ';
+        $query .= 'aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') as logincode_dec ';
         if (dbConfig::defaultSeparateInterviewAddress()) {
             $query .= Respondents::getExtraDeidentified();
         }
@@ -38,14 +38,14 @@ class Respondents {
     }
 
     static function getExtraDeidentified() {
-        $extra = ', aes_decrypt(original_firstname, "' . Config::smsPersonalInfoKey() . '") as original_firstname_dec ';
-        $extra .= ', aes_decrypt(original_lastname, "' . Config::smsPersonalInfoKey() . '") as original_lastname_dec ';
-        $extra .= ', aes_decrypt(original_telephone1, "' . Config::smsPersonalInfoKey() . '") as original_telephone1_dec ';
-        $extra .= ', aes_decrypt(interview_address1, "' . Config::smsPersonalInfoKey() . '") as interview_address1_dec ';
-        $extra .= ', aes_decrypt(interview_address2, "' . Config::smsPersonalInfoKey() . '") as interview_address2_dec ';
-        $extra .= ', aes_decrypt(interview_zip, "' . Config::smsPersonalInfoKey() . '") as interview_zip_dec ';
-        $extra .= ', aes_decrypt(interview_city, "' . Config::smsPersonalInfoKey() . '") as interview_city_dec ';
-        $extra .= ', aes_decrypt(interview_state, "' . Config::smsPersonalInfoKey() . '") as interview_state_dec ';
+        $extra = ', aes_decrypt(original_firstname, \'' . Config::smsPersonalInfoKey() . '\') as original_firstname_dec ';
+        $extra .= ', aes_decrypt(original_lastname, \'' . Config::smsPersonalInfoKey() . '\') as original_lastname_dec ';
+        $extra .= ', aes_decrypt(original_telephone1, \'' . Config::smsPersonalInfoKey() . '\') as original_telephone1_dec ';
+        $extra .= ', aes_decrypt(interview_address1, \'' . Config::smsPersonalInfoKey() . '\') as interview_address1_dec ';
+        $extra .= ', aes_decrypt(interview_address2, \'' . Config::smsPersonalInfoKey() . '\') as interview_address2_dec ';
+        $extra .= ', aes_decrypt(interview_zip, \'' . Config::smsPersonalInfoKey() . '\') as interview_zip_dec ';
+        $extra .= ', aes_decrypt(interview_city, \'' . Config::smsPersonalInfoKey() . '\') as interview_city_dec ';
+        $extra .= ', aes_decrypt(interview_state, \'' . Config::smsPersonalInfoKey() . '\') as interview_state_dec ';
         return $extra;
     }
 
@@ -173,7 +173,7 @@ class Respondents {
     function removeRespondentFromTable($primkey, $table) {
 
         global $db;
-        $query = 'delete from ' . Config::dbSurvey() . $table . ' where primkey = "' . prepareDatabaseString($primkey) . '"';
+        $query = 'delete from ' . Config::dbSurvey() . $table . ' where primkey = \'' . prepareDatabaseString($primkey) . '\'';
         $result = $db->selectQuery($query);
     }
 
@@ -204,7 +204,7 @@ class Respondents {
         if ($user != null) {
             $urid = $user->getUrid();
         }
-        $query = 'replace into ' . Config::dbSurvey() . '_respondents (primkey, firstname, urid, test, hhid, sex, age, selected, present, permanent, hhorder) values ("' . $primkey . '", aes_encrypt("' . $firstname . '", "' . Config::smsPersonalInfoKey() . '"), ' . prepareDatabaseString($urid) . ', ' . $test . ', "' . $hhid . '", aes_encrypt("' . $sex . '", "' . Config::smsPersonalInfoKey() . '"), aes_encrypt("' . $age . '", "' . Config::smsPersonalInfoKey() . '"), ' . $selected . ', ' . $present . ', ' . $permanent . ', ' . $hhorder . ')';
+        $query = 'replace into ' . Config::dbSurvey() . '_respondents (primkey, firstname, urid, test, hhid, sex, age, selected, present, permanent, hhorder) values (\'' . $primkey . '\', aes_encrypt(\'' . $firstname . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . prepareDatabaseString($urid) . ', ' . $test . ', \'' . $hhid . '\', aes_encrypt(\'' . $sex . '\', \'' . Config::smsPersonalInfoKey() . '\'), aes_encrypt(\'' . $age . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . $selected . ', ' . $present . ', ' . $permanent . ', ' . $hhorder . ')';
         //echo '<br/><br/><Br/>' . $query . '<hr>';
         $result = $db->selectQuery($query);
         return new Respondent($primkey);
@@ -219,8 +219,8 @@ class Respondents {
         $respondents = array();
 
         $query = 'select primkey from ' . Config::dbSurveyData() . '_lab where 
-              aes_decrypt(barcode, "' . Config::filePictureKey() . '") = "' . prepareDatabaseString($searchterm) . '" or
-              aes_decrypt(labbarcode, "' . Config::filePictureKey() . '") = "' . prepareDatabaseString($searchterm) . '"';
+              aes_decrypt(barcode, \'' . Config::filePictureKey() . '\') = \'' . prepareDatabaseString($searchterm) . '\' or
+              aes_decrypt(labbarcode, \'' . Config::filePictureKey() . '\') = \'' . prepareDatabaseString($searchterm) . '\'';
 //echo $query;
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
@@ -230,7 +230,7 @@ class Respondents {
         }
         if (sizeof($respondents) == 0) { //nothing found yet
             global $survey;
-            $query = 'select primkey from ' . Config::dbSurveyData() . '_data where variablename="bs021" and cast(aes_decrypt(answer, "' . $survey->getDataEncryptionKey() . '") as char) = "' . prepareDatabaseString($searchterm) . '"';
+            $query = 'select primkey from ' . Config::dbSurveyData() . '_data where variablename="bs021" and cast(aes_decrypt(answer, \'' . $survey->getDataEncryptionKey() . '\') as char) = \'' . prepareDatabaseString($searchterm) . '\'';
             $result = $db->selectQuery($query);
             if ($result != null && $db->getNumberOfRows($result) > 0) {
                 $row = $db->getRow($result);
@@ -254,13 +254,13 @@ class Respondents {
             $test .= ' AND t1.urid = ' . prepareDatabaseString($user->getUrid());
         }
         //search through respondent table
-        $query = 'select *, aes_decrypt(firstname, "' . Config::smsPersonalInfoKey() . '") as firstname_dec, 
-            aes_decrypt(lastname, "' . Config::smsPersonalInfoKey() . '") as lastname_dec 
+        $query = 'select *, aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname_dec, 
+            aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') as lastname_dec 
             from ' . Config::dbSurvey() . '_respondents as t1
             where ' . $test . ' and (
               t1.primkey like "%' . prepareDatabaseString($searchterm) . '%" or
-              aes_decrypt(firstname, "' . Config::smsPersonalInfoKey() . '") like "%' . prepareDatabaseString($searchterm) . '%" or
-              aes_decrypt(lastname, "' . Config::smsPersonalInfoKey() . '") like "%' . prepareDatabaseString($searchterm) . '%"
+              aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') like "%' . prepareDatabaseString($searchterm) . '%" or
+              aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') like "%' . prepareDatabaseString($searchterm) . '%"
             )';
 
         $result = $db->selectQuery($query);
@@ -271,9 +271,9 @@ class Respondents {
 
         //search through remarks
 
-        $query = 'select *, aes_decrypt(firstname, "' . Config::smsPersonalInfoKey() . '") as firstname_dec, 
+        $query = 'select *, aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname_dec, 
 
-            aes_decrypt(lastname, "' . Config::smsPersonalInfoKey() . '") as lastname_dec 
+            aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') as lastname_dec 
 
 
 
@@ -285,7 +285,7 @@ class Respondents {
 
             where t2.' . $test . ' and (
 
-              aes_decrypt(remark, "' . Config::smsRemarkKey() . '") like "%' . prepareDatabaseString($searchterm) . '%" 
+              aes_decrypt(remark, \'' . Config::smsRemarkKey() . '\') like "%' . prepareDatabaseString($searchterm) . '%" 
 
             )';
 
@@ -303,7 +303,7 @@ class Respondents {
 
     function getRespondentByLoginCode($logincode) {
         global $db;
-        $query = 'select *, ' . $this->getDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, "' . Config::loginCodeKey() . '") = "' . prepareDatabaseString($logincode) . '"';
+        $query = 'select *, ' . $this->getDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') = \'' . prepareDatabaseString($logincode) . '\'';
 //echo $query;
         if ($result = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($result) > 0) {
@@ -321,7 +321,7 @@ class Respondents {
     function getRespondentsByUrid($urid) {
         global $db;
         $respondents = array();
-        $query = 'select primkey from ' . Config::dbSurvey() . '_lab where urid = "' . prepareDatabaseString($urid) . '"';
+        $query = 'select primkey from ' . Config::dbSurvey() . '_lab where urid = \'' . prepareDatabaseString($urid) . '\'';
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $respondents[] = new Respondent($row['primkey']);

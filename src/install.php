@@ -19,7 +19,7 @@ class Install {
 
     function __construct($page = '') {
         echo $this->mainPage($page);
-        exit;
+        doExit();
     }
 
     function mainPage($page = "", $message = "") {
@@ -71,6 +71,7 @@ class Install {
     <li role="presentation"><a href="#encryption" aria-controls="encryption" role="tab" data-toggle="tab">' . Language::installLabelEncryption() . '</a></li>
     <li role="presentation"><a href="#logging" aria-controls="logging" role="tab" data-toggle="tab">' . Language::installLabelLogging() . '</a></li>
     <li role="presentation"><a href="#session" aria-controls="session" role="tab" data-toggle="tab">' . Language::installLabelSession() . '</a></li>    
+    <li role="presentation"><a href="#performance" aria-controls="sample" role="tab" data-toggle="tab">' . Language::installLabelPerformance() . '</a></li>    
     <li role="presentation"><a href="#sample" aria-controls="sample" role="tab" data-toggle="tab">' . Language::installLabelSample() . '</a></li>    
   </ul>
 
@@ -291,7 +292,7 @@ class Install {
         <button onclick="$(\'#myTabs li:eq(3) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
         <button onclick="$(\'#myTabs li:eq(5) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonNext() . '</button>    
     </div>
-    
+        
     <div role="tabpanel" class="tab-pane" id="session">
     ' . Language::installSessionWelcome() . '
         <br/><br/>
@@ -350,6 +351,73 @@ class Install {
         <button onclick="$(\'#myTabs li:eq(4) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
         <button onclick="$(\'#myTabs li:eq(6) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonNext() . '</button>    
     </div>
+
+    <div role="tabpanel" class="tab-pane" id="performance">
+    ' . Language::installPerformanceWelcome() . '
+        <br/><br/>
+        <table style="width: 400px; max-width: 400px;" class="table table-striped table-bordered">
+        <tr>
+        <td>' . Language::installLabelPerformanceUseSerialize() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performanceserialize" />
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUseLocking() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performancelocking" />
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUseDataRecords() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performancerecords" />
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUsePreparedQueries() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performancequeries" />
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUseState() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performancestate" />
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUseTransactions() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performancetransaction" />
+            <option selected value="1">' . Language::installLabelYes() . '</option>
+            <option value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelPerformanceUseMinify() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="performanceminify" />
+            <option selected value="1">' . Language::installLabelYes() . '</option>
+            <option value="2">' . Language::installLabelNo() . '</option>            
+            </td>
+        </tr>
+        </table> 
+        <br/>
+        <button onclick="$(\'#myTabs li:eq(5) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
+        <button onclick="$(\'#myTabs li:eq(7) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonNext() . '</button>    
+    </div>
+
     <div role="tabpanel" class="tab-pane" id="sample">
     ' . Language::installSampleWelcome() . '
         <br/><br/>
@@ -413,7 +481,7 @@ class Install {
         </tr>
         </table> 
         <br/>
-        <button onclick="$(\'#myTabs li:eq(5) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
+        <button onclick="$(\'#myTabs li:eq(6) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
         <button type="submit" class="btn btn-primary">' . Language::installButtonFinish() . '</button>
     </div>
   </div>  
@@ -498,6 +566,15 @@ $configuration = array(
         CONFIGURATION_SESSION_LOGOUT => "' . loadvar('sessionlogout') . '",
         CONFIGURATION_SESSION_REDIRECT => "' . loadvar('sessionredirect') . '",
         CONFIGURATION_SESSION_PING => "' . loadvar('sessionping') . '"
+    ),
+    CONFIGURATION_PERFORMANCE => array(
+        CONFIGURATION_PERFORMANCE_DATA_FROM_STATE => "' . loadvar('performancestate') . '",
+        CONFIGURATION_PERFORMANCE_PREPARE_QUERIES => "' . loadvar('performancequeries') . '",
+        CONFIGURATION_PERFORMANCE_UNSERIALIZE => "' . loadvar('performanceserialize') . '",
+        CONFIGURATION_PERFORMANCE_USE_DATARECORDS => "' . loadvar('performancerecords') . '",
+        CONFIGURATION_PERFORMANCE_USE_DYNAMIC_MINIFY => "' . loadvar('performanceminify') . '",
+        CONFIGURATION_PERFORMANCE_USE_LOCKING => "' . loadvar('performancelocking') . '",
+        CONFIGURATION_PERFORMANCE_USE_TRANSACTIONS => "' . loadvar('performancetransaction') . '"
     )
 );
 ?>';
@@ -552,7 +629,7 @@ $configuration = array(
 
         $returnStr .= '
     <!-- Bootstrap core CSS -->
-		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.min.css">
 
     <!-- Custom scripts and styles for this template -->';
 
@@ -560,7 +637,7 @@ $configuration = array(
             $returnStr .= '<script type="text/javascript" charset="utf-8" language="javascript" src="bootstrap/assets/js/jquery.js"></script>';
         }
         $returnStr .= '<link href="css/uscicadmin.css" rel="stylesheet">
-                  <link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet"> 
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"> 
                   ';
         $returnStr .= '
     ' . $style . '
@@ -637,13 +714,13 @@ $configuration = array(
 
     function displayComboBox() {
         $str = '';
-        if (!isRegisteredScript("js/bootstrap-select.js")) {
-            registerScript('js/bootstrap-select.js');
-            $str .= '<script src="js/bootstrap-select.js"></script>';
+        if (!isRegisteredScript("js/bootstrap-select/bootstrap-select-min.js")) {
+            registerScript('js/bootstrap-select/bootstrap-select-min.js');
+            $str .= getScript("js/bootstrap-select/bootstrap-select-min.js");
         }
         if (!isRegisteredScript("css/bootstrap-select.css")) {
             registerScript('css/bootstrap-select.css');
-            $str .= '<link href="css/bootstrap-select.css" type="text/css" rel="stylesheet">';
+            $str .= getCSS("css/bootstrap-select.css");
         }
         $str .= '<script type="text/javascript">
                     $(document).ready(function(){

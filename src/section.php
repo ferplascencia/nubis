@@ -237,7 +237,13 @@ class Section extends Component {
         $row = $db->getRow($r);
         $seid = $row["max"] + 1;
         $oldseid = $this->getSeid();
-
+        $oldsuid = $this->getSuid();
+        
+        /* move routing */
+        $query = "update " . Config::dbSurvey() . "_routing set suid=" . $suid . ", seid=" . $seid . " where suid=" . $oldsuid . " and seid=" . $oldseid;
+        $db->executeQuery($query);
+        
+        // remove in current survey
         $this->remove();
 
         $this->setObjectName($seid);
@@ -258,10 +264,10 @@ class Section extends Component {
         $vars = $survey->getVariableDescriptives($oldseid);
         foreach ($vars as $var) {
             $var->move($suid, $this->getSeid());
-        }
+        }        
     }
 
-    function copy($newsuid = "", $suffix = 2) {
+    function copy($newsuid = "", $suffix = 2, $types = true) {
 
         /* copy section */
         global $db;
@@ -294,10 +300,10 @@ class Section extends Component {
         $vars = $survey->getVariableDescriptives($oldseid);
         foreach ($vars as $var) {
             if ($suffix == 2) {
-                $var->copy($var->getName() . "_cl", $newsuid, $this->getSeid());
+                $var->copy($var->getName() . "_cl", $newsuid, $this->getSeid(), $types);
             }
             else {
-                $var->copy($var->getName(), $newsuid, $this->getSeid());
+                $var->copy($var->getName(), $newsuid, $this->getSeid(), $types);
             }
         }
         

@@ -40,7 +40,7 @@ class Login {
         else {
             if ($survey->getAccessType() == LOGIN_ANONYMOUS) {
                 $displayLogin = new DisplayLogin();
-    //TODO MAKE SURE generateRandomPrimkey doesn't exist yet!!   
+    //TODO MAKE SURE generateRandomPrimkey doesn't exist yet!!                  
                 $returnStr .= $displayLogin->showLoginAnonymous(generateRandomPrimkey(8));
             } elseif ($survey->getAccessType() == LOGIN_DIRECT) {                
                 $displayLogin = new DisplayLogin();
@@ -57,7 +57,7 @@ class Login {
         global $db;
         $username = loadvar('username');
         $password = loadvar('password');
-        $result = $db->selectQuery('select count(*), urid from ' . Config::dbSurvey() . '_users where username="' . prepareDatabaseString($username) . '" and status=1 and aes_decrypt(password, "' . Config::smsPasswordKey() . '") = "' . prepareDatabaseString($password) . '"');
+        $result = $db->selectQuery('select count(*), urid from ' . Config::dbSurvey() . '_users where username=\'' . prepareDatabaseString($username) . '\' and status=1 and aes_decrypt(password, \'' . Config::smsPasswordKey() . '\') = \'' . prepareDatabaseString($password) . '\'');
         //echo 'select count(*), urid from ' . Config::dbSurvey() . '_users where username="' . prepareDatabaseString($username) . '" and status=1 and aes_decrypt(password, "' . Config::smsPasswordKey() . '") = "' . prepareDatabaseString($password) . '"';
         $row = $db->getRow($result);
         if ($row[0] == 1) {
@@ -85,7 +85,7 @@ class Login {
 
             case LOGIN_LOGINCODE:
                 $logincode = loadvarSurvey('primkey');
-                $result = $db->selectQuery('select count(*), primkey from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, "' . Config::loginCodeKey() . '") = "' . prepareDatabaseString($logincode) . '"');
+                $result = $db->selectQuery('select count(*), primkey from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') = \'' . prepareDatabaseString($logincode) . '\'');
                 //echo 'select count(*), primkey from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, "' . Config::loginCodeKey() . '") = "' . prepareDatabaseString($logincode) . '"';
                 $row = $db->getRow($result);
                 if ($row[0] == 1) {

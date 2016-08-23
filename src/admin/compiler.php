@@ -17,9 +17,9 @@ require_once("phpparser_bootstrap.php");
 
 
 
-ini_set('memory_limit', '512M');
+ini_set('memory_limit', Config::compilerMemoryLimit());
 
-//ini_set('xdebug.max_nesting_level', 4000);
+ini_set('xdebug.max_nesting_level', 4000);
 
 ini_set("error_reporting", "ALL");
 
@@ -57,6 +57,7 @@ class Compiler {
     private $loopnextrgids; // keeps track of loop next rgids for exitfor
     private $setfills;
     private $fillclass; // indicates whether we are generating a section engine or set fill class
+    private $checkclass; // indicates whether we are generating a check class
     private $currentrgid;
     private $messages;
     private $ifreset;
@@ -419,6 +420,12 @@ class Compiler {
                     $setfillclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
 
                     //echo "<textarea style='width: 100%;' rows=5>" . $setfillclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] . "</textarea><hr>";
+                } else {
+
+                    // no fill code, then remove
+                    if (isset($setfillclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())])) {
+                        unset($setfillclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())]);
+                    }
                 }
             } else {
                 if (isset($setfillclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())])) {
@@ -1303,6 +1310,7 @@ class Compiler {
     /* MAIN ROUTING FUNCTIONS */
 
     function generateEngine($seid, $compile = true) {
+        set_time_limit(0);
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         global $db;
         $this->seid = $seid;
@@ -1365,6 +1373,12 @@ class Compiler {
                     $this->instructions[$row["rgid"]] = new RoutingInstruction($this->suid, $this->seid, $row["rgid"], $row["rule"]);
                 }
 
+                // set default survey language and mode for routing
+                $cm = getSurveyMode();
+                $cl = getSurveyLanguage();
+                $mode = $this->survey->getDefaultMode();
+                $_SESSION['SURVEY_MODE'] = $mode;
+                $_SESSION['SURVEY_LANGUAGE'] = $this->survey->getDefaultLanguage($mode);
 
                 /* process rules */
                 for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
@@ -1428,9 +1442,197 @@ class Compiler {
 
                 /* group fill names */
                 $this->generateGetFillsRouting($seid, $compile);
+
+                $_SESSION['SURVEY_MODE'] = $cm;
+                $_SESSION['SURVEY_LANGUAGE'] = $cl;
             }
         }
 
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
+        return $this->messages;
+    }
+
+    function loadChecks() {
+        global $db;
+        $q = "select checks from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $r = $db->selectQuery($q);
+        if ($row = $db->getRow($r)) {
+            if ($row["checks"] != "") {
+                return unserialize(gzuncompress($row["checks"]));
+            }
+        }
+        return array();
+    }
+
+    function generateChecks($variables = array(), $remove = false, $compile = true) {
+
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
+
+        /* create factory, printer and root node */
+
+        $this->factory = new PHPParser_BuilderFactory();
+
+        $this->printer = new PHPParser_PrettyPrinter_Default();
+        $this->messages = array();
+        //$setfillclasses = array();
+
+        $this->fillclass = true;
+        $this->checkclass = true;
+
+        /* load any existing checks from context */
+        $checkclasses = $this->loadChecks();
+
+        /* go through all variable(s) if none provided */
+        global $db;
+        if (sizeof($variables) == 0) {
+            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " order by vsid asc";
+            if ($result = $db->selectQuery($q)) {
+                if ($db->getNumberOfRows($result) > 0) {
+                    while ($row = $db->getRow($result)) {
+                        $variables[] = new VariableDescriptive($row);
+                    }
+                }
+            }
+        }
+
+        foreach ($variables as $var) {
+            if ($remove == false) {
+                $code = $var->getCheckCode();
+                //echo $code;
+                if (trim($code) != "") {
+
+                    $this->currentfillvariable = $var->getName();
+                    //$rule = trim(str_ireplace(".FILL", "", $s->getRule()));            
+                    //$rgid = $s->getRgid();
+
+                    /* store pairing */
+                    //$setfillarray[strtoupper(getBasicName($rule))] = $rgid;
+
+                    $rootnode = $this->factory->class(CLASS_CHECK . "_" . $this->currentfillvariable)->extend(CLASS_BASICCHECK);
+
+                    /* preset trackers */
+
+                    $this->looptimes = 1;
+
+                    $this->lasttimesloop = array();
+
+                    $this->lastloopactions = array();
+
+                    $this->loops = array();
+                    $this->groups = array();
+                    $this->groupsend = array();
+                    $this->groupactions = array();
+                    $this->instructions = array();
+                    $this->whiles = array();
+                    $this->lastwhileactions = array();
+
+                    $this->doaction_cases = array();
+                    $this->actions = array();
+                    $stmts = array();
+
+                    //$var = $this->survey->getVariableDescriptiveByName(getBasicName($rule));
+
+
+                    $checkrules = explode("\r\n", $code);
+                    $cnt = 1;
+
+                    foreach ($checkrules as $checkrule) {
+
+                        $this->instructions[$cnt] = new RoutingInstruction($var->getSuid(), $var->getSeid(), $cnt, rtrim($checkrule));
+
+                        $cnt++;
+                    }
+
+                    //print_r($this->instructions);
+
+
+
+                    /* process setfillvalue cases */
+                    //echo "<hr>" . $rule . $rgid;
+                    for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
+
+                        if (isset($this->instructions[$this->cnt])) {
+                            //echo $this->instructions[$this->cnt]->getRule() . "<br/>";
+                            $this->addRule($rootnode, $this->instructions[$this->cnt]);
+                        }
+                    }
+                    //echo "END";
+
+
+
+                    /* add end */
+
+                    $stmts[] = new PHPParser_Node_Stmt_Break();
+
+                    $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(null, $stmts);
+
+
+
+                    /* add doAction function */
+
+                    $this->doaction = $this->factory->method(FUNCTION_DO_ACTION);
+
+                    $this->doaction->makePublic();
+
+                    $param = new PHPParser_Builder_Param('rgid');
+
+                    $param->setDefault("");
+
+                    $this->doaction->addParam($param);
+
+                    $doactioncond = new PHPParser_Node_Expr_Variable("rgid");
+
+                    $this->doaction->addStmt(new PHPParser_Node_Stmt_Switch($doactioncond, $this->doaction_cases));
+
+                    $rootnode->addStmt($this->doaction);
+
+
+                    /* add getFirstAction function */
+                    $firstaction = $this->factory->method(FUNCTION_GET_FIRST_ACTION);
+                    $firstaction->makePublic();
+                    $firstaction->addStmt(new PHPParser_Node_Stmt_Return(new PHPParser_Node_Scalar_LNumber($this->actions[0])));
+                    $rootnode->addStmt($firstaction);
+
+                    /* get statements */
+
+                    $stmts = array($rootnode->getNode());
+
+
+
+                    /* generate code for check class */
+
+                    //$setfillclasses[$rgid] = $this->printer->prettyPrint($stmts);
+                    $checkclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
+
+                    //echo "<textarea style='width: 100%;' rows=5>" . $checkclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] . "</textarea><hr>";
+                } else {
+
+                    // no check code, then remove
+                    if (isset($checkclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())])) {
+                        unset($checkclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())]);
+                    }
+                }
+            } else {
+                if (isset($checkclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())])) {
+                    unset($checkclasses[strtoupper($var->getName() . getSurveyLanguage() . getSurveyMode())]);
+                }
+            }
+        }
+
+        if ($compile == true) {
+
+            /* check for first time */
+            $this->addContext();
+
+            /* store in db */
+            global $db;
+            $bp = new BindParam();
+            $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($checkclasses), 9));
+            $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
+            $bp->add(MYSQL_BINDING_INTEGER, $this->version);
+            $query = "update " . Config::dbSurvey() . "_context set checks = ? where suid=? and version = ? ";
+            $db->executeBoundQuery($query, $bp->get());
+        }
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
         return $this->messages;
     }
@@ -1548,38 +1750,42 @@ class Compiler {
         // for loop  
         else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
 
-            $action = FUNCTION_DO_LOOP . $rgid;
-            $this->addForLoop($action, $node, $instruction);
+            if ($this->checkclass == false) {
+                $action = FUNCTION_DO_LOOP . $rgid;
+                $this->addForLoop($action, $node, $instruction);
 
-            // not in group
-            if (sizeof($this->groups) == 0) {
-                $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
-                $stmts[] = new PHPParser_Node_Stmt_Break();
+                // not in group
+                if (sizeof($this->groups) == 0) {
+                    $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
+                    $stmts[] = new PHPParser_Node_Stmt_Break();
+                }
+                // in group
+                else {
+                    $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
+                }
+                $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
+                $this->actions[] = $rgid;
             }
-            // in group
-            else {
-                $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
-            }
-            $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
-            $this->actions[] = $rgid;
         }
         // while loop  
         else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
 
-            $action = FUNCTION_DO_WHILE . $rgid;
-            $this->addWhileLoop($action, $node, $instruction);
+            if ($this->checkclass == false) {
+                $action = FUNCTION_DO_WHILE . $rgid;
+                $this->addWhileLoop($action, $node, $instruction);
 
-            // not in group
-            if (sizeof($this->groups) == 0) {
-                $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
-                $stmts[] = new PHPParser_Node_Stmt_Break();
+                // not in group
+                if (sizeof($this->groups) == 0) {
+                    $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
+                    $stmts[] = new PHPParser_Node_Stmt_Break();
+                }
+                // in group
+                else {
+                    $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
+                }
+                $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
+                $this->actions[] = $rgid;
             }
-            // in group
-            else {
-                $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
-            }
-            $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
-            $this->actions[] = $rgid;
         }
         // group  
         else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
@@ -1686,29 +1892,24 @@ class Compiler {
         // assignment
         else if (contains($rule, ":=")) {
 
-            $action = FUNCTION_DO_ASSIGNMENT . $rgid;
+            if ($this->checkclass == false) {
+                $action = FUNCTION_DO_ASSIGNMENT . $rgid;
+                $this->addAssignment($action, $node, $instruction);
 
-            $this->addAssignment($action, $node, $instruction);
+                // not in group
+                if (sizeof($this->groups) == 0) {
+                    $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
+                    $stmts[] = new PHPParser_Node_Stmt_Break();
+                }
 
+                // in group
+                else {
+                    $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
+                }
 
-
-            // not in group
-
-            if (sizeof($this->groups) == 0) {
-
-                $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
-
-                $stmts[] = new PHPParser_Node_Stmt_Break();
+                $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
+                $this->actions[] = $rgid;
             }
-
-            // in group
-            else {
-
-                $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array()));
-            }
-
-            $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
-            $this->actions[] = $rgid;
         }
 
         // multi line comment
@@ -1907,6 +2108,15 @@ class Compiler {
                         $this->addQuestion($node, $instruction);
                     }
                 }
+                // check code
+                else if ($this->checkclass == true) {
+                    $action = FUNCTION_DO_CHECK_RETURN . $rgid;                    
+                    $this->addCheckReturn($action, $node, $instruction);                    
+                    $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($action)), array());
+                    $stmts[] = new PHPParser_Node_Stmt_Break();
+                    $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
+                    $this->actions[] = $rgid;
+                }
                 // in fill code, then none of this is allowed
                 else {
                     $this->addErrorMessage(Language::errorFillCodeOnlyAssignments());
@@ -1918,6 +2128,9 @@ class Compiler {
     function addSection($rule, $rgid, $seid, $typequestion = false) {
 
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
 
@@ -2021,6 +2234,9 @@ class Compiler {
         if ($this->fillclass == true) {
             return;
         }
+        if ($this->checkclass == true) {
+            return;
+        }
         $rule = trim($instruction->getRule());
 
         $rgid = trim($instruction->getRgid());
@@ -2118,6 +2334,9 @@ class Compiler {
     function addMoveBackward($function, &$node, $instruction) {
 
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
         $rule = trim($instruction->getRule());
@@ -2222,6 +2441,9 @@ class Compiler {
     function addGroup($function, &$node, $instruction) {
 
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
 
@@ -2497,6 +2719,9 @@ class Compiler {
     function addSubGroup($function, &$node, $instruction) {
 
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
 
@@ -2873,6 +3098,7 @@ class Compiler {
             }
         }
 
+
         //echo $locate;
         // handle 1 in variable (set of enumerated reference)
         $find = array();
@@ -2953,7 +3179,7 @@ class Compiler {
         if (!$ifstmt) {
             return;
         }
-        
+
         $iftype = "";
         if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
             $iftype = ROUTING_IDENTIFY_IF;
@@ -3048,9 +3274,9 @@ class Compiler {
 
 
 
-        // loop AND (not nested if OR nested if inside a nested loop), then set where we left off
+        // not in group AND loop AND (not nested if OR nested if inside a nested loop), then set where we left off
 
-        if ($iftype == ROUTING_IDENTIFY_IF) {
+        if ($iftype == ROUTING_IDENTIFY_IF && sizeof($this->groups) == 0) {
 
             // loop action
             if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
@@ -3177,11 +3403,16 @@ class Compiler {
 
     function addAssignment($function, &$node, $instruction) {
 
+        if ($this->checkclass == true) {
+            return;
+        }
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
 
         // hide quoted text
         $excluded = array();
+        $tempparts = splitString("/:=/", $rule, PREG_SPLIT_NO_EMPTY, 2);
+        $checkvar = trim($tempparts[0]);
         $rule = excludeText($rule, $excluded);
 
         // hide module dot notations
@@ -3240,7 +3471,8 @@ class Compiler {
             $args[] = $stmt;
 
             // add check assignment statement
-            $ifstmt = new PHPParser_Node_Expr_Equal(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_CHECK_ANSWER)), array($stmt)), new PHPParser_Node_Scalar_LNumber(2));
+            $stmtvar = new PHPParser_Node_Scalar_String($checkvar);
+            $ifstmt = new PHPParser_Node_Expr_Equal(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_CHECK_ANSWER)), array($stmtvar, $stmt)), new PHPParser_Node_Scalar_LNumber(2));
             $ifnode = new PHPParser_Node_Stmt_If($ifstmt, array('stmts' => array(new PHPParser_Node_Stmt_Return())));
             $assignfunctionnode->addStmt($ifnode);
 
@@ -3408,10 +3640,89 @@ class Compiler {
         /* add assign function */
         $node->addStmt($assignfunctionnode);
     }
+    
+    function addCheckReturn($function, &$node, $instruction) {
+
+        if ($this->checkclass == false) {
+            return;
+        }
+        $rule = trim($instruction->getRule());
+        $rgid = trim($instruction->getRgid());
+
+        // hide quoted text
+        $excluded = array();
+        $rule = excludeText($rule, $excluded);
+
+        // hide module dot notations
+        $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+
+        /* replace brackets */
+        $rule = str_replace("[", TEXT_BRACKET_LEFT, $rule);
+        $rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
+
+        if (!startsWith($rule, FUNCTION_CHECK_ERROR_RETURN)) {
+              $this->addErrorMessage(Language::errorCheckReturnInvalid());          
+        }
+        $rule = trim(str_ireplace(FUNCTION_CHECK_ERROR_RETURN, "", $rule));
+        $rule = includeText($rule, $excluded);
+        
+        /* create check return */
+        $checkfunctionnode = $this->factory->method($function);
+        $checkfunctionnode->makePrivate();
+
+        $parser = new PHPParser_Parser(new PHPParser_Lexer);
+        try {
+            
+            $level = ERROR_HARD;
+            if (startsWith($rule, VARIABLE_VALUE_SOFT_ERROR)) {
+                $level = ERROR_SOFT;
+                $rule = trim(str_ireplace(VARIABLE_VALUE_SOFT_ERROR, "", $rule));
+            }
+            else if (startsWith($rule, VARIABLE_VALUE_HARD_ERROR)) {
+                $rule = trim(str_ireplace(VARIABLE_VALUE_HARD_ERROR, "", $rule));
+            }
+            else {
+                $this->addErrorMessage(Language::errorCheckReturnInvalid());
+                return;
+            }
+            
+            // numeric error line
+            if (is_numeric($rule)) {
+                $stmt = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rule));
+                $args[] = $stmt;
+            }
+            else {
+                $stmts = $parser->parse("<?php " . $rule . "?>");
+
+                // only one statement
+                $stmt = new PHPParser_Node_Arg($stmts[0]);
+                $this->updateVariables($stmt);
+                $args[] = $stmt;
+            }
+            
+            // add set error level
+            $stmtvar = new PHPParser_Node_Scalar_LNumber($level);
+            $setnode = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_SET_CHECK_LEVEL)), array($stmtvar));
+            $checkfunctionnode->addStmt($setnode);
+
+            // add return error
+            $returnnode = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_GET_ERROR_TEXT_BY_LINE)), $args));
+            $checkfunctionnode->addStmt($returnnode);
+        } catch (PHPParser_Error $e) {
+            $this->addErrorMessage(Language::errorCheckReturnInvalid());
+            return;
+        }
+        
+        /* add check function */
+        $node->addStmt($checkfunctionnode);
+    }
 
     function addInspect($node, $instruction) {
 
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
 
@@ -3512,16 +3823,21 @@ class Compiler {
                 //echo "AAAA<hr>";
                 if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $this->groupactions[end($this->groups)]) && !inArray($nextrgid, $this->loopactions[end($this->loops)]) && !inArray($nextrgid, $this->whileactions[end($this->whiles)])) {
                     //echo $rgid . "<br/>";
+                    //echo $nextrgid;
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                     $stmt = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
 
+                    $stmtthis = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp1"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($function)), array()));
+
                     $cond = new PHPParser_Node_Expr_NotEqual(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Scalar_String(""));
-                    $stmt1 = new PHPParser_Node_Expr_Concat(new PHPParser_Node_Expr_Concat($args[0], new PHPParser_Node_Scalar_String("~")), new PHPParser_Node_Expr_Variable("temp"));
+                    $stmt1 = new PHPParser_Node_Expr_Concat(new PHPParser_Node_Expr_Concat(new PHPParser_Node_Expr_Variable("temp1"), new PHPParser_Node_Scalar_String("~")), new PHPParser_Node_Expr_Variable("temp"));
                     $ifstmt = new PHPParser_Node_Stmt_If($cond, array('stmts' => array(new PHPParser_Node_Stmt_Return($stmt1))));
+                    //$ifstmt = new PHPParser_Node_Stmt_If($cond, array('stmts' => array()));
 
                     $stmts[] = $stmt;
+                    $stmts[] = $stmtthis;
                     $stmts[] = $ifstmt;
-                    $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($function)), array()));
+                    $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_Variable("temp1"));
                 } else {
                     $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($function)), array()));
                 }
@@ -3538,6 +3854,9 @@ class Compiler {
 
         // questions only allowed in main routing (not in fill code)
         if ($this->fillclass == true) {
+            return;
+        }
+        if ($this->checkclass == true) {
             return;
         }
 
@@ -3717,6 +4036,17 @@ class Compiler {
         $db->executeQuery($query);
     }
 
+    // TODO: ADD DUMMY SCREEN IF END OF OUTER LOOP OR OUTER WHILE, SO PROGRESS BAR BREAKS FINE
+    /* // add dummy entry if outer loop or while
+      if (sizeof($this->loops) == 1) {
+      global $db;
+      $this->screencounter++;
+      $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, ifrgid, number, section, looptimes, outerlooptimes, outerlooprgids, outerwhilergids, dummy) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($rgid) . "', '" . prepareDatabaseString($ifrgid) . "', '" . prepareDatabaseString($this->screencounter) . "', -1, -1, '-1','-1','-1', 1);";
+      $db->executeQuery($query);
+      //echo $query;
+      }
+     */
+
     function addNext($from, $to) {
 
         global $db;
@@ -3735,6 +4065,9 @@ class Compiler {
 
     function addForLoop($function, &$node, $instruction) {
 
+        if ($this->checkclass == true) {
+            return;
+        }
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
         $rgidafter = $rgid;
@@ -3981,6 +4314,15 @@ class Compiler {
 
             $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP)), $args);
             $this->loopnextrgids[] = $args;
+
+            // add dummy entry if outer loop or while
+            if (sizeof($this->loops) == 1) {
+                global $db;
+                $this->screencounter++;
+                $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, ifrgid, number, section, looptimes, outerlooptimes, outerlooprgids, outerwhilergids, dummy) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($rgid) . "', '" . prepareDatabaseString($ifrgid) . "', '" . prepareDatabaseString($this->screencounter) . "', -1, -1, '-1','-1','-1', 1);";
+                $db->executeQuery($query);
+//echo $query;
+            }
         }
 
         // in group OR fill class
@@ -4183,6 +4525,9 @@ class Compiler {
 
     function addWhileLoop($function, &$node, $instruction) {
 
+        if ($this->checkclass == true) {
+            return;
+        }
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
         $rgidafter = $rgid;
@@ -5275,6 +5620,52 @@ class Compiler {
                             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($line));
                         }
                         $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_GET_FILL_TEXT_BY_LINE)), $args);
+                        $node->$subs[$i] = $stmt;
+                    }
+                } else if ($this->checkclass && (startsWith($name, VARIABLE_VALUE_SOFT_ERROR) || startsWith($name, VARIABLE_VALUE_HARD_ERROR))) {
+                    $type = ERROR_HARD;
+                    echo $line . '----';
+                    if (startsWith($name, VARIABLE_VALUE_SOFT_ERROR)) {
+                        $line = trim(str_ireplace(VARIABLE_VALUE_SOFT_ERROR, "", $name));
+                    } else {
+                        $type = ERROR_SOFT;
+                        $line = trim(str_ireplace(VARIABLE_VALUE_HARD_ERROR, "", $name));
+                    }
+                    if ($line != "") {
+
+                        $args = array();
+                        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($this->currentfillvariable));
+
+                        if (!is_numeric($line)) {
+                            $parser = new PHPParser_Parser(new PHPParser_Lexer);
+                            try {
+                                $stmtsleft = $parser->parse("<?php " . $line . "?>");
+                                $temp = new PHPParser_Node_Arg($stmtsleft[0]); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
+                                $this->updateVariables($temp);
+                                if ($temp->value instanceof PHPParser_Node_Expr_MethodCall) {
+                                    $args[] = $temp->value->args[0];
+                                    //print_r($temp->value->args[0]);
+                                }
+
+                                // a non-bracketed field
+                                else {
+
+                                    /* not a constant, which happens if the counter field does not exist */
+                                    if ($temp->value->name instanceof PHPParser_Node_Expr_MethodCall) {
+                                        $args[] = $temp->value->name;
+                                        //print_r($temp->value->name->args[0]);
+                                    }
+                                }
+                            } catch (Exception $e) {
+                                $this->addErrorMessage(Language::errorAssignmentInvalid());
+                                return;
+                            }
+                        } else {
+                            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($line));
+                        }
+
+                        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($type));
+                        $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_GET_ERROR_TEXT_BY_LINE)), $args);
                         $node->$subs[$i] = $stmt;
                     }
                 } else {

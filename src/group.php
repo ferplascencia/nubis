@@ -457,6 +457,14 @@ class Group extends Component {
     function setCustomTemplate($text) {
         $this->setSettingValue(SETTING_GROUP_CUSTOM_TEMPLATE, $text);
     }
+    
+    function getXiTemplate($default = true) {
+        return $this->getSettingValue(SETTING_GROUP_XI_TEMPLATE, $default);
+    }
+
+    function setXiTemplate($text) {
+        $this->setSettingValue(SETTING_GROUP_XI_TEMPLATE, $text);
+    }
 
     /* table display */
 
@@ -551,6 +559,58 @@ class Group extends Component {
     function setTableHovered($text) {
         $this->setSettingValue(SETTING_GROUP_TABLE_HOVERED, $text);
     }
+    
+    function getTableMobile($default = true) {
+
+        /* group level setting */
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobile($default);
+    }
+    
+    function isTableMobile() {
+        if ($this->getTableMobile() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobile($text) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE, $text);
+    }  
+    
+    function getTableMobileLabels($default = true) {
+
+        /* group level setting */
+        $val = $this->getSettingValue(SETTING_GROUP_TABLE_MOBILE_LABELS, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobileLabels($default);
+    }
+    
+    function isTableMobileLabels() {
+        if ($this->getTableMobileLabels() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobileLabels($text) {
+        $this->setSettingValue(SETTING_GROUP_TABLE_MOBILE_LABELS, $text);
+    }  
 
     /* validation */
 

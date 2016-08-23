@@ -14,32 +14,65 @@ You should have received a copy of the GNU Lesser General Public License along w
 class Database {
 
     var $db = null;
+    private $type;
 
     function Database() {
+        $this->type = dbConfig::getProperty(CONFIGURATION_DATABASE, CONFIGURATION_DATABASE_TYPE);
         if ($this->db == null) {
             
             //$this->db = @mysqli_connect(Config::dbServer(), Config::dbUser(), Config::dbPassword());  //default mysql
-            $this->db = @mysqli_connect(null, Config::dbUser(), Config::dbPassword());  //default mysql
-            if ($this->db != null) {                
-                if (mysqli_select_db($this->db, Config::dbName())) {
-                    @mysqli_query($this->db, 'SET CHARACTER SET utf8;');
-                    @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
-                }
-                else {
-                    $this->db = null;
-                }                
+            switch ($this->type) {
+                case DB_SQLITE:
+                    $this->db = new SQLite3('c:/myprograms/wamp/bart/nubis.sqlite');
+                    $this->db->createFunction('aes_encrypt', 'aes_encrypt');
+                    $this->db->createFunction('aes_decrypt', 'aes_decrypt');
+                    break;
+                default: 
+                    $this->db = @mysqli_connect(null, Config::dbUser(), Config::dbPassword());  //default mysql
+                    if ($this->db != null) {                
+                        if (mysqli_select_db($this->db, Config::dbName())) {
+                            @mysqli_query($this->db, 'SET CHARACTER SET utf8;');
+                            @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
+                        }
+                        else {
+                            $this->db = null;
+                        }                
+                    }
+                    break;
             }
         }        
     }
 
     function connect($dbServer, $dbName, $username, $password) {      
-        $this->db = @mysqli_connect($dbServer, $username, $password);  //default mysql                    
-        if ($this->db != null) {
-            if (mysqli_select_db($this->db, $dbName)) {
+        switch ($this->type) {
+            case DB_SQLITE:
+                $this->db = new SQLite3('c:/myprograms/wamp/bart/nubis.db');
+                $this->db->createFunction('aes_encrypt', 'encryptC');
+                $this->db->createFunction('aes_decrypt', 'decryptC');
                 return true;
-            }
+            default:
+                $this->db = @mysqli_connect($dbServer, $username, $password);  //default mysql                    
+                if ($this->db != null) {
+                    if (mysqli_select_db($this->db, $dbName)) {
+                        return true;
+                    }
+                }
         }
         return false;
+    }
+    
+    function disconnect() {
+        switch ($this->type) {
+            case DB_SQLITE:
+                $this->db = null;
+                break;
+            default:
+                if ($this->db) {
+                    @mysqli_close($this->db);
+                }
+                $this->db = null;
+                break;
+        }
     }
 
     function getDb() {
@@ -47,11 +80,21 @@ class Database {
     }
 
     function selectQuery($query) {
-        return mysqli_query($this->db, $query);
+        switch ($this->type) {
+            case DB_SQLITE:                
+                return $this->db->query($query);
+            default:
+                return mysqli_query($this->db, $query);        
+        }
     }
 
     function executeQuery($query) {
-        return mysqli_query($this->db, $query);
+        switch ($this->type) {
+            case DB_SQLITE:
+                $this->db->exec($query);
+            default:
+                return mysqli_query($this->db, $query);
+        }
     }
     
     function executeQueries($queries) {
@@ -61,16 +104,31 @@ class Database {
         }        
     }
 
-    function getLastInsertedId() {
-        return @mysqli_insert_id($this->db);
+    function getLastInsertedId() {        
+        switch ($this->type) {
+            case DB_SQLITE:
+                return $this->db->lastInsertRowID();
+            default:
+                return @mysqli_insert_id($this->db);
+        }
     }
 
     function getNumberOfRows($result) {
-        return @mysqli_num_rows($result);
+        switch ($this->type) {
+            case DB_SQLITE:
+                return 100;
+            default:
+                return @mysqli_num_rows($result);
+        }
     }
     
     function getNumberOfFields($result) {
-        return @mysqli_num_fields($result);
+        switch ($this->type) {
+            case DB_SQLITE:
+                return $result->numColumns();
+            default:
+                return @mysqli_num_fields($result);
+        }
     }
     
     function getFields($result) {
@@ -78,11 +136,44 @@ class Database {
     }
 
     function getRow($result, $type = MYSQLI_BOTH) {
-        return @mysqli_fetch_array($result, $type);
+        switch ($this->type) {
+            case DB_SQLITE:
+                if ($result) {
+                    return $result->fetchArray();
+                }
+            default:
+                return @mysqli_fetch_array($result, $type);
+        }
     }
 
     function escapeString($string) {        
-        return mysqli_escape_string($this->db, $string);
+        switch ($this->type) {
+            case DB_SQLITE:
+                return $this->db->escapeString(str_replace('"', '""', $string)); // sqlite does not escape "
+            default:
+                return mysqli_escape_string($this->db, $string);
+        }
+    }
+    
+    function beginTransaction() {
+        switch ($this->type) {
+            case DB_SQLITE:
+                $this->selectQuery("BEGIN TRANSACTION");
+                break;
+            default:
+                $this->selectQuery("BEGIN");
+                break;
+        }
+    }
+    
+    function commitTransaction() {
+        switch ($this->type) {
+            case DB_SQLITE:
+                $this->selectQuery("END TRANSACTION");
+                break;
+            default:
+                $this->selectQuery("COMMIT");
+        }
     }
 
     function executeBoundQuery($query, $parameters) {

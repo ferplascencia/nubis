@@ -29,6 +29,7 @@ class DisplayQuestionBasic extends Display {
     private $showdk;
     private $dkrfna;
     private $dkrfnainline;
+    private $combobox;
     var $inlineeditable;
     var $inlineediticon;
 
@@ -42,6 +43,7 @@ class DisplayQuestionBasic extends Display {
         $this->showfooter = true;
         $this->inlineeditable = '';
         $this->inlineediticon = '';
+        $this->combobox = false;
     }
 
     function getEngine() {
@@ -169,8 +171,8 @@ class DisplayQuestionBasic extends Display {
         if (getSurveyLanguageAllowChange() == LANGUAGE_CHANGE_RESPONDENT_ALLOWED) {
             $returnStr .= $this->showLanguage();
         }
-        $returnStr .= '<link href="css/uscic.css" type="text/css" rel="stylesheet">';
-        $returnStr .= '<form id="form" role="form" method="post" autocomplete="off">';
+        //$returnStr .= '<link href="css/uscic.css" type="text/css" rel="stylesheet">';
+        $returnStr .= '<form id="form" role="form" method="post" autocapitalize="off" spellcheck="false" autocorrect="off" autocomplete="off">';
 
         if ($this->padding) {
             $returnStr .= '<div class="uscic-wrap-with-sms">';
@@ -205,7 +207,8 @@ class DisplayQuestionBasic extends Display {
         $this->queryvariables = $queryvariables;
 
         /* determine query object that holds settings */
-        if (sizeof($queryvariables) == 1) {
+        //if (sizeof($queryvariables) == 1) {
+        if (trim($groupname) == "") { // go to variable only if not a group name, otherwise assume group object
             $queryobject = $this->engine->getVariableDescriptive($queryvariables[0]);
         } else {
             $queryobject = $this->engine->getGroup($groupname);
@@ -474,6 +477,7 @@ class DisplayQuestionBasic extends Display {
         /* add script to capture screenshot of currently displayed screen on button click */
         $screenshotscript = "";
         $extrascripts = "";
+        $extracss = "";
         if ($screendumps == true) {
             $screenshotscript = 'captureScreenshot(); ';
 
@@ -482,7 +486,7 @@ class DisplayQuestionBasic extends Display {
             //$params = array(POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_DISPLAYED => $this->engine->getDisplayed(), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
             //$r = setSessionsParamString($params);
             $returnStr .= "<input type=hidden name='" . POST_PARAM_SCREENSHOT . "' id='" . POST_PARAM_SCREENSHOT . "' value=''/>";
-            $extrascripts .= "<script type='text/javascript'>
+            $extrascripts .= minifyScript("<script type='text/javascript'>
                             function captureScreenshot() {                           
                                 $('#" . POST_PARAM_SCREENSHOT . "').val(encodeURIComponent(getDocTypeAsString() + $('html')[0].outerHTML));                                 
                             }
@@ -491,7 +495,7 @@ class DisplayQuestionBasic extends Display {
                                 var node = document.doctype;
                                 return node ? \"<!DOCTYPE \" + node.name + (node.publicId ? ' PUBLIC \"' + node.publicId + '\"' : '') + (!node.publicId && node.systemId ? ' SYSTEM' : '') + (node.systemId ? ' \"' + node.systemId + '\"' : '') + '>\\n' : '';
                             };
-                            </script>";
+                            </script>");
         }
 
 
@@ -785,7 +789,8 @@ class DisplayQuestionBasic extends Display {
 
         /* data tables */
         if ($this->datatables == true) {
-            $extrascripts .= $this->displayDataTablesScripts();
+            $extrascripts .= $this->displayDataTablesScripts(array(), false);
+            $extracss .= $this->displayDataTablesCSS();
         }
 
         /* keyboard binding */
@@ -795,18 +800,19 @@ class DisplayQuestionBasic extends Display {
 
         /* button switches for dk/rf/na */
         if ($this->showdk == true && $this->dkrfna == true) {
-            $extrascripts .= $this->displayRadioSwitch();
+            $extrascripts .= $this->displayRadioSwitch(false);
+            $extracss .= $this->displayRadioSwitchCSS();
         }
 
         // button disabling
         $extrascripts .= $this->displayButtonToggling();
 
         /* button enabling on load */
-        $extrascripts .= '<script type="text/javascript">
+        $extrascripts .= minifyScript('<script type="text/javascript">
                                 $(document).ready(function() {
                                     enableButtons();
                                 });
-                            </script>';
+                            </script>');
 
 
         // session timeout handling
@@ -817,10 +823,8 @@ class DisplayQuestionBasic extends Display {
         /* enter submit link to next button click 
          * (adapted from http://stackoverflow.com/questions/895171/prevent-users-from-submitting-form-by-hitting-enter)
          */
-        $extrascripts .= "<script type='text/javascript'>
-                        $(document).ready(function() {";
-        $extrascripts .= "$(':input').not('textarea').keypress(function(event) { if (event.keyCode != 13) { return true;} else {\$('#nextbutton').click(); return false;} });";
-        $extrascripts .= "});</script>";
+        $extrascripts .= minifyScript("<script type='text/javascript'>
+                        $(document).ready(function() {\$(':input').not('textarea').keypress(function(event) { if (event.keyCode != 13) { return true;} else {\$('#nextbutton').click(); return false;} });});</script>");
 
         $header = "";
         $footer = "";
@@ -836,17 +840,24 @@ class DisplayQuestionBasic extends Display {
         } else {
             
         }
+        
+        // combo box css
+        if ($this->combobox = true) {
+            $extracss .= $this->displayComboBoxCSS();
+        }
 
         /* add header now that we know all the scripts */
         if ($this->showheader == true) {
-            $returnStrHeader = $this->showSurveyHeader($survey->getTitle(), implode("", array_unique($scriptarray)) . '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+            $returnStrHeader = $this->showSurveyHeader($survey->getTitle(), implode("", array_unique($scriptarray)) . '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">' . $extracss);
             if ($header != "") {
                 $returnStrHeader .= $header;
             }
         }
 
         // combo box dropdown
-        $extrascripts .= $this->displayComboBox();
+        if ($this->combobox) {
+            $extrascripts .= $this->displayComboBox(false);        
+        }
 
         // paradata
         $extrascripts .= $this->displayParadataScripts($paradata);
@@ -885,9 +896,9 @@ class DisplayQuestionBasic extends Display {
     }
 
     function showRemarkModal($queryobject, $qa, $current) {
-        $params = array(POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), SESSION_PARAM_TEMPLATE => getSurveyTemplate(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_DISPLAYED => $this->engine->getDisplayed(), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
+        $params = array(POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), POST_PARAM_GROUP => $this->engine->getTemplate() ,POST_PARAM_TEMPLATE => getSurveyTemplate(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_RGID => $this->engine->getRgid(), POST_PARAM_DISPLAYED => $this->engine->getDisplayed(), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
         $r = setSessionsParamString($params);
-        $returnStr = "<script type='text/javascript'>
+        $returnStr = minifyScript("<script type='text/javascript'>
                             function storeRemark() { 
                                 var val=$('#remarkfield').val();
                                 if (val == '') {
@@ -912,7 +923,7 @@ class DisplayQuestionBasic extends Display {
                                         async: true
                                       });
                                 }
-                            }</script>";
+                            }</script>");
         $inlineclass = '';
         $returnStr .= '<div class="modal fade" id="remarkmodal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
     <div class="modal-dialog">
@@ -1007,7 +1018,7 @@ class DisplayQuestionBasic extends Display {
         $ifgroup = $var->getIfErrorGroup();
 
         // if this is the first variable in a group, it might have errors that must be fixed, so we check for that
-        if ($iferror != $ifgroup && $ifgroup == 1) {
+        if ($this->engine->getTemplate() != "" && $iferror != $ifgroup && $ifgroup == 1) {
             $iferror = $ifgroup;
         }
         $str .= " data-validation-error=" . $iferror;
@@ -1122,9 +1133,14 @@ class DisplayQuestionBasic extends Display {
         }
         $this->addInlineFieldChecks($varname, $variable, $var, $ids);
         $order = $var->getEnumeratedOrder();
-        if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= "<table>";
+        $itemspercolumn = $var->getEnumeratedColumns();
+        if ($itemspercolumn == "") {
+            $itemspercolumn = sizeof($orderedoptions);
         }
+        $splitup = array_chunk($orderedoptions, $itemspercolumn);
+        $tableid = $var->getSeid() . '-' . $var->getVsid();
+        $returnStr .= "<table id='table-" . $tableid . "' >";
+
         $textbox = $var->isEnumeratedTextbox();
         if ($textbox) {
             $message = $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_ENUMERATED_ENTERED);
@@ -1144,70 +1160,93 @@ class DisplayQuestionBasic extends Display {
         }
 
         $label = $var->getEnumeratedLabel();
-        foreach ($orderedoptions as $option) {
-            if (trim($option["label"] != "")) {
-                $selected = '';
-                if ($option["code"] == $previousdata) {
-                    $selected = ' CHECKED';
-                }
-
-                switch ($label) {
-                    case ENUMERATED_LABEL_INPUT_ONLY:
-                        $labelstr = "";
-                        break;
-                    case ENUMERATED_LABEL_LABEL_ONLY:
-                        $labelstr = $option["label"];
-                        break;
-                    case ENUMERATED_LABEL_LABEL_CODE:
-                        $labelstr = "(" . $option["code"] . ") " . $option["label"];
-                        break;
-                    case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
-                        $acr = "";
-                        if (trim($option["acronym"]) != "") {
-                            $acr = " " . $option["acronym"];
+        $cnt = 1;
+        //print_r($splitup[1]);
+        // TODO: SPLIT INTO NUMBER OF ARRAYS DEPENDING ON NUMBER OF COLUMNS, THEN PICK ONE FROM EACH ARRAY AND ADD AS A TD
+        //foreach ($orderedoptions as $option) {
+        for ($i = 0; $i < $itemspercolumn; $i++) {
+            $returnStr .= "<tr>";
+            $j = 0;
+            foreach ($splitup as $s) {
+                if (isset($s[$i])) {
+                    $option = $s[$i];
+                    if (trim($option["label"] != "")) {
+                        $selected = '';
+                        if ($option["code"] == $previousdata) {
+                            $selected = ' CHECKED';
                         }
-                        $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
-                        break;
-                    default:
-                        $labelstr = $option["label"];
-                        break;
-                }
 
-                $disabled = '';
-                if ($this->isEnumeratedActive($variable, $var, $option["code"]) == false) {
-                    $disabled = ' disabled ';
-                }
-                if ($order == ORDER_LABEL_FIRST) {
-                    $returnStr .= '<tr><td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-radio-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</label>                        
-                                        </td>
-                                                <td class="uscic-table-row-cell-enumerated' . $disabled . '">
-                                                <div class="radio uscic-radio-label-first-radio' . $disabled . '">
-                                                
-                                                    <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>
-                                                
-                                                </div>';
-                    if ($disabled == '') {
-                        $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"], true);
+                        switch ($label) {
+                            case ENUMERATED_LABEL_INPUT_ONLY:
+                                $labelstr = "";
+                                break;
+                            case ENUMERATED_LABEL_LABEL_ONLY:
+                                $labelstr = $option["label"];
+                                break;
+                            case ENUMERATED_LABEL_LABEL_CODE:
+                                $labelstr = "(" . $option["code"] . ") " . $option["label"];
+                                break;
+                            case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
+                                $acr = "";
+                                if (trim($option["acronym"]) != "") {
+                                    $acr = " " . $option["acronym"];
+                                }
+                                $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
+                                break;
+                            default:
+                                $labelstr = $option["label"];
+                                break;
+                        }
+
+                        $disabled = '';
+                        if ($this->isEnumeratedActive($variable, $var, $option["code"]) == false) {
+                            $disabled = ' disabled ';
+                        }                        
+                        if ($j > 0) {
+                            $returnStr .= '<td class="uscic-enumerated-column-padding"><nobr/></td>';
+                        }
+                        if ($order == ORDER_LABEL_FIRST) {
+                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-radio-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</label>                        
+                                            </td>
+                                                    <td class="uscic-table-row-cell-enumerated' . $disabled . '">
+                                                    <div class="radio uscic-radio-label-first-radio' . $disabled . '">
+
+                                                        <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>
+
+                                                    </div>';
+                            if ($disabled == '') {
+                                $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"], true);
+                            }
+                            $returnStr .= '</td>';
+                        } else {
+                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '"><div class="radio uscic-radio"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
+                                                    <div class="uscic-radiobutton ' . $inlineclass . ' ' . $qa . '">
+
+                                                        <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '
+                                                    </div> 
+                                                    </label>
+                                                </div></td>';
+                            /* $returnStr .= '<tr><td class="uscic-table-row-cell-enumerated' . $disabled . '"><div class="radio uscic-radio" style="margin-top: 0px;"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
+                              <div class="uscic-radiobutton ' . $inlineclass . ' ' . $qa . '">
+
+                              <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '
+                              </div>
+                              </label>
+                              </div></td></tr>'; */
+                            if ($disabled == '') {
+                                $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"]);
+                            }
+                        }
                     }
-                    $returnStr .= '</td></tr>';
-                } else {
-                    $returnStr .= '<div class="radio uscic-radio"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
-                                                <div class="uscic-radiobutton ' . $inlineclass . ' ' . $qa . '">
-                                                    
-                                                    <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '
-                                                </div> 
-                                                </label>
-                                            </div>';
-                    if ($disabled == '') {
-                        $returnStr .= $this->displayRadioButtonScript($id . '_' . $option["code"]);
-                    }
                 }
+                $j++;
             }
+            $returnStr .= "</tr>";
         }
 
-        if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= "</table>";
-        }
+        //if ($order == ORDER_LABEL_FIRST) {
+        $returnStr .= "</table>";
+        //}
 
 
 
@@ -1371,15 +1410,26 @@ class DisplayQuestionBasic extends Display {
         }
 
         /* start table */
-        $returnStr .= $this->displayTableSaw();
+        if ($var->isTableMobile() == true) {
+            $returnStr .= $this->displayTableSaw();
+        }
         $noofcolumns = sizeof($orderedoptions);
         $cellwidth = "width=" . round(100 / $noofcolumns) . "%";
         $label = $var->getEnumeratedLabel();
-        $order = $var->getEnumeratedOrder();
+        $order = $var->getEnumeratedOrder();        
+            
         if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-preappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
+            $nolabels = "data-tablesaw-preappend";
+            if ($var->isTableMobileLabels() == false) {
+                $nolabels = "data-tablesaw-no-labels";
+            }    
+            $returnStr .= '<table data-tablesaw-firstcolumn ' . $nolabels . ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
         } else {
-            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-postappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
+            $nolabels = "data-tablesaw-postappend";
+            if ($var->isTableMobileLabels() == false) {
+                $nolabels = "data-tablesaw-no-labels";
+            } 
+            $returnStr .= '<table data-tablesaw-firstcolumn ' . $nolabels. ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
         }
 
         /* split, then add header */
@@ -1763,12 +1813,12 @@ class DisplayQuestionBasic extends Display {
         $placeholder = $this->engine->getFill($variable, $var, SETTING_INPUT_MASK_PLACEHOLDER);
         $textmask = "data-inputmask=" . $m . " data-inputmask-placeholder='" . $placeholder . "'";
         $returnStr .= '<div ' . $style . ' class="uscic-radio-textbox ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input id="' . $id . '_textbox" autocomplete="off" ' . $textmask . ' class="form-control uscic-form-control" type=text value="' . addslashes($previousdata) . '">                                    
+                                <input id="' . $id . '_textbox" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $textmask . ' class="form-control uscic-form-control" type=text value="' . addslashes($previousdata) . '">                                    
                                     ' . $inputgroupend . '
                                 </div>
                                 ';
         $returnStr .= "<script type=text/javascript>";
-        $returnStr .= '$("#' . $id . '_textbox").keyup(
+        $returnStr .= minifyScript('$("#' . $id . '_textbox").keyup(
                                     function(event) {
                                         if ($(this).val() == "") {
                                             $("input[name=\'' . $varname . '\']").each(function(index) {
@@ -1800,7 +1850,7 @@ class DisplayQuestionBasic extends Display {
                                             });
                                         }
                                 });    
-                                ';
+                                ');
         $returnStr .= "</script>";
         return $returnStr;
     }
@@ -1851,11 +1901,14 @@ class DisplayQuestionBasic extends Display {
         $this->addSetOfEnumeratedChecks($varname, $variable, $var, ANSWER_TYPE_SETOFENUMERATED);
         $this->addInlineFieldChecks($varname, $variable, $var, $ids);
         $order = $var->getEnumeratedOrder();
-        if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= "<table>";
+        $itemspercolumn = $var->getEnumeratedColumns();
+        if ($itemspercolumn == "") {
+            $itemspercolumn = sizeof($orderedoptions);
         }
+        $splitup = array_chunk($orderedoptions, $itemspercolumn);
+        $tableid = $var->getSeid() . '-' . $var->getVsid();
+        $returnStr .= "<table id='table-" . $tableid . "' >";
         $label = $var->getEnumeratedLabel();
-
         $dkrfna = $this->addDKRFNAButton(substr($realvarname, 0, strlen($realvarname) - 2), $var, $variable, false, '', $id);
         $dkrfnaclass = "";
         if ($dkrfna != "") {
@@ -1868,44 +1921,54 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
-        foreach ($orderedoptions as $option) {
-            if (trim($option["label"] != "")) {
+        //foreach ($orderedoptions as $option) {
+        for ($i = 0; $i < $itemspercolumn; $i++) {
+            $returnStr .= "<tr>";
+            $j = 0;
+            foreach ($splitup as $s) {
+                if (isset($s[$i])) {
+                    $option = $s[$i];
+                    if (trim($option["label"] != "")) {
 
-                switch ($label) {
-                    case ENUMERATED_LABEL_INPUT_ONLY:
-                        $labelstr = "";
-                        break;
-                    case ENUMERATED_LABEL_LABEL_ONLY:
-                        $labelstr = $option["label"];
-                        break;
-                    case ENUMERATED_LABEL_LABEL_CODE:
-                        $labelstr = "(" . $option["code"] . ") " . $option["label"];
-                        break;
-                    case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
-                        $acr = "";
-                        if (trim($option["acronym"]) != "") {
-                            $acr = " " . $option["acronym"];
+                        switch ($label) {
+                            case ENUMERATED_LABEL_INPUT_ONLY:
+                                $labelstr = "";
+                                break;
+                            case ENUMERATED_LABEL_LABEL_ONLY:
+                                $labelstr = $option["label"];
+                                break;
+                            case ENUMERATED_LABEL_LABEL_CODE:
+                                $labelstr = "(" . $option["code"] . ") " . $option["label"];
+                                break;
+                            case ENUMERATED_LABEL_LABEL_CODE_VALUELABEL:
+                                $acr = "";
+                                if (trim($option["acronym"]) != "") {
+                                    $acr = " " . $option["acronym"];
+                                }
+                                $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
+                                break;
+                            default:
+                                $labelstr = $option["label"];
+                                break;
                         }
-                        $labelstr = "(" . $option["code"] . $acr . ") " . $option["label"];
-                        break;
-                    default:
-                        $labelstr = $option["label"];
-                        break;
-                }
 
-                $disabled = '';
-                if ($this->isEnumeratedActive($variable, $var, $option["code"]) == false) {
-                    $disabled = ' disabled ';
-                }
+                        $disabled = '';
+                        if ($this->isEnumeratedActive($variable, $var, $option["code"]) == false) {
+                            $disabled = ' disabled ';
+                        }
 
-                $selected = '';
-                if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
-                    $selected = ' CHECKED';
-                }
+                        $selected = '';
+                        if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
+                            $selected = ' CHECKED';
+                        }
+                        
+                        if ($j > 0) {
+                            $returnStr .= '<td class="uscic-enumerated-column-padding"><nobr/></td>';
+                        }
 
-                if ($order == ORDER_LABEL_FIRST) {
-                    $returnStr .= '<tr><td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-checkbox-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>
-                                        <script type="text/javascript">$( document ).ready(function() {
+                        if ($order == ORDER_LABEL_FIRST) {
+                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-checkbox-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>
+                                        <script type="text/javascript">' . minifyScript('$( document ).ready(function() {
 
                                                 $("#' . $id . '_' . $option["code"] . '").click(function (e) {     
                                                     e.stopPropagation();    
@@ -1925,7 +1988,7 @@ class DisplayQuestionBasic extends Display {
                                                                           e.stopPropagation();  
 
                                                                           });
-                                                                         });</script>
+                                                                         });') . '</script>
 
 
                                         </td>
@@ -1936,27 +1999,29 @@ class DisplayQuestionBasic extends Display {
                                                 
                                                 </div>
                                              </td>
-                                            </tr>';
-                } else {
-                    $returnStr .= '<div class="checkbox uscic-checkbox' . $inlineclass . ' ' . $qa . '">
-                                        <label class="checkbox uscic-checkbox-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">
+                                            ';
+                        } else {
+                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '"><div class="checkbox uscic-checkbox' . $inlineclass . ' ' . $qa . '">
+                                        <label class="uscic-checkbox-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">
                                         <div class="uscic-checkbox-box">                                            
                                        <input ' . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>                                        
                                         </div>           
                                         </label>
-                                        </div>
+                                        </div></td>
                                         ';
+                        }
+                    }
                 }
+                $j++;
             }
+            $returnStr .= "</tr>";
         }
 
         if ($var->isInputMaskEnabled()) {
             $returnStr .= $this->displayCheckBoxUnchecking($id, $var->getInvalidSubSelected());
         }
 
-        if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= "</table>";
-        }
+        $returnStr .= "</table>";        
 
         if ($textbox) {
             $returnStr .= "<div class='uscic-checkbox-vertical-textbox'>";
@@ -2050,14 +2115,25 @@ class DisplayQuestionBasic extends Display {
         }
 
         /* start table */
-        $returnStr .= $this->displayTableSaw();
+        if ($var->isTableMobile() == true) {
+            $returnStr .= $this->displayTableSaw();
+        }
         $noofcolumns = sizeof($orderedoptions);
         $cellwidth = "width=" . round(100 / $noofcolumns) . "%";
         $order = $var->getEnumeratedOrder();
         if ($order == ORDER_LABEL_FIRST) {
-            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-preappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
+            $nolabels = "data-tablesaw-preappend";
+            if ($var->isTableMobileLabels()) {
+                $nolabels = "data-tablesaw-no-labels";
+            }             
+            $returnStr .= '<table data-tablesaw-firstcolumn ' . $nolabels . ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
         } else {
-            $returnStr .= '<table data-tablesaw-firstcolumn data-tablesaw-postappend data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
+            $nolabels = "data-tablesaw-postappend";
+            if ($var->isTableMobileLabels() == false) {
+                $nolabels = "data-tablesaw-no-labels";
+            } 
+            //echo $nolabels;
+            $returnStr .= '<table data-tablesaw-firstcolumn ' . $nolabels. ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
         }
 
         /* split, then add header */
@@ -2214,7 +2290,7 @@ class DisplayQuestionBasic extends Display {
                                    </div>';
                 }
                 if ($disabled == '') {
-                    $returnStr .= '<script type="text/javascript">$( document ).ready(function() {
+                    $returnStr .= '<script type="text/javascript">' . minifyScript('$( document ).ready(function() {
 
                                                     $("#' . $id . '_' . $option["code"] . '").click(function (e) {     
                                                         e.stopPropagation();    
@@ -2234,7 +2310,7 @@ class DisplayQuestionBasic extends Display {
                                                                               e.stopPropagation();  
 
                                                                               });
-                                                                             });</script>';
+                                                                             });') . '</script>';
                 }
                 $returnStr .= '</td>';
             } else {
@@ -2268,7 +2344,6 @@ class DisplayQuestionBasic extends Display {
                     default:
                         break;
                 }
-
 
                 foreach ($orderedoptions as $option) {
 
@@ -2487,12 +2562,12 @@ class DisplayQuestionBasic extends Display {
         $placeholder = $this->engine->getFill($variable, $var, SETTING_INPUT_MASK_PLACEHOLDER);
         $textmask = "data-inputmask=" . $m . " data-inputmask-placeholder='" . $placeholder . "'";
         $returnStr .= '<div ' . $style . ' class="uscic-checkbox-textbox ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input name="' . $varname . '" id="' . $id . '_textbox" autocomplete="off" ' . $textmask . ' class="form-control uscic-form-control" type=text value="' . addslashes($previousdata) . '">                                    
+                                <input name="' . $varname . '" id="' . $id . '_textbox" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $textmask . ' class="form-control uscic-form-control" type=text value="' . addslashes($previousdata) . '">                                    
                                     ' . $inputgroupend . '
                                 </div>
                                 ';
         $returnStr .= "<script type=text/javascript>";
-        $returnStr .= '$( document ).ready(function() {
+        $returnStr .= minifyScript('$( document ).ready(function() {
                             $("#' . $id . '_textbox").keyup(
                                     function(event) {
                                         var str = $(this).val();
@@ -2544,7 +2619,7 @@ class DisplayQuestionBasic extends Display {
                                         return;
                                 });    
                                 });
-                                ';
+                                ');
         $returnStr .= "</script>";
         return $returnStr;
     }
@@ -2558,9 +2633,9 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
-        $returnStr .= '<input name="' . $varname . '" id="' . $id . '_hidden" autocomplete="off" type=hidden value="' . addslashes($previousdata) . '">';
+        $returnStr .= '<input name="' . $varname . '" id="' . $id . '_hidden" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" type=hidden value="' . addslashes($previousdata) . '">';
         $returnStr .= "<script type=text/javascript>";
-        $returnStr .= '$( document ).ready(function() {
+        $returnStr .= minifyScript('$( document ).ready(function() {
                                 $("input[name=\'' . $refername . '\']").on(\'change\', function(event) {                                        
                                         var str = $("#' . $id . '_hidden").val();
                                         var arr = [];    
@@ -2589,7 +2664,7 @@ class DisplayQuestionBasic extends Display {
                                         return;
                                 });
                                 });
-                                ';
+                                ');
         $returnStr .= "</script>";
         return $returnStr;
     }
@@ -2650,12 +2725,12 @@ class DisplayQuestionBasic extends Display {
         $str .= '</span>';
 
         // add script to handle input
-        $str .= "<script type='text/javascript'>";
+        $strscript = "<script type='text/javascript'>";
 
         // text boxes
         if (inArray($type, array(ANSWER_TYPE_INTEGER, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_STRING))) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= '                       
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= '                       
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("input[name=\'' . $id . '\']").addClass("dkrfna");
                         $("[name=\'' . $id . '\']").val(""); 
@@ -2664,16 +2739,16 @@ class DisplayQuestionBasic extends Display {
                         $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     }
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('[name=\"" . $id . "\"]').on('keyup', function(event) {if (this.value != ''){";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('[name=\"" . $id . "\"]').on('keyup', function(event) {if (this.value != ''){";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     }';
-            $str .= "});";
+            $strscript .= "});";
         } else if (inArray($type, array(ANSWER_TYPE_OPEN))) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= '
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= '
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("[name=\'' . $id . '\']").addClass("dkrfna");
                         $("[name=\'' . $id . '\']").val("");                        
@@ -2682,16 +2757,16 @@ class DisplayQuestionBasic extends Display {
                         $("[name=\'' . $id . '\']").removeClass("dkrfna");
                     }
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('[name=\"" . $id . "\"]').on('keyup', function(event) {if (this.value != ''){";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('[name=\"" . $id . "\"]').on('keyup', function(event) {if (this.value != ''){";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("[name=\'' . $id . '\']").removeClass("dkrfna");
                     }';
-            $str .= "});";
+            $strscript .= "});";
         } else if (inArray($type, array(ANSWER_TYPE_DATE, ANSWER_TYPE_DATETIME, ANSWER_TYPE_TIME))) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= 'if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= 'if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("input[name=\'' . $id . '\']").addClass("dkrfna");
                         $("[name=\'' . $id . '\']").val("");    
                     }
@@ -2699,18 +2774,18 @@ class DisplayQuestionBasic extends Display {
                         $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     }
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('input[name=\"" . $id . "\"]').on('click', function(event) {"; // if (this.value != ''){
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('input[name=\"" . $id . "\"]').on('click', function(event) {"; // if (this.value != ''){
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     '; // }
-            $str .= "});";
+            $strscript .= "});";
         }
         // radio
         else if ($type == ANSWER_TYPE_ENUMERATED) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= '                                   
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= '                                   
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) { 
                         $("input[name=\'' . $id . '\']").prop("checked", false); 
                         $("input[name=\'' . $id . '\']").addClass("dkrfna");
@@ -2719,23 +2794,23 @@ class DisplayQuestionBasic extends Display {
                         $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     }    
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('input[name=\"" . $id . "\"]').on('change', function(event) {";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('input[name=\"" . $id . "\"]').on('change', function(event) {";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     ';
-            $str .= "});";
+            $strscript .= "});";
         }
         // checkbox
         else if ($type == ANSWER_TYPE_SETOFENUMERATED) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
 
             // with textbox
             $textbox = $var->isEnumeratedTextbox();
             if ($textbox) {
-                $str .= '$("input[name=\'' . $id . '[]\']").val("");';
-                $str .= '
+                $strscript .= '$("input[name=\'' . $id . '[]\']").val("");';
+                $strscript .= '
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("input[name=\'' . $setofenumname . '_name[]\']").addClass("dkrfna");                        
                         $("input[name=\'' . $setofenumname . '_name[]\']").prop("checked", false);    
@@ -2747,8 +2822,8 @@ class DisplayQuestionBasic extends Display {
             }
             // without textbox
             else {
-                $str .= '$("#' . $id . '_hidden").val("");';
-                $str .= '                    
+                $strscript .= '$("#' . $id . '_hidden").val("");';
+                $strscript .= '                    
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("input[name=\'' . $setofenumname . '_name[]\']").addClass("dkrfna");
                         $("input[name=\'' . $setofenumname . '_name[]\']").prop("checked", false);
@@ -2759,18 +2834,18 @@ class DisplayQuestionBasic extends Display {
                     ';
             }
 
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('input[name=\"" . $setofenumname . "_name[]\"]').on('change', function(event) {";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('input[name=\"" . $setofenumname . "_name[]\"]').on('change', function(event) {";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("input[name=\'' . $setofenumname . '_name[]\']").removeClass("dkrfna");
                     ';
-            $str .= "});";
+            $strscript .= "});";
         }
         // dropdown
         else if ($type == ANSWER_TYPE_DROPDOWN) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= '                    
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= '                    
                     if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         $("[name=\'' . $id . '\']").addClass("dkrfna");
                         $("[name=\'' . $id . '\']").selectpicker("val","");
@@ -2779,16 +2854,16 @@ class DisplayQuestionBasic extends Display {
                         $("[name=\'' . $id . '\']").removeClass("dkrfna");
                     }
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('[name=\"" . $id . "\"]').on('change', function(event) {if ($(this).val() != ''){";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('[name=\"" . $id . "\"]').on('change', function(event) {if ($(this).val() != ''){";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("[name=\'' . $id . '\']").removeClass("dkrfna");
                     }';
-            $str .= "});";
+            $strscript .= "});";
         } else if ($type == ANSWER_TYPE_MULTIDROPDOWN) {
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= 'if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= 'if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {
                         $("[name=\'' . $id . '[]\']").selectpicker("val", "");    
                         $("[name=\'' . $id . '[]\']").addClass("dkrfna");
                      }       
@@ -2796,20 +2871,20 @@ class DisplayQuestionBasic extends Display {
                         $("[name=\'' . $id . '[]\']").removeClass("dkrfna");
                      }       
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
-            $str .= "$('[name=\"" . $id . "[]\"]').on('change', function(event) {if ($(this).val() != ''){";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('[name=\"" . $id . "[]\"]').on('change', function(event) {if ($(this).val() != ''){";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("[name=\'' . $id . '[]\']").removeClass("dkrfna");
                     }';
-            $str .= "});";
+            $strscript .= "});";
         } else if ($type == ANSWER_TYPE_SLIDER) {
             $realid = $var->getID();
             if ($realid == "") {
                 $realid = $id;
             }
-            $str .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
-            $str .= '
+            $strscript .= "$('input[name=\"" . $id . "_dkrfna\"]').on('switchChange.bootstrapSwitch', function(event, state) {";
+            $strscript .= '
                      if ($("input[name=\'' . $id . '_dkrfna\']:checked").val()) {                        
                         var x = $("#' . $realid . '").slider();
                         x.slider("setValue", ""); 
@@ -2820,29 +2895,29 @@ class DisplayQuestionBasic extends Display {
                         $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     }
                     ';
-            $str .= "});";
+            $strscript .= "});";
 
             // handle text box
             $textbox = $var->isTextbox();
             if ($textbox) {
-                $str .= '$("#' . $realid . '_textbox").keyup(
+                $strscript .= '$("#' . $realid . '_textbox").keyup(
                                     function(event) {
                                         $("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false")
                                     });';
             }
 
             // handle sliding
-            $str .= "$('#" . $realid . "').on('slideStop', function(slideEvt) {";
-            $str .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
+            $strscript .= "$('#" . $realid . "').on('slideStop', function(slideEvt) {";
+            $strscript .= '$("input[name=\'' . $id . '_dkrfna\']").bootstrapSwitch("state", false, "false");
                     $("input[name=\'' . $id . '\']").removeClass("dkrfna");
                     ';
-            $str .= "});";
+            $strscript .= "});";
         }
 
 
-        $str .= "</script>";
+        $strscript .= "</script>";
 
-        return $str;
+        return $str . minifyScript($strscript);
     }
 
     function showAnswer($number, $variable, $var, $previousdata, $inline = false, $enumid = "") {
@@ -2962,7 +3037,6 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
-
         /* add answer display */
         switch ($answertype) {
             case ANSWER_TYPE_STRING: //string                
@@ -2991,7 +3065,7 @@ class DisplayQuestionBasic extends Display {
                 if ($inline) {
                     $returnStr .= '<label>
                                 <div class="uscic-string ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-string' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-string' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna . '
                                 </div>
                                 </label>';
@@ -3000,7 +3074,7 @@ class DisplayQuestionBasic extends Display {
                     $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                                 <label>
                                     <div class="uscic-string ' . $qa . '">' . $inputgroupstart . $pretext . '                                    
-                                    <input autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                    <input spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                         ' . $posttext . $inputgroupend . $dkrfna . '
                                     </div>    
                                 </label>                                
@@ -3030,12 +3104,12 @@ class DisplayQuestionBasic extends Display {
                 break;
             case ANSWER_TYPE_DROPDOWN: //drop down
                 $options = $this->engine->getFill($variable, $var, SETTING_OPTIONS);
-                $returnStr .= $this->showComboBox($variable, $var, $varname, $id, $options, $previousdata, $inline);
+                $returnStr .= $this->showComboBox($variable, $var, $varname, $id, $options, $previousdata, $inline, "", $linkedto);
                 break;
             case ANSWER_TYPE_MULTIDROPDOWN: //multiple selection dropdown                
                 $this->addSetOfEnumeratedChecks($varname, $variable, $var, ANSWER_TYPE_MULTIDROPDOWN);
                 $options = $this->engine->getFill($variable, $var, SETTING_OPTIONS);
-                $returnStr .= $this->showComboBox($variable, $var, $varname, $id, $options, $previousdata, $inline, "multiple");
+                $returnStr .= $this->showComboBox($variable, $var, $varname, $id, $options, $previousdata, $inline, "multiple", $linkedto);
                 break;
             case ANSWER_TYPE_INTEGER: //integer 
 
@@ -3046,7 +3120,7 @@ class DisplayQuestionBasic extends Display {
                 if ($inline) {
                     $returnStr .= '<div class="form-group uscic-formgroup-inline"><label>
                                 <div class="uscic-integer ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-integer' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-integer' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna . '
                                 </div>
                                 </label></div>';
@@ -3054,7 +3128,7 @@ class DisplayQuestionBasic extends Display {
                     $returnStr .= '<div class="form-group uscic-formgroup">
                                 <label>
                                 <div class="uscic-integer ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna . '
                                 </div>
                                 </label>
@@ -3070,7 +3144,7 @@ class DisplayQuestionBasic extends Display {
                 if ($inline) {
                     $returnStr .= '<div class="form-group uscic-formgroup-inline"><label>
                                 <div class="uscic-double ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-double' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-double' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna . '
                                 </div>
                                 </label></div>';
@@ -3078,7 +3152,7 @@ class DisplayQuestionBasic extends Display {
                     $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                                 <label>
                                 <div class="uscic-double ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                 ' . $posttext . $inputgroupend . $dkrfna . '</div>
                                 </label>
                                 </div>';
@@ -3108,7 +3182,7 @@ class DisplayQuestionBasic extends Display {
                 if ($inline) {
                     $returnStr .= '<div class="form-group uscic-formgroup-inline"><label>
                                 <div class="uscic-range ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-range' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input class="form-control uscic-form-control-inline ' . $dkrfnaclass . '" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $linkedto . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="uscic-range' . $inlineclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna . '
                                 </div>
                                 </label></div>';
@@ -3116,7 +3190,7 @@ class DisplayQuestionBasic extends Display {
                     $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">                                
                                 <label>
                                 <div class="uscic-range ' . $qa . '">' . $inputgroupstart . $pretext . '
-                                <input autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
+                                <input spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $textmask . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" type=text id=' . $id . ' name=' . $varname . ' value="' . convertHTLMEntities($previousdata, ENT_QUOTES) . '">
                                     ' . $posttext . $inputgroupend . $dkrfna .
                             '</div>
                                 </label>
@@ -3143,13 +3217,13 @@ class DisplayQuestionBasic extends Display {
                     $tooltip = "hide";
                 }
 
-                $returnStr .= $this->displaySlider($variable, $var, $varname, $id, $previousdata, $minimum, $maximum, $this->getErrorTextString($varname), $qa, $inlineclass, $step, $tooltip, $orientation, $dkrfna);
+                $returnStr .= $this->displaySlider($variable, $var, $varname, $id, $previousdata, $minimum, $maximum, $this->getErrorTextString($varname), $qa, $inlineclass, $step, $tooltip, $orientation, $dkrfna, $linkedto);
                 break;
             case ANSWER_TYPE_DATE: //date                
                 $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                               <div class="uscic-date' . $inlineclass . ' ' . $qa . '">
                                 <label>
-                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "true", "false", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getDateFormat()), $this->getErrorTextString($varname), $dkrfna, $variable) . '
+                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "true", "false", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getDateFormat()), $this->getErrorTextString($varname), $dkrfna, $variable, $linkedto) . '
                                 </label>
                                 </div>
                                 </div>';
@@ -3158,7 +3232,7 @@ class DisplayQuestionBasic extends Display {
                 $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                                 <div class="uscic-time' . $inlineclass . ' ' . $qa . '">
                                 <label>
-                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "false", "true", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getTimeFormat()), $this->getErrorTextString($varname), $dkrfna, $variable) . '
+                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "false", "true", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getTimeFormat()), $this->getErrorTextString($varname), $dkrfna, $variable, $linkedto) . '
                                 </label>
                                 </div>
                                 </div>';
@@ -3167,7 +3241,7 @@ class DisplayQuestionBasic extends Display {
                 $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                                 <div class="uscic-datetime' . $inlineclass . ' ' . $qa . '">
                                 <label>
-                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "true", "true", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getDateTimeFormat()), $this->getErrorTextString($varname), $dkrfna, $variable) . '
+                                ' . $this->displayDateTimePicker($varname, $id, $previousdata, getSurveyLanguagePostFix(getSurveyLanguage()), "true", "true", Config::usFormatSurvey(), Config::secondsSurvey(), Config::minutesSurvey(), $inlineclass, $inlinestyle, $inlinejavascript, $this->engine->replaceFills($var->getDateTimeFormat()), $this->getErrorTextString($varname), $dkrfna, $variable, $linkedto) . '
                                 </label>
                                 </div>
                                 </div>';
@@ -3194,13 +3268,13 @@ class DisplayQuestionBasic extends Display {
 
                 if ($inline) {
                     $returnStr .= '<div class="form-group uscic-formgroup-inline"><label>
-                                <textarea ' . $placeholder . $linkedto . $inlinestyle . ' ' . $inlinejavascript . ' ' . $qa . ' ' . $this->getErrorTextString($varname) . ' id=' . $id . ' class="uscic-open-inline' . $inlineclass . ' ' . $dkrfnaclass . '" name=' . $varname . '>' . convertHTLMEntities($previousdata, ENT_QUOTES) . '</textarea>' . $dkrfna . '
+                                <textarea spellcheck="false" autocorrect="off" autocapitalize="off" ' . $placeholder . $linkedto . $inlinestyle . ' ' . $inlinejavascript . ' ' . $qa . ' ' . $this->getErrorTextString($varname) . ' id=' . $id . ' class="uscic-open-inline' . $inlineclass . ' ' . $dkrfnaclass . '" name=' . $varname . '>' . convertHTLMEntities($previousdata, ENT_QUOTES) . '</textarea>' . $dkrfna . '
                                 </label></div>';
                 } else {
                     $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                                 <label>
                                 <div class="uscic-open">
-                                <textarea ' . $placeholder . $inlinestyle . ' ' . $inlinejavascript . ' ' . $qa . ' ' . $this->getErrorTextString($varname) . ' id=' . $id . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" name=' . $varname . '>' . convertHTLMEntities($previousdata, ENT_QUOTES) . '</textarea>
+                                <textarea spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" ' . $placeholder . $inlinestyle . ' ' . $inlinejavascript . ' ' . $qa . ' ' . $this->getErrorTextString($varname) . ' id=' . $id . ' class="form-control uscic-form-control ' . $dkrfnaclass . '" name=' . $varname . '>' . convertHTLMEntities($previousdata, ENT_QUOTES) . '</textarea>
                                     </div>' . $dkrfna . '
                                 </label>                                
                                 </div>';
@@ -3255,7 +3329,7 @@ class DisplayQuestionBasic extends Display {
                         
                     }
                 }
-        }
+        }        
         if (!$inline) {
             $returnStr .= "</div>";
         }
@@ -3614,7 +3688,8 @@ class DisplayQuestionBasic extends Display {
         return $returnStr;
     }
 
-    function showComboBox($variable, $var, $name, $id, $options, $previousdata, $inline, $multiple = "") {
+    function showComboBox($variable, $var, $name, $id, $options, $previousdata, $inline, $multiple = "", $linkedto = "") {
+        $this->combobox = true;
         $empty = '';
         $previous = explode(SEPARATOR_SETOFENUMERATED, $previousdata);
         if ($inline == false) {
@@ -3696,12 +3771,17 @@ class DisplayQuestionBasic extends Display {
         }
 
         if ($inline == false) {
-            $returnStr .= $inputgroupstart . $pretext . '<select ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
+            if ($multiple == "") {
+                $returnStr .= $inputgroupstart . $pretext . '<select ' . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
+            }
+            else {
+                $returnStr .= $inputgroupstart . $pretext . '<select ' . $linkedto . ' data-size="' . sizeof($options) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' name="' . $name . '"' . ' id="' . $id . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
+            }
         } else {
             if ($multiple == "") {
-                $returnStr .= '<select ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-singledropdown-inline ' . $dkrfnaclass . '">';
+                $returnStr .= '<select ' . $linkedto . ' data-size="' . (sizeof($options)+1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-singledropdown-inline ' . $dkrfnaclass . '">';
             } else {
-                $returnStr .= '<select ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
+                $returnStr .= '<select ' . $linkedto . '  data-size="' . (sizeof($options)+1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
             }
         }
         $returnStr .= $empty;
@@ -3737,7 +3817,7 @@ class DisplayQuestionBasic extends Display {
         }
         $returnStr = '
 <input type=hidden ' . $this->getErrorTextString($name) . ' id="calendardiv" name="' . $name . '" value="' . $value . '" />
-<script type=text/javascript>
+<script type=text/javascript>' . minifyScript('
 
 function addEventHandlers(calendar, include) {
 //alert($("span[data-cal-date]").length);
@@ -3846,9 +3926,7 @@ function getEvents() {
     }
     return out;
    }
-}
-
-</script>';
+}') . '</script>';
         $returnStr .= '<link rel="stylesheet" href="css/calendar.css">' . $this->displayCalendar($id, USCIC_SURVEY);
         return $returnStr;
     }
@@ -3974,6 +4052,14 @@ function getEvents() {
         $str = $this->showQuestion(VARIABLE_LOCKED, 0);
         if ($str == "") {
             return Language::errorLocked();
+        }
+        return $str;
+    }
+    
+    function showInProgressSurvey() {
+        $str = $this->showQuestion(VARIABLE_IN_PROGRESS, 0);
+        if ($str == "") {
+            return Language::errorInProgress();
         }
         return $str;
     }

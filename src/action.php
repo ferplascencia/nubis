@@ -41,7 +41,7 @@ class Action {
         $nosessionactions = $logactions->getNumberOfActionsBySession($this->phpid, USCIC_SMS);
         //echo 'ytytytyt';
         //echo ' [[[[' . $this->phpid;
-        if ($nosessionactions == 0) { //no entry yet: ask for prim_key!   
+        if ($nosessionactions == 0) { //no entry yet: ask for prim_key!  
             $logactions->addAction('', '', "loginstart", USCIC_SMS);
             $login = new Login($this->phpid);
             return $login->getSMSLoginScreen();
@@ -54,7 +54,7 @@ class Action {
                 if ($username != '' && loadvar('password') != '') { //check username!!
                     $login = new Login($this->phpid);
                     if ($login->checkSMSAccess()) {
-                        $urid = $_SESSION['URID'];
+                        $urid = $_SESSION['URID'];                        
                         $logactions->addAction('', $urid, "loggedin", USCIC_SMS);
                         $sms = new SMS($urid, $this->phpid);
                         return $sms->getPage();
@@ -148,8 +148,7 @@ class Action {
     }
 
     function surveyEntry() {
-        global $engine;
-
+        global $engine;        
         if ($this->checkDateTime() == false) {
 
             /* get whatever the language is (either post or default) and use it */
@@ -213,6 +212,7 @@ class Action {
 
                         // pass along primkey to load correct engine!
                         $engine = loadEngine(getSurvey(), $primkey, $this->phpid, getSurveyVersion(), getSurveySection(getSurvey(), $primkey));
+                        $engine->setFirstForm(true);
                         return $engine->getNextQuestion();
                     } else {
                         // incorrect login..start new session
@@ -259,7 +259,7 @@ class Action {
                 if (isset($_POST['navigation']) && $_POST['navigation'] != NAVIGATION_LANGUAGE_CHANGE && $survey->getReentryLanguage(getSurveyMode()) == LANGUAGE_REENTRY_YES) {
                     setSurveyLanguage($loggedin["language"]);
                 }
-
+                
                 /* update version with what we know from the last session action */
                 setSurveyVersion($loggedin["version"]);
 

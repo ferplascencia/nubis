@@ -22,9 +22,9 @@ class DisplayLogin extends Display {
         global $survey, $engine;        
         //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
-        $engine = loadEngine($survey->getSuid(), 'aaa', "", getSurveyVersion(), 1);
+        $engine = loadEngine($survey->getSuid(), 'aaa', "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
         $do = $engine->getDisplayObject();
-        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $do->displayBody();
         $returnStr .= $do->showClosedSurvey();        
         $returnStr .= '</form>';
@@ -38,9 +38,9 @@ class DisplayLogin extends Display {
         global $survey, $engine;
         //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
-        $engine = loadEngine($survey->getSuid(), $randomId, "", getSurveyVersion(), 1);
+        $engine = loadEngine($survey->getSuid(), $randomId, "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
         $do = $engine->getDisplayObject();
-        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         //$returnStr .= '<form id="form" role="form" method=post>';
         $returnStr .= $do->displayBody();
         $returnStr .= '<input type=hidden name="' . POST_PARAM_PRIMKEY . '" value="' . $randomId . '">';
@@ -68,9 +68,9 @@ class DisplayLogin extends Display {
         global $survey, $engine;
         //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
-        $engine = loadEngine($survey->getSuid(), $randomId, "", getSurveyVersion(), 1);        
+        $engine = loadEngine($survey->getSuid(), $randomId, "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));        
         $do = $engine->getDisplayObject();
-        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $do->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         //$returnStr .= '<form id="form" role="form" method=post>';
         $returnStr .= $do->displayBody();
         $returnStr .= $do->showWelcomeSurvey();
@@ -97,7 +97,7 @@ class DisplayLogin extends Display {
         
         global $survey, $engine;
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
 
         if (true) {
             if ($primkey != '') {
@@ -119,7 +119,7 @@ class DisplayLogin extends Display {
             } else {                
                 $returnStr .= '<div id="wrap">';
                 $returnStr .= '<div class="container"><p>';
-                $engine = loadEngine($survey->getSuid(), $primkey, '', getSurveyVersion(), 1);
+                $engine = loadEngine($survey->getSuid(), $primkey, '', getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
                 $do = $engine->getDisplayObject();
                 $returnStr .= $do->showDirectAccessOnlySurvey();
                 //$returnStr .= Language::errorDirectLogin();
@@ -128,7 +128,7 @@ class DisplayLogin extends Display {
             $returnStr .= '<div id="wrap">';
             $returnStr .= '<div class="container"><p>';
             //$returnStr .= Language::errorDirectLogin();
-            $engine = loadEngine($survey->getSuid(), $primkey, '', getSurveyVersion(), 1);
+            $engine = loadEngine($survey->getSuid(), $primkey, '', getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
             $do = $engine->getDisplayObject();
             $returnStr .= $do->showDirectAccessOnlySurvey();
         }

@@ -15,7 +15,19 @@
 class DisplayQuestionSms extends DisplayQuestionBasic {
 
     function showHeader($title, $style = '') {
-        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
+        $returnStr .= $this->showNavBar();
+
+//        $returnStr .= $this->engine->getDisplayed();
+        $this->padding = true;
+//      $returnStr .= 'SMS balk hier!'; 
+//      $returnStr .= parent::showLanguage(); 
+
+        return $returnStr;
+    }
+    
+    function showSurveyHeader($title, $style = '') {
+        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $this->showNavBar();
 
 //        $returnStr .= $this->engine->getDisplayed();
@@ -31,12 +43,25 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
     }
 
     public function showNavBar() {
-
         $returnStr = $this->showCalculator();
 //language
 
         $rgid = $this->engine->getRgid();
-        $variablenames = $this->engine->getDisplayed();
+        $variablenames = $this->getRealVariables(explode("~", $this->engine->getDisplayed()));        
+        $variablenamesfull = $this->engine->getDisplayed();
+        $template = $this->engine->getTemplate();
+        
+        $click = "";
+        if ($template != "") {
+            $group = $this->engine->getGroup($template);
+            $click = $this->engine->replaceFills($group->getClickLanguageChange());
+        }
+        else {
+            $vars = explode("~", $variablenames);
+            $var = $this->engine->getVariableDescriptive($vars[0]);
+            $click = $this->engine->replaceFills($var->getClickLanguageChange());
+        }
+        $click = str_replace("'", "", $click);
 
         // begin language
         global $survey;
@@ -54,7 +79,7 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
                         if ($lang["value"] == getSurveyLanguage()) {
                             $check = ' <span class="glyphicon glyphicon-ok"></span>';
                         }
-                        $returnStr .= '<li><a href=# onclick=\'document.getElementById("r").value="' . setSessionsParamString(array_merge(array(SESSION_PARAM_PRIMKEY => $this->engine->primkey, SESSION_PARAM_RGID => $rgid, SESSION_PARAM_VARIABLES => $variablenames, SESSION_PARAM_LANGUAGE => getSurveyLanguage(), SESSION_PARAM_TIMESTAMP => time(), SESSION_PARAM_SEID => $this->engine->getSeid(), SESSION_PARAM_MAINSEID => $this->engine->getMainSeid()), array(SESSION_PARAM_NEWLANGUAGE => $lang["value"]))) . '"; document.getElementById("navigation").value="' . addslashes(Language::buttonUpdate()) . '"; document.getElementById("form").submit(); \'>' . $lang["name"] . $check . '</a></li>';
+                        $returnStr .= '<li><a href=# onclick=\'document.getElementById("r").value="' . setSessionsParamString(array_merge(array(SESSION_PARAM_SURVEY => $survey->getSuid(), SESSION_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), SESSION_PARAM_RGID => $rgid, SESSION_PARAM_VARIABLES => $variablenames, SESSION_PARAM_GROUP => $template, SESSION_PARAM_MODE => getSurveyMode(), SESSION_PARAM_LANGUAGE => getSurveyLanguage(), SESSION_PARAM_TEMPLATE => getSurveyTemplate(), SESSION_PARAM_TIMESTAMP => time(), SESSION_PARAM_SEID => $this->engine->getSeid(), SESSION_PARAM_MAINSEID => $this->engine->getMainSeid()), array(SESSION_PARAM_NEWLANGUAGE => $lang["value"]))) . '"; document.getElementById("navigation").value="' . addslashes(Language::buttonUpdate()) . '"; ' . $click . ' document.getElementById("form").submit(); \'>' . $lang["name"] . $check . '</a></li>';
                     }
                 }
                 $returnStr .= '</ul></li>';
@@ -67,14 +92,35 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
               <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">' . $user->getName() . ' <b class="caret"></b></a>
                  <ul class="dropdown-menu">
 										<li class="dropdown-header">' . $this->engine->primkey . '</li>
-                                                                                <li class="dropdown-header">' . $variablenames . '</li>';
+                                                                                <li class="dropdown-header">' . $variablenamesfull . '</li>';
 
 
 
         //$returnStr .= '<li><a href=# data-toggle="modal" data-target="#calculator">Calculator</a></li>';
 
-        $returnStr .= '<li><a href="#" data-toggle="modal" data-target="#calculator"><span class="glyphicon glyphicon-th"></span> Calculator</a></li>';
+        $returnStr .= '<li><a href="#" data-toggle="modal" data-target="#calculator"><span class="glyphicon glyphicon-th"></span> ' . Language::linkCalculator() . '</a></li>';
 
+        
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'watch', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=650,scrollbars=yes,top=100,left=100\'); return false;';
+        $javascript = ' onclick="' . $windowopen . '"';
+        $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-zoom-in"></span> ' . Language::linkWatch() . '</a></li>';
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'update', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=1200,height=650,scrollbars=yes,top=100,left=100\'); return false;';
+        $javascript = ' onclick="' . $windowopen . '"';
+        $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-zoom-in"></span> ' . Language::linkUpdate() . '</a></li>';
+        $first = $this->engine->isFirstState();   
+        if ($first == false || ($first == true && $this->engine->getForward() == true)) {            
+            if ($this->engine->getForward() == true) {
+                
+                $stateid = $this->engine->getStateId() + 1;
+            }
+            else {
+                $stateid = $this->engine->getStateId();
+            }            
+            $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'jumpback', 'jumpurid' => $_SESSION['URID'], 'jumpsuid' => $this->engine->getSuid(), 'jumpstateid' => $stateid, 'jumpprimkey' => $this->engine->getPrimaryKey())) . '\', \'popupWindow\', \'width=770,height=300,scrollbars=yes,top=100,left=100\'); return false;';
+            $javascript = ' onclick="' . $windowopen . '"';
+            $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-arrow-left"></span> ' . Language::linkJumpBack() . '</a></li>';
+        }
+        
         $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'interviewer.backfromsms', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid())) . '&se=' . addslashes(USCIC_SMS) . '"><span class="glyphicon glyphicon-home"></span> ' . Language::linkBackToSMS() . '</a></li>                   
                     <li class="divider"></li>
                    <li><a href="index.php?rs=1&se=2"><span class="glyphicon glyphicon-log-out"></span> ' . Language::linkLogout() . '</a></li>
@@ -89,7 +135,7 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
 
     function showEndSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'interviewer.surveycompleted', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid()));
@@ -106,7 +152,7 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
 
     function showCompletedSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'interviewer.backfromsms', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid()));

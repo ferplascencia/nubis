@@ -694,3 +694,61 @@ CREATE TABLE IF NOT EXISTS `survey1_test_consolidated_times` (
 
     PRIMARY KEY (`suid`,`primkey`,`begintime`,`variable`)
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `survey1_processed_paradata` (
+
+  `pid` int(11) NOT NULL,
+
+  `suid` int(11) NOT NULL DEFAULT '1',
+
+  `primkey` varchar(150) NOT NULL,
+
+  `rgid` int(11) NOT NULL DEFAULT '0',
+
+  `variablename` varchar(150) NOT NULL,
+
+  `answer` blob,
+
+  `language` int(11) NOT NULL,
+
+  `mode` int(11) NOT NULL,
+
+  `version` int(11) NOT NULL,
+
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`pid`, `suid`, `primkey`,`variablename`),
+  KEY `primkeyindex` (`suid`,`primkey`),   
+  KEY `variablenameindex` (`suid`,`variablename`)
+) ENGINE=MyIsam DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `survey1_test_processed_paradata` (
+
+  `pid` int(11) NOT NULL,
+
+  `suid` int(11) NOT NULL DEFAULT '1',
+
+  `primkey` varchar(150) NOT NULL,
+
+  `rgid` int(11) NOT NULL DEFAULT '0',
+
+  `variablename` varchar(150) NOT NULL,
+
+  `answer` blob,
+
+  `language` int(11) NOT NULL,
+
+  `mode` int(11) NOT NULL,
+
+  `version` int(11) NOT NULL,
+
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`pid`, `suid`, `primkey`,`variablename`),
+  KEY `primkeyindex` (`suid`,`primkey`),   
+  KEY `variablenameindex` (`suid`,`variablename`)
+) ENGINE=MyIsam DEFAULT CHARSET=utf8;
+
+ALTER TABLE `survey1_context` ADD `checks` BLOB NULL DEFAULT NULL AFTER `setfills` ;

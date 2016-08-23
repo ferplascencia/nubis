@@ -143,12 +143,35 @@ class Interviewer {
     }
 
     function getDataFromSurvey($d, $variablename, $default = '') {
-        $var = $d->getData($variablename);
-        if (isset($var)) {
-            return $var->getAnswer();
-        } else {
-            return $default;
+        
+        // using data records
+        if (Config::useDataRecords()) {
+            $var = $d->getData($variablename);
+            if (isset($var)) {
+                return $var->getAnswer();
+            } else {
+                return $default;
+            }
         }
+        
+        // fall back on _data table
+        global $db;
+        $surv = new Survey($d->getSuid());
+        $decrypt = "answer as answer_dec";
+        if ($surv->getDataEncryptionKey() != "") {
+            $decrypt = "aes_decrypt(answer, '" . $surv->getDataEncryptionKey() . "') as answer_dec";
+        }
+        $query = "select " . $decrypt . " from " . Config::dbSurveyData() . "_data where suid=" . $d->getSuid() . " and primkey='" . $d->getPrimaryKey() . "' and variablename='" . $variablename . "'";
+        $res = $db->selectQuery($query);
+        if ($res) {
+            if ($db->getNumberOfRows($res) > 0) {
+                $row = $db->getRow($res);
+                return $row["answer_dec"];
+            }
+        }
+        
+        // not found or something went wrong
+        return $default;
     }
 
     function checkCompletedCoverscreen(&$respondentorhousehold) {

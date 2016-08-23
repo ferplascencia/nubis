@@ -107,7 +107,7 @@ class DataExport {
         $this->setProperty(DATA_OUTPUT_CLEAN, DATA_CLEAN);
         $this->setProperty(DATA_OUTPUT_TYPEDATA, DATA_REAL);
         $this->setProperty(DATA_OUTPUT_VARLIST, "");
-        $this->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATARECORD_TABLE);
+        $this->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATA_TABLE);
         $this->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, "");
         $this->setProperty(DATA_OUTPUT_FROM, "");
         $this->setProperty(DATA_OUTPUT_TO, "");
@@ -191,7 +191,7 @@ class DataExport {
 
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         set_time_limit(0);
-        ini_set('memory_limit', '128M');
+        ini_set('memory_limit', Config::dataExportMemoryLimit());
 
         /* set file names */
         $this->setProperty(DATA_OUTPUT_FILENAME_CSV, $this->getProperty(DATA_OUTPUT_FILENAME) . "_auxiliary.csv");
@@ -357,7 +357,7 @@ class DataExport {
                                     continue;
                                 }
 
-                                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                                     if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                                         $prim = encryptC($row["primkey"], $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
                                     } else {
@@ -415,7 +415,7 @@ class DataExport {
                                 if (isset($currentrecord[strtoupper($varnames[$i])])) {
                                     $info = $currentrecord[strtoupper($varnames[$i])];
 
-                                    if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                                    if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                                         if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                                             $prim = encryptC($row["primkey"], $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
                                         } else {
@@ -483,7 +483,7 @@ class DataExport {
 
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         set_time_limit(0);
-        //ini_set('memory_limit', '128M');
+        //ini_set('memory_limit', Config::dataExportMemoryLimit());
 
         /* set arrays */
         if (trim($this->getProperty(DATA_OUTPUT_MODES)) != "") {
@@ -621,7 +621,7 @@ class DataExport {
 
                     $remark = $row["remark_dec"];
                     $line = "";
-                    if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                    if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                         if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                             
                         } else {
@@ -682,6 +682,7 @@ class DataExport {
         $create = "create table if not exists " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times  (
                 suid int(11) NOT NULL DEFAULT '1',
                 primkey varchar(150) NOT NULL,
+                begintime varchar(50) NOT NULL,
                 stateid int(11) DEFAULT NULL, 
                 variable varchar(50) NOT NULL,
                 timespent int(11) NOT NULL DEFAULT '0',
@@ -689,7 +690,7 @@ class DataExport {
                 mode int(11) NOT NULL DEFAULT '1',
                 version int(11) NOT NULL DEFAULT '1',
                 ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (suid,primkey,variable)
+                PRIMARY KEY (suid,primkey,begintime,variable)
               ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;";
         $this->db->executeQuery($create);
 
@@ -698,7 +699,7 @@ class DataExport {
 //exit;
         $query = "delete from table " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid;
         $this->db->executeQuery($query);
-        $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT suid, primkey, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
+        $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT suid, primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
         $this->db->executeQuery($query);
 
         // check for filter
@@ -717,7 +718,7 @@ class DataExport {
             $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
         }
 
-        $cutoff = DATA_TIMINGS_CUTOFF; // more than 5 minutes we ignore in calculating total interview time	
+        $cutoff = Config::getTimingCutoff(); //DATA_TIMINGS_CUTOFF; // more than 5 minutes we ignore in calculating total interview time	
         $data = '';
         $select = "select primkey, variable, timespent, language, mode from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, ts asc";
         //echo $select;
@@ -736,10 +737,18 @@ class DataExport {
                     continue;
                 } else if (sizeof($filter) > 0 && !inArray(getBasicName($row["variable"]), $filter)) {
                     continue;
-                }
+                } /* else {
+                  $vd = $this->getVariableDescriptive(getBasicName($row["variable"]));
+                  if ($vd->getVsid() != "") { // if info not found, then ignore since we don't know how to handle it
+                  // hidden variable
+                  if ($this->getProperty(DATA_OUTPUT_HIDDEN) == HIDDEN_YES && $vd->isHidden()) {
+                  continue;
+                  }
+                  }
+                  } */
 
                 $line = '';
-                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                     if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                         $line .= getValueForCsv(encryptC($row["primkey"], $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION)));
                     } else {
@@ -770,6 +779,14 @@ class DataExport {
         $res = $this->db->selectQuery($select);
         if ($this->db->getNumberOfRows($res) > 0) {
             while ($row = $this->db->getRow($res)) {
+                /* $vd = $this->getVariableDescriptive(getBasicName($row["variable"]));
+                  if ($vd->getVsid() != "") { // if info not found, then ignore since we don't know how to handle it
+                  // hidden variable
+                  if ($this->getProperty(DATA_OUTPUT_HIDDEN) == HIDDEN_YES && $vd->isHidden()) {
+                  continue;
+                  }
+                  } */
+
                 $line = getValueForCsv($row["variable"]);
                 $line .= getValueForCsv($row["cnt"]);
                 $line .= getValueForCsv($row["average"]);
@@ -796,7 +813,7 @@ class DataExport {
                 }
 
                 $line = '';
-                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                     if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                         $line .= getValueForCsv(encryptC($row["primkey"], $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION)));
                     } else {
@@ -829,7 +846,7 @@ class DataExport {
         }
         $this->downloadlocation = $outdir . $this->getProperty(DATA_OUTPUT_FILENAME_CSV);
 
-        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
             $header = 'primkey' . $this->separator . 'variable' . $this->separator . 'timespent' . $this->separator . 'language' . $this->separator . 'mode';
             $header2 = 'primkey' . $this->separator . 'total time spent (in seconds)' . $this->separator . 'total time spent (in minutes)' . $this->separator . 'number of screens' . $this->separator . 'average time spent per screen (in seconds)' . $this->separator . 'language' . $this->separator . 'mode';
         } else {
@@ -855,7 +872,437 @@ class DataExport {
 
     /* PARADATA FILES */
 
-    /* WRITE CSV FILE */
+    function processParaData($name = "") {
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
+        $query = "select max(pid) as pid from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $this->survey->getSuid();
+        //}
+        //echo $query;
+        $pid = 0;
+        $res = $this->db->selectQuery($query);
+        if ($res) {
+            $row = $this->db->getRow($res);
+            $pid = $row["pid"];
+            if ($pid == "") {
+                $pid = 0;
+            }
+        }
+
+        $arr = array();
+        $decrypt = "paradata as data_dec";
+        $key = "";
+        if ($this->survey->getDataEncryptionKey() != "") {
+            $key = $this->survey->getDataEncryptionKey();
+            $decrypt = "aes_decrypt(paradata, '" . $this->survey->getDataEncryptionKey() . "') as data_dec";
+        }
+
+        if ($name == "") {
+            $query = "select *, $decrypt from " . Config::dbSurveyData() . "_paradata where pid > $pid and suid=" . $this->survey->getSuid() . ' order by primkey, pid asc';
+        } else {
+            $query = "select *, $decrypt from " . Config::dbSurveyData() . "_paradata where pid > $pid and suid=" . $this->survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey, pid asc';
+        }
+        //}
+        //echo $query;
+        $res = $db->selectQuery($query);
+        $codes = array_values(Common::errorCodes());
+        if ($res) {
+            $oldprimkey = "";
+            $arr = array();
+            if ($this->db->getNumberOfRows($res) > 0) {
+                while ($row = $this->db->getRow($res)) {
+
+                    // end of primkey, so store
+                    if ($oldprimkey != "" && $row["primkey"] != $oldprimkey) {
+
+                        // k: varname
+                        // a: array of error codes with number of times
+                        foreach ($arr as $k => $a) {
+                            foreach ($a as $error => $times) {
+                                $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
+                                if ($key != "") {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "',aes_encrypt('" . $times . "','" . $key . "')," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                } else {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "','" . $times . "'," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                }
+                                $query .= ")";
+                                $this->db->executeQuery($query);
+                                //echo $query . "<hr>";
+                            }
+                        }
+
+                        // reset
+                        $arr = array();
+                    }
+                    $oldprimkey = $row["primkey"];
+
+                    $line = strtoupper($row["displayed"]);
+
+                    // if displayed == variable OR displayed contains ~varname~ or displayed starts with varname~, process; otherwise skip
+                    if ($name == "" || $line == strtoupper($name) || contains($line, "~" . $name . "~") || startsWith($line, $name . "~")) {
+
+                        $line = $row["data_dec"];
+                        $line = str_replace("FO=", "FO:", $line);
+                        $line = str_replace("FI=", "FI:", $line);
+                        $a = explode("||", $line);
+                        $displayed = explode("~", $row["displayed"]);
+                        $variables = array();
+                        foreach ($displayed as $d) {
+                            if (startsWith($d, ROUTING_IDENTIFY_SUBGROUP) == false && startsWith($d, ROUTING_IDENTIFY_ENDSUBGROUP) == false) {
+                                $variables[] = $d;
+                            }
+                        }
+
+                        foreach ($a as $k) {
+                            $t = explode(":", $k);
+                            $code = $t[0];
+
+                            // error code
+                            if (inArray($code, $codes)) {
+                                $s = explode("=", $t[1]);
+                                $varname = $s[0];
+                                $number = str_replace("answer", "", str_replace("_name[]", "", $varname));
+
+                                // find varname
+                                if (isset($variables[$number - 1])) {
+                                    $variable = $variables[$number - 1];
+                                    if (isset($arr[strtoupper($variable)])) {
+                                        $vararray = $arr[strtoupper($variable)];
+                                    } else {
+                                        $vararray = array();
+                                    }
+                                    if (isset($vararray[strtoupper($code)])) {
+                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
+                                        $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
+                                    } else {
+                                        $vararray[strtoupper($code)] = 1;
+                                    }
+                                    $arr[strtoupper($variable)] = $vararray;
+                                }
+                            } else if (inArray($code, array("FO", "FI"))) {
+                                foreach ($variables as $variable) {
+                                    if (isset($arr[strtoupper($variable)])) {
+                                        $vararray = $arr[strtoupper($variable)];
+                                    } else {
+                                        $vararray = array();
+                                    }
+                                    if (isset($vararray[strtoupper($code)])) {
+                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
+                                        $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
+                                    } else {
+                                        $vararray[strtoupper($code)] = 1;
+                                    }
+                                    $arr[strtoupper($variable)] = $vararray;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
+    }
+    
+    /* WRITE PROCESSED STATA FILE */
+
+    function generateProcessedParadata() {
+
+        $this->processParadata();
+        
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
+        set_time_limit(0);
+        ini_set('memory_limit', Config::dataExportMemoryLimit());
+
+        /* set arrays */
+        if (trim($this->getProperty(DATA_OUTPUT_MODES)) != "") {
+            $this->setProperty(DATA_OUTPUT_MODES, explode("~", $this->getProperty(DATA_OUTPUT_MODES)));
+        } else {
+            $this->setProperty(DATA_OUTPUT_MODES, array());
+        }
+        if (trim($this->getProperty(DATA_OUTPUT_LANGUAGES)) != "") {
+            $this->setProperty(DATA_OUTPUT_LANGUAGES, explode("~", $this->getProperty(DATA_OUTPUT_LANGUAGES)));
+        } else {
+            $this->setProperty(DATA_OUTPUT_LANGUAGES, array());
+        }
+        if (trim($this->getProperty(DATA_OUTPUT_VERSIONS)) != "") {
+            $this->setProperty(DATA_OUTPUT_VERSIONS, explode("~", $this->getProperty(DATA_OUTPUT_VERSIONS)));
+        } else {
+            $this->setProperty(DATA_OUTPUT_VERSIONS, array());
+        }
+
+        /* set file names */
+        $this->setProperty(DATA_OUTPUT_FILENAME_STATA, $this->getProperty(DATA_OUTPUT_FILENAME) . ".dta");
+        $this->setProperty(DATA_OUTPUT_FILENAME_CSV, $this->getProperty(DATA_OUTPUT_FILENAME) . ".csv");
+
+        $extracompleted = "";
+        if ($this->getProperty(DATA_OUTPUT_COMPLETED) == INTERVIEW_COMPLETED) {
+            $extracompleted = " and completed=" . $this->getProperty(DATA_OUTPUT_COMPLETED);
+        }
+
+        // find any data names in the data   
+        $extra = "";
+        if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
+            $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
+        }
+        if ($this->getProperty(DATA_OUTPUT_TO) != "") {
+            $extra .= " and ts < '" . $this->getProperty(DATA_OUTPUT_TO) . "'";
+        }
+        $datanames = array();
+        $this->maxwidths = array();
+
+        $decrypt = ", MAX( LENGTH(answer)) as max";
+        if ($this->survey->getDataEncryptionKey() != "") {
+            $decrypt = ", MAX( LENGTH( cast(aes_decrypt(answer, '" . $this->survey->getDataEncryptionKey() . "') as char))) AS max";
+        }
+
+        $query = "select variablename" . $decrypt . " from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . " group by variablename";
+
+        //exit;
+        $res = $this->db->selectQuery($query);
+        if ($res) {
+            if ($this->db->getNumberOfRows($res) == 0) {
+                return 'No records found';
+            } else {
+                /* go through records */
+                while ($row = $this->db->getRow($res)) {
+                    $realname = trim(substr($row["variablename"], 0, strrpos($row["variablename"], "_")));
+                    $vd = $this->getVariableDescriptive(getBasicName($realname));
+                    if ($vd->getVsid() != "") { // if info not found, then ignore since we don't know how to handle it           
+                        // hidden variable
+                        if ($this->getProperty(DATA_OUTPUT_HIDDEN) == HIDDEN_YES && $vd->isHidden()) {
+                            continue;
+                        }
+                    }
+                    $datanames[] = $row["variablename"];
+                    $this->maxwidths[strtoupper($row["variablename"])] = $row["max"];
+                    $row = null;
+                    unset($row);
+                }
+            }
+            $res = null;
+            unset($res);
+        }
+
+        // check for filter
+        $filter = array();
+        if ($this->getProperty(DATA_OUTPUT_VARLIST) != "") {
+            $filter = explode("~", $this->getProperty(DATA_OUTPUT_VARLIST));
+            //echo $this->getProperty(DATA_OUTPUT_VARLIST);
+            //exit;
+        }
+
+        // sort data names by name
+        sort($datanames);
+
+
+        /* check for primkey variable presence */
+        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
+            array_unshift($datanames, VARIABLE_PRIMKEY);
+        }
+
+        /* retrieve variable information */
+        foreach ($datanames as $d) {
+            $this->processParadataVariable($d);
+        }
+
+        /* set number of variables */
+        $this->variablenumber = sizeof($this->variablenames);
+
+        /* get number of records */
+        $query = "select distinct primkey from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra;
+        $res = $this->db->selectQuery($query);
+        $this->recordcount = $this->db->getNumberOfRows($res);
+
+        $this->setofenumeratedbinary = array();
+        $this->skipvariables = array();
+        $this->withsuffix = array();
+
+        /* start writing files */
+        $outputtype = strtolower($this->getProperty(DATA_OUTPUT_FILETYPE));
+        //$outputtype = FILETYPE_CSV;
+        $this->asked = sprintf('%.0F', "8.988465625461158E307");
+        if ($outputtype == FILETYPE_CSV) {
+            $this->startCSVFile();
+            $this->separator = ",";
+        } else {
+            $this->startStataFile();
+            $this->littleendian = $this->isLittleEndian();
+
+            // http://www.stata.com/help.cgi?dta_113
+            $this->shortempty = 32741;
+            $this->shorterror = 32763;
+            $this->shortdk = 32745;
+            $this->shortna = 32755;
+            $this->shortrf = 32759;
+            $this->shortmarkempty = 32746;
+            $this->doubleempty = sprintf('%.0F', "8.98846567431158E307"); // 2^1013            
+            $this->doubledk = sprintf('%.0F', "8.99724347282165E307");
+            $this->doublerf = sprintf('%.0F', "9.027965767606894E307");
+            $this->doublemarkempty = sprintf('%.0F', "8.98846567431158E307") * 1.001220703125000;
+            $this->doublena = sprintf('%.0F', "8.98846567431158E307") * 1.003417968750000000;
+            $this->doubleerror = sprintf('%.0F', "8.98846567431158E307") * 1.005371093750000000;
+
+            // floats not used right now
+            $this->floatempty = sprintf('%.0F', "1.7014118E38F");
+            $this->floatdk = sprintf('%.0F', "1.7030734E38F");
+            $this->floatna = sprintf('%.0F', "1.7030734E38F"); // TODO
+            $this->floatrf = sprintf('%.0F', "1.7088887E38F");
+            $this->floatmarkempty = sprintf('%.0F', "1.7030734E38F");
+        }
+
+        // get languages, modes, versions
+        $this->languages = $this->getProperty(DATA_OUTPUT_LANGUAGES);
+        $this->modes = $this->getProperty(DATA_OUTPUT_MODES);
+        $this->versions = $this->getProperty(DATA_OUTPUT_VERSIONS);
+        $this->encoding = $this->getProperty(DATA_OUTPUT_ENCODING);
+
+        /* go through all records */
+        if ($res) {
+            if ($this->db->getNumberOfRows($res) == 0) {
+                return 'No records found';
+            } else {
+
+                $decrypt = "answer as data_dec";
+                if ($this->survey->getDataEncryptionKey() != "") {
+                    $decrypt = "aes_decrypt(answer, '" . $this->survey->getDataEncryptionKey() . "') as data_dec";
+                }
+
+                /* go through records */
+                while ($row = $this->db->getRow($res)) {
+
+                    $query = "select primkey, variablename, $decrypt, language, mode, version from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->suid . " and primkey='" . $row["primkey"] . "'";
+                    $this->currentrecord = array();
+                    //echo $query;
+                    //exit;
+                    $res2 = $this->db->selectQuery($query);
+                    if ($res2) {
+                        if ($this->db->getNumberOfRows($res2)) {
+                            $tempcnt = 1;
+                            while ($row2 = $this->db->getRow($res2)) {
+                                $this->currentrecord[strtoupper($row2["variablename"])] = array("name" => $row2["variablename"], "answer" => $row2["data_dec"], "language" => $row2["language"], "mode" => $row2["mode"], "version" => $row2["version"]);
+                                if ($tempcnt == 1) {
+                                    if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
+                                        $this->currentrecord[strtoupper(VARIABLE_PRIMKEY)] = array("name" => VARIABLE_PRIMKEY, "answer" => $row["primkey"], "language" => $row2["language"], "mode" => $row2["mode"], "version" => $row2["version"]);
+                                        $tempcnt++;
+                                    }
+                                }
+                                $row2 = null;
+                                unset($row2);
+                            }
+
+                            if (sizeof($this->currentrecord) > 0) {
+                                if ($outputtype == FILETYPE_CSV) {
+                                    $this->addCSVRecord($row["primkey"]);
+                                } else {
+                                    $this->addStataRecord($row["primkey"]);
+                                    $cnt++;
+                                }
+                            }
+                            $this->currentrecord = null;
+                            unset($this->currentrecord);
+                        }
+                    }
+                    $query = null;
+                    unset($query);
+                    $res2 = null;
+                    unset($res2);
+                    $row = null;
+                    unset($row);
+                }
+            }
+        }
+
+        /* finish */
+        if ($outputtype == FILETYPE_CSV) {
+            $this->finishCSVFile();
+        } else {
+            $this->addValueLabels();
+            $this->finishStataFile();
+        }
+
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
+    }
+
+    function processParadataVariable($variablename) {
+
+        // remove any spacing
+        $variablename = trim($variablename);
+
+        // already processed
+        if (inArray(strtoupper($variablename), $this->lookup)) {
+            return;
+        }
+
+        // no primary key in data
+        if (strtoupper($variablename) == strtoupper(VARIABLE_PRIMKEY) && $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_NO) {
+            return;
+        }
+
+        // get answer type
+        if (strtoupper($variablename) == strtoupper(VARIABLE_PRIMKEY)) {
+            $answertype = ANSWER_TYPE_STRING;
+            $label = "PRIMARY KEY";
+        } else {
+            $ops = Language::errorCodeLabels();
+            $answertype = ANSWER_TYPE_INTEGER;
+            $pos = strrpos($variablename, "_");
+            $code = substr($variablename, $pos + 1);
+            $label = strtoupper($variablename . ' - ' . $ops[strtoupper($code)]);
+        }
+
+        $suid = $this->suid;
+
+        /* check for lowercase */
+        if ($this->getProperty(DATA_OUTPUT_FIELDNAME_CASE) == FIELDNAME_LOWERCASE) {
+            $variablename = strtolower($variablename);
+        } else {
+            $variablename = strtoupper($variablename);
+        }
+
+        /* process */
+        $width = 1;
+        switch ($answertype) {
+
+            /* string (prim_key) */
+            case ANSWER_TYPE_STRING:
+                $datatype = STATA_TYPE_STRING;
+                $width = 20;
+                break;
+
+            /* integer */
+            case ANSWER_TYPE_INTEGER:
+                $datatype = STATA_TYPE_DOUBLE;
+                $width = strlen(ANSWER_RANGE_MAXIMUM);
+                break;
+        }
+
+        $valueLabel = "";
+        $this->variablenames[] = $variablename;
+        $this->lookup[] = strtoupper($variablename);
+        $this->valuelabels[] = "";
+        $this->labels[] = $label;
+        $this->datatypes[] = $datatype;
+        $labelset = false;
+
+        if (isset($this->maxwidths[strtoupper($variablename)]) && $labelset == false) {
+            $max = $this->maxwidths[strtoupper($variablename)];
+            if (is_numeric($max)) {
+                if ($max < $width) {
+                    if ($datatype != STATA_TYPE_DOUBLE) {
+                        $width = $max;
+                    } else {
+                        $width = $max * 2; // these we need to add some extra, so Stata editor displays them fine
+                    }
+                }
+            }
+        }
+
+        if (inArray($answertype, array(ANSWER_TYPE_INTEGER, ANSWER_TYPE_DOUBLE)) && $width < 4) {
+            $width = 4;
+        }
+
+        $this->answerwidth[] = $width;
+    }
+
+    /* WRITE RAW CSV FILE */
 
     function generateParadata() {
 
@@ -934,10 +1381,25 @@ class DataExport {
                     if ($include == false) {
                         continue;
                     }
+                } else {
+                    $include = true;
+                    $displayed = explode("~", $row["displayed"]);
+                    foreach ($displayed as $d) {
+                        $vd = $this->getVariableDescriptive(getBasicName($d));
+                        if ($vd->getVsid() != "") { // if info not found, then ignore since we don't know how to handle it           
+                            // hidden variable
+                            if ($this->getProperty(DATA_OUTPUT_HIDDEN) == HIDDEN_YES && $vd->isHidden()) {
+                                $include = false;
+                            }
+                        }
+                    }
+                    if ($include == false) {
+                        continue;
+                    }
                 }
 
                 $line = '';
-                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+                if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
                     if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                         $line .= getValueForCsv(encryptC($row["primkey"], $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION)));
                     } else {
@@ -969,7 +1431,7 @@ class DataExport {
         }
         $this->downloadlocation = $outdir . $this->getProperty(DATA_OUTPUT_FILENAME_CSV);
 
-        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
             $header = 'primkey' . $this->separator . 'variable(s)' . $this->separator . 'paradata' . $this->separator . 'language' . $this->separator . 'mode' . $this->separator . 'date/time';
         } else {
             $header = 'variable(s)' . $this->separator . 'paradata' . $this->separator . 'language' . $this->separator . 'mode' . $this->separator . 'date/time';
@@ -991,10 +1453,10 @@ class DataExport {
     /* RAW DATA FILES */
 
     function processVariable($variablename, $var) {
-        
+
         // remove any spacing
         $variablename = trim($variablename);
-        
+
         // already processed
         if (inArray(strtoupper($variablename), $this->lookup)) {
             return;
@@ -1358,7 +1820,7 @@ class DataExport {
 
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', Config::dataExportMemoryLimit());
 
         /* set arrays */
         if (trim($this->getProperty(DATA_OUTPUT_MODES)) != "") {
@@ -1574,7 +2036,7 @@ class DataExport {
         unset($this->descriptives);
 
         /* check for primkey variable presence */
-        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) == PRIMARYKEY_YES) {
+        if ($this->getProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA) != PRIMARYKEY_NO) {
             /* TODO */
         }
 
@@ -1610,6 +2072,7 @@ class DataExport {
             $this->shortna = 32755;
             $this->shortrf = 32759;
             $this->shortmarkempty = 32746;
+
             $this->doubleempty = sprintf('%.0F', "8.98846567431158E307"); // 2^1013            
             $this->doubledk = sprintf('%.0F', "8.99724347282165E307");
             $this->doublerf = sprintf('%.0F', "9.027965767606894E307");
@@ -1755,7 +2218,7 @@ class DataExport {
         if (!endsWith($outdir, DIRECTORY_SEPARATOR)) {
             $outdir .= DIRECTORY_SEPARATOR;
         }
-        //echo $outdir . $this->getProperty("STATAFileName"); 
+
         $this->statahandle = fopen($outdir . $this->getProperty(DATA_OUTPUT_FILENAME_STATA), "w");
         if (!$this->statahandle) {
             /* show error */
@@ -1798,7 +2261,6 @@ class DataExport {
             }
         }
 
-
         /* START OF FILE */
 
         /* header */
@@ -1820,7 +2282,7 @@ class DataExport {
         for ($i = 0; $i < $this->variablenumber; $i++) {
             $this->writeByte($this->recordbytes, $this->variabletypes[$i]);
         }
-        
+
         $trunced = array();
         $untrunced = array();
 
@@ -2083,12 +2545,11 @@ class DataExport {
             //        $value = implode("-", flatten(unserialize(gzuncompress($value))));
             //    }
             //}
-            
             // we have a value, then check for serialized array answer
             if ($value != null) {
-                
+
                 // variable is an instance of an array variable
-                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {                
+                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {
 
                     // this is a compressed string!
                     $v = gzuncompress($value);
@@ -2097,7 +2558,7 @@ class DataExport {
                         // this is a serialized string!
                         if (unserialize($v) !== false) {
                             $v1 = unserialize(gzuncompress($value));
-                            
+
                             // the unserialized is an array or object, then output empty string so it appears as empty (not skipped)
                             if (is_array($v1) || is_object($v1)) {
                                 $value = "";
@@ -2110,6 +2571,19 @@ class DataExport {
             // primary key encryption
             if ($fieldname == VARIABLE_PRIMKEY && $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION) != "") {
                 $value = encryptC($value, $this->getProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
+            }
+
+
+            // check if it is a setofenum/multi-dropdown
+            if (isset($this->variabledescriptives[strtoupper($fieldname)])) {
+                $vardes = $this->variabledescriptives[strtoupper($fieldname)];
+            } else {
+                $vardes = $this->getVariableDescriptive($fieldname);
+                //$this->descriptives[] = $vardesc;
+            }
+            $setofenum = false;
+            if (inArray($vardes->getAnswerType(), array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
+                $setofenum = true;
             }
 
             // write variable
@@ -2174,6 +2648,9 @@ class DataExport {
                 unset($doubleobj);
             } else {
                 $stringobj = "";
+                if ($setofenum == true) {
+                    $stringobj = ".";
+                }
                 if ($value == ANSWER_RF) {
                     $stringobj = ".r";
                 } else if ($value == ANSWER_DK) {
@@ -2378,6 +2855,7 @@ class DataExport {
         //$versions = $this->getProperty(DATA_OUTPUT_VERSIONS);
         //$primkey = $record->getPrimaryKey();
         $value = null; // assume never asked
+        //echo $fieldname;
         // from _data table
         if ($this->getProperty(DATA_OUTPUT_TYPE) == DATA_OUTPUT_TYPE_DATA_TABLE) {
             $value = $this->getDataTableValue($primkey, $fieldname);
@@ -2468,9 +2946,9 @@ class DataExport {
 
             // we have a value, then check for serialized array answer
             if ($value != null) {
-                
+
                 // variable is an instance of an array variable
-                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {                
+                if (inArray(strtoupper(getBasicName($fieldname)), $this->arrayfields)) {
 
                     // this is a compressed string!
                     $v = gzuncompress($value);
@@ -2479,7 +2957,7 @@ class DataExport {
                         // this is a serialized string!
                         if (unserialize($v) !== false) {
                             $v1 = unserialize(gzuncompress($value));
-                            
+
                             // the unserialized is an array or object, then output empty string so it appears as empty (not skipped)
                             if (is_array($v1) || is_object($v1)) {
                                 $value = "";

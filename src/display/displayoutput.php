@@ -122,7 +122,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $headers[] = array('link' => '', 'label' => Language::headerOutputRemarkData());
         $returnStr = $this->showOutputHeader($headers);
         $returnStr .= $this->displayComboBox();
-        
+
         $returnStr .= "<form id=refreshform method=post>";
         $returnStr .= '<input type=hidden name=page value="sysadmin.output.remark">';
         $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
@@ -160,7 +160,7 @@ class DisplayOutput extends DisplaySysAdmin {
                                                 });
                                                 })';
         $returnStr .= "</script>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelOutputDataMode() . '</td><td>' . $this->displayModesAdmin(DATA_OUTPUT_MODES, DATA_OUTPUT_MODES, MODE_CAPI . "~" . MODE_CATI . "~" . MODE_CASI, "multiple", implode("~", $modes)) . '</td></tr>';
         $returnStr .= '<tr><td>' . Language::labelOutputDataLanguage() . '</td><td>' . $this->displayLanguagesAdmin(DATA_OUTPUT_LANGUAGES, DATA_OUTPUT_LANGUAGES, implode("~", $langs), true, false, false, "multiple", implode("~", $langs)) . '</td></tr>';
         $returnStr .= '<tr><td>' . Language::labelOutputDataType() . '</td><td>';
@@ -171,7 +171,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -267,7 +267,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $headers[] = array('link' => '', 'label' => Language::headerOutputTimingsData());
         $returnStr = $this->showOutputHeader($headers);
         $returnStr .= $this->displayComboBox();
-        
+
         $returnStr .= "<form id=refreshform method=post>";
         $returnStr .= '<input type=hidden name=page value="sysadmin.output.timing">';
         $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
@@ -308,7 +308,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -374,7 +374,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= '<input type=hidden name=page value="sysadmin.output.paradata">';
         $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
         $returnStr .= "</form>";
-        
+
         $returnStr .= '<form ' . POST_PARAM_NOAJAX . '=' . NOAJAX . ' id=surveyform method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.output.paradatares'));
 
@@ -383,7 +383,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= '<table>';
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataSurvey() . '</td><td>' . $this->displaySurveys(DATA_OUTPUT_SURVEY, DATA_OUTPUT_SURVEY, $suid, '', "") . '</td></tr>';
-        
+
         $returnStr .= "<script type='text/javascript'>";
         $returnStr .= '$( document ).ready(function() {
                                                 $("#' . DATA_OUTPUT_SURVEY . '").change(function (e) {
@@ -411,7 +411,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -432,6 +432,22 @@ class DisplayOutput extends DisplaySysAdmin {
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataFileName() . '</td><td>';
         $returnStr .= "<div class='input-group'><input type=text class='form-control' name='" . DATA_OUTPUT_FILENAME . "' ><span class='input-group-addon'>" . Language::labelOutputDataFileNameNoExtension() . "</span></div>";
+        $returnStr .= "</td></tr>";        
+
+        $returnStr .= '<tr><td>' . Language::labelOutputDataFileType() . '</td><td>';
+        $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_FILETYPE . ">";
+        //$returnStr .= "<option></option>";
+        $returnStr .= "<option value=" . FILETYPE_STATA . ">" . Language::optionsFileTypeStata() . "</option>";
+        $returnStr .= "<option value=" . FILETYPE_CSV . ">" . Language::optionsFileTypeCSV() . "</option>";
+        $returnStr .= "</select>";
+        $returnStr .= "</td></tr>";
+
+        $returnStr .= '<tr><td>' . Language::labelOutputDataTypeParadata() . '</td><td>';
+        $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPEPARADATA . ">";
+        //$returnStr .= "<option></option>";
+        $returnStr .= "<option value=" . PARADATA_RAW . ">" . Language::optionsParadataRaw() . "</option>";
+        $returnStr .= "<option value=" . PARADATA_PROCESSED . ">" . Language::optionsParadataProcessed() . "</option>";
+        $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataPrimaryKey() . '</td><td>';
@@ -472,12 +488,12 @@ class DisplayOutput extends DisplaySysAdmin {
         $headers[] = array('link' => '', 'label' => Language::headerOutputAuxiliaryData());
         $returnStr = $this->showOutputHeader($headers);
         $returnStr .= $this->displayComboBox();
-        
+
         $returnStr .= "<form id=refreshform method=post>";
         $returnStr .= '<input type=hidden name=page value="sysadmin.output.addondata">';
         $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
         $returnStr .= "</form>";
-        
+
         $returnStr .= '<form ' . POST_PARAM_NOAJAX . '=' . NOAJAX . ' id=surveyform method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.output.addondatares'));
 
@@ -529,7 +545,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -679,7 +695,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelToolsCleanFrom() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_FROM, DATA_OUTPUT_FROM, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr><tr><td>' . Language::labelToolsCleanTo() . ': </td><td>' . $this->displayDateTimePicker(DATA_OUTPUT_TO, DATA_OUTPUT_TO, "", getSMSLanguagePostFix(getSMSLanguage()), "true", "true", "false") . '</td></tr>';
 
         if (isset($_COOKIE['uscicvariablecookie'])) {
@@ -697,7 +713,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= "<option value=" . INTERVIEW_NOTCOMPLETED . ">" . Language::optionsDataNotCompleted() . "</option>";
         $returnStr .= "<option value=" . INTERVIEW_COMPLETED . ">" . Language::optionsDataCompleted() . "</option>";
         $returnStr .= "</select></td></tr>";
-        
+
         $returnStr .= '<tr><td>' . Language::labelOutputDataClean() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_CLEAN . ">";
         //$returnStr .= "<option></option>";
@@ -842,11 +858,12 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= '<div class="list-group">';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.response')) . '" class="list-group-item">' . Language::headerOutputStatisticsResponse() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.aggregates')) . '" class="list-group-item">' . Language::headerOutputStatisticsAggregate() . '</a>';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.contacts.graphs')) . '" class="list-group-item">' . Language::headerOutputStatisticsContactGraphs() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.paradata')) . '" class="list-group-item">' . Language::headerOutputStatisticsParadata() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.timings.distribution')) . '" class="list-group-item">' . Language::headerOutputStatisticsTimings() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.timings.overtime')) . '" class="list-group-item">' . Language::headerOutputStatisticsTimingsOverTime() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.timings.respondent')) . '" class="list-group-item">' . Language::headerOutputStatisticsTimingsRespondent() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.platform')) . '" class="list-group-item">' . Language::headerOutputStatisticsPlatform() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.contacts.graphs')) . '" class="list-group-item">' . Language::headerOutputStatisticsContactGraphs() . '</a>';
 
         $returnStr .= '</div>';
         $returnStr .= '</div>';
@@ -926,7 +943,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
 
         $brackets = Language::timingsBrackets();
-        $returnStr.= $this->getTimingsData($survey->getName(), implode($timings, ","), $brackets);
+        $returnStr.= $this->getTimingsData($survey->getName(), implode(",", $timings), $brackets);
         $returnStr .= '</div>'; // well
         $returnStr .= '</div>    </div>'; //container and wrap
 
@@ -1073,7 +1090,7 @@ var chart = new Highcharts.Chart({
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<script src="js/export-csv.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-        $returnStr.= $this->getTimingsDataOverTime($survey->getName(), implode($timings, ","), $brackets);
+        $returnStr.= $this->getTimingsDataOverTime($survey->getName(), implode(",", $timings), $brackets);
         $returnStr .= '</div>'; // well
         $returnStr .= '</div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
@@ -1255,7 +1272,7 @@ var chart = new Highcharts.Chart({
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
         //print_r($brackets);
         //print_r($timings);
-        $returnStr.= $this->getTimingsDataRespondent($survey->getName() . ' - ' . loadvar('respondent'), implode($timings, ","), $brackets);
+        $returnStr.= $this->getTimingsDataRespondent($survey->getName() . ' - ' . loadvar('respondent'), implode(",", $timings), $brackets);
         $returnStr .= '</div>'; // well
         $returnStr .= '</div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
@@ -1559,7 +1576,7 @@ var chart = new Highcharts.Chart({
                         break;
                 }
 
-                $returnStr .= $this->createChart($variable->getName(), implode($aggdata, ","), $brackets);
+                $returnStr .= $this->createChart($variable->getName(), implode(",", $aggdata), $brackets);
             }
             $returnStr .= "</div>";
 
@@ -1576,7 +1593,7 @@ var chart = new Highcharts.Chart({
             } else {
 
                 $returnStr .= '<div id="chart2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-                $returnStr .= $this->createChart2($variable->getName(), implode($aggdata, ","), $brackets);
+                $returnStr .= $this->createChart2($variable->getName(), implode(",", $aggdata), $brackets);
             }
             $returnStr .= "</div>";
         }
@@ -1901,7 +1918,7 @@ var chart = new Highcharts.Chart({
     function getArrayData($survey, $fieldname) {
         global $db;
         $array = array();
-        $query = 'select variablename from ' . Config::dbSurveyData() . '_data where suid = ' . $survey . ' and variablename like "' . $fieldname . '[%" and length(primkey) > ' . Config::getMinimumPrimaryKeyLength() . ' and length(primkey) < ' . Config::getMaximumPrimaryKeyLength();
+        $query = 'select distinct variablename from ' . Config::dbSurveyData() . '_data where suid = ' . $survey . ' and variablename like "' . $fieldname . '[%" and length(primkey) > ' . Config::getMinimumPrimaryKeyLength() . ' and length(primkey) < ' . Config::getMaximumPrimaryKeyLength();
         $result = $db->selectQuery($query);
         if ($db->getNumberOfRows($result) > 0) {
             while ($row = $db->getRow($result)) {
@@ -2919,6 +2936,263 @@ var chart = new Highcharts.Chart({
         [{  
             name: 'Browser',
             colorByPoint: true,
+            data: [" . $data . "]        
+            ";
+
+        $returnStr.= "                }]
+            });
+</script>";
+        return $returnStr;
+    }
+
+    function showOutputStatisticsParadata($content = "") {
+        $survey = new Survey($_SESSION['SUID']);
+        //echo $_SESSION["SUID"] . '----';
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output'), Language::headerOutput()), 'label' => Language::headerOutputData());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics'), Language::headerOutputStatistics()), 'label' => Language::headerOutputStatistics());
+        $headers[] = array('link' => '', 'label' => Language::headerOutputStatisticsParadata());
+
+        $returnStr = $this->showOutputHeader($headers);
+        $returnStr .= $content;
+        $returnStr .= $this->displayComboBox();
+        $surveys = new Surveys();
+        $surveys = $surveys->getSurveys();
+        if (sizeof($surveys) > 0) {
+            $returnStr .= "<form id=refreshform method=post>";
+            $returnStr .= '<input type=hidden name=page value="sysadmin.output.statistics.paradata">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_SURVEY . '" id="' . SMS_POST_SURVEY . '_hidden" value="' . getSurvey() . '">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_MODE . '" id="' . SMS_POST_MODE . '_hidden" value="' . getSurveyMode() . '">';
+            $returnStr .= '<input type=hidden name="' . SMS_POST_LANGUAGE . '" id="' . SMS_POST_LANGUAGE . '_hidden" value="' . getSurveyLanguage() . '">';
+            $returnStr .= "</form>";
+
+            $returnStr .= '<div class="well well-sm">';
+            $returnStr .= '<table>';
+            $returnStr .= '<tr><td>' . Language::labelTestSurvey() . "</td><td><select onchange='document.getElementById(\"" . SMS_POST_SURVEY . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();' name=" . POST_PARAM_SUID . " class='selectpicker show-tick'>";
+            $current = new Survey(getSurvey());
+            foreach ($surveys as $s) {
+                $selected = "";
+                if ($s->getSuid() == $current->getSuid()) {
+                    $selected = "SELECTED";
+                }
+                $returnStr .= "<option $selected value=" . $s->getSuid() . '>' . $s->getName() . '</option>';
+            }
+            $returnStr .= "</select></td></tr>";
+            $returnStr .= '</table><br/><br/>';
+
+            $sections = $survey->getSections();
+            foreach ($sections as $section) {
+                $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.paradata.section', 'seid' => $section->getSeid())) . '" class="list-group-item">' . $section->getName() . ' ' . $section->getDescription() . '</a>';
+            }
+            $returnStr .= "</div>";
+        } else {
+            $returnStr .= $this->displayInfo(Language::messageNoSurveysAvailable());
+        }
+        $returnStr .= '</p></div>    </div>'; //container and wrap
+        $returnStr .= $this->showBottomBar();
+
+        $returnStr .= $this->showFooter(false);
+        return $returnStr;
+    }
+
+    function showOutputStatisticsParadataSection($seid) {
+        $survey = new Survey($_SESSION['SUID']);
+        $section = $survey->getSection($seid);
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output'), Language::headerOutput()), 'label' => Language::headerOutputData());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics'), Language::headerOutputStatistics()), 'label' => Language::headerOutputStatistics());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics.paradata'), Language::headerOutputStatisticsParadata()), 'label' => Language::headerOutputStatisticsParadata());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics.paradata', 'suid' => $suid), $survey->getName()), 'label' => $survey->getName());
+        $headers[] = array('link' => '', 'label' => $section->getName());
+        $returnStr = $this->showOutputHeader($headers);
+        $returnStr .= $content;
+        $variables = $survey->getVariableDescriptives($seid);
+        foreach ($variables as $variable) {
+            if (!inArray($variable->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
+                $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.output.statistics.paradata.variable', 'seid' => $seid, 'vsid' => $variable->getVsid())) . '" class="list-group-item">' . $variable->getName() . ' ' . $variable->getDescription() . '</a>';
+            }
+        }
+        $returnStr .= '</p></div>    </div>'; //container and wrap
+        $returnStr .= $this->showBottomBar();
+
+        $returnStr .= $this->showFooter(false);
+        return $returnStr;
+    }
+
+    function showOutputStatisticsParadataVariable($seid, $vsid) {
+        if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
+            if (loadvar(DATA_OUTPUT_TYPEDATA) == DATA_TEST) {
+                $_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_TEST;
+            } else {
+                $_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_NORMAL;
+            }
+        } else {
+            $_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_NORMAL;
+        }
+        $survey = new Survey($_SESSION['SUID']);
+        $section = $survey->getSection($seid);
+        $variable = $survey->getVariableDescriptive($vsid);
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output'), Language::headerOutput()), 'label' => Language::headerOutputData());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics'), Language::headerOutputStatistics()), 'label' => Language::headerOutputStatistics());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics.paradata'), Language::headerOutputStatisticsParadata()), 'label' => Language::headerOutputStatisticsParadata());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics.paradata', 'suid' => $suid), $survey->getName()), 'label' => $survey->getName());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output.statistics.paradata.section', 'seid' => $seid), $section->getName()), 'label' => $section->getName());
+
+        $headers[] = array('link' => '', 'label' => $variable->getName());
+
+        $returnStr = $this->showOutputHeader($headers);
+
+        $returnStr .= '<form id=surveyform method="post">';
+        $returnStr .= '<span class="label label-default">' . Language::labelAggregateDetails() . '</span>';
+        $returnStr .= '<div class="well well-sm">';
+        $returnStr .= '<table>';
+
+        $returnStr .= $this->displayComboBox();
+        $returnStr .= '<tr><td>' . Language::labelOutputDataType() . '</td><td>';
+        $returnStr .= "<select id='typedata' class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPEDATA . ">";
+        $selected = array('', '');
+        if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
+            $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
+        }
+        //print_r($selected);
+        $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
+        $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
+        $returnStr .= "</select>";
+        $returnStr .= "</td></tr>";
+        $returnStr .= '<script type=text/javascript>
+                        $(document).ready(function(){
+                            $("#typedata").on("change", function(event) {
+                                document.getElementById("surveyform").submit();
+                            });
+                        });
+                    </script>';
+        $returnStr .= "</form>";
+
+        $returnStr .= '</table>';
+
+        $returnStr .= '<br/><table>';
+        $returnStr .= '<tr><td valign=top style="min-width: 100px;">' . Language::labelTypeEditGeneralQuestion() . ": </td><td valign=top>";
+        $returnStr .= $variable->getQuestion() . "</td></tr>";
+        $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditGeneralAnswerType() . ": </td><td valign=top>";
+        $answertype = $variable->getAnswerType();
+        $arr = Language::getAnswerTypes();
+        $returnStr .= $arr[$answertype] . "</td></tr>";
+        if (inArray($answertype, array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN))) {
+            $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditGeneralCategories() . ": </td><td valign=top>";
+            $returnStr .= str_replace("\r\n", "<br/>", $variable->getOptionsText()) . "</td></tr>";
+        } else if (inArray($answertype, array(ANSWER_TYPE_RANGE, ANSWER_TYPE_SLIDER))) {
+            $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditRangeMinimum() . ": </td><td valign=top>";
+            $returnStr .= $variable->getMinimum() . "</td></tr>";
+            $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditRangeMaximum() . ": </td><td valign=top>";
+            $returnStr .= $variable->getMaximum() . "</td></tr>";
+        }
+
+        if ($variable->isArray()) {
+            $returnStr .= $this->displayComboBox();
+            $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditGeneralArrayInstance() . ": </td><td valign=top>";
+            $options = $this->getArrayData($_SESSION['SUID'], $variable->getName());
+            $returnStr .= "<form id=instanceform method=post>";
+            $returnStr .= "<select class='selectpicker show-tick' id='arrayinstance' name='arrayinstance'>";
+            foreach ($options as $op) {
+                $returnStr .= "<option value='" . $op . "'>" . $op . "</option>";
+            }
+            $returnStr .= "</select>";
+            $returnStr .= "</td></tr>";
+            $params = getSessionParams();
+            $params['vsid'] = $variable->getVsid();
+            $returnStr .= setSessionParamsPost($params);
+            $returnStr .= "</form>";
+            $returnStr .= "<script type='text/javascript'>";
+            $returnStr .= "$('#arrayinstance').change(function () {
+                                $('#instanceform').submit();
+                            });";
+            $returnStr .= "</script>";
+        }
+
+        $returnStr .= "</table></div>";
+
+        $returnStr .= '<span class="label label-default">' . Language::labelAggregateData() . '</span>';
+        $returnStr .= '<div class="well well-sm">';
+        $data = new Data();
+        $brackets = array();
+        $varname = $variable->getName();
+        if ($variable->isArray()) {
+            if (loadvar("arrayinstance") != "") {
+                $varname = loadvar("arrayinstance");
+            } else {
+                $varname = $varname . "[1]";
+            }
+        }
+        $paradata = $data->getParaData($variable, $varname);
+
+        //$aggdata = array(2,5);
+        if (sizeof($paradata) == 0) {
+            $returnStr .= "<br>" . $this->displayWarning(Language::messageNoData());
+        } else {
+
+            $returnStr .= '<script src="js/highcharts.js"></script>';
+            $returnStr .= '<script src="js/modules/exporting.js"></script>';
+            $returnStr .= '<script src="js/export-csv.js"></script>';
+            $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
+            $errorlabels = Language::errorCodeLabels();
+            $brackets = array();
+            foreach ($paradata as $k => $p) {
+                if (isset($errorlabels[$k])) {
+                    $brackets[] = $errorlabels[$k];
+                }
+            }            
+            $returnStr .= $this->createParadataChart($variable->getName(), implode(",", array_values($paradata)), $brackets);
+        }
+        $returnStr .= "</div>";        
+
+        $returnStr .= '</p></div>    </div>'; //container and wrap
+        $returnStr .= $this->showBottomBar();
+        $returnStr .= $this->showFooter(false);
+        return $returnStr;
+    }
+    
+    function createParaDataChart($title, $data, $brackets = array()) {
+
+        $bracks = '';
+        for ($i = 0; $i < sizeof($brackets); $i++) {
+            $br = $brackets[$i];
+            $bracks .= "'" . $br . "'";
+            if ($i + 1 <= sizeof($brackets)) {
+                $bracks .= ",";
+            }
+        }
+        $returnStr .= "<script type='text/javascript'>           
+var chart = new Highcharts.Chart({
+    chart: {
+        renderTo: 'chart1',
+            type: 'column',
+            zoomType: 'x'            
+        },
+        title: {
+            text: '" . $title . "'
+        },
+        subtitle: {
+            text: 'Source: " . Language::labelNubis() . "'
+        },
+        xAxis: {
+            categories: [
+                " . $bracks . "
+            ],
+            crosshair: true
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '" . Language::labelErrors() . "'
+            }
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },            
+        series:         
+        [{  
+            name: '" . Language::labelNumberOfTimes() . "',
             data: [" . $data . "]        
             ";
 

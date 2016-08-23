@@ -21,6 +21,7 @@ class VariableDescriptive extends Component {
     private $type;
     private $iferrorgroup;
     private $fillines;
+    private $checklines;
 
     function __construct($variablenameOrRow = "") {
 
@@ -472,7 +473,7 @@ class VariableDescriptive extends Component {
 
         /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
-        }
+        }        
         global $survey;
         return $survey->getParadata($default);
     }
@@ -2828,6 +2829,33 @@ class VariableDescriptive extends Component {
     function setEnumeratedCustom($value) {
         $this->setSettingValue(SETTING_ENUMERATED_CUSTOM, $value);
     }
+    
+    function getEnumeratedcolumns($default = true) {
+
+        /* variable level setting */
+        $val = $this->getSettingValue(SETTING_ENUMERATED_COLUMNS, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+            return $val;
+        }
+
+        /* type level setting */
+        if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
+            if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+                return SETTING_FOLLOW_TYPE;
+            }
+            $val = $this->type->getEnumeratedColumns($default);
+            if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+                return $val;
+            }
+        }
+
+        /* no survey level setting */
+        return "";
+    }
+
+    function setEnumeratedColumns($value) {
+        $this->setSettingValue(SETTING_ENUMERATED_COLUMNS, $value);
+    }
 
     function getEnumeratedRandomizer($default = true) {
 
@@ -3129,6 +3157,11 @@ class VariableDescriptive extends Component {
         }
         return implode(", ", $labels);
     }
+    
+    function clearOptions() {
+        $this->options = null;
+        unset($this->options);
+    }
 
     function getOptions() {
         $this->setOptions();
@@ -3240,6 +3273,80 @@ class VariableDescriptive extends Component {
 
     function setEnumeratedLabel($value) {
         $this->setSettingValue(SETTING_ENUMERATED_LABEL, $value);
+    }
+    
+    function getTableMobile($default = true) {
+
+        /* variable level setting */
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+            return $val;
+        }
+
+        /* type level setting */
+        if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
+            if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+                return SETTING_FOLLOW_TYPE;
+            }
+            $val = $this->type->getTableMobile($default);
+            if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+                return $val;
+            }
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobile($default);
+    }
+    
+    function isTableMobile() {
+        if ($this->getTableMobile() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobile($text) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE, $text);
+    }  
+    
+    function getTableMobileLabels($default = true) {
+
+        /* variable level setting */
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE_LABELS, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+            return $val;
+        }
+
+        /* type level setting */
+        if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
+            if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+                return SETTING_FOLLOW_TYPE;
+            }
+            $val = $this->type->getTableMobileLabels($default);
+            if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+                return $val;
+            }
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getTableMobileLabels($default);
+    }
+    
+    function isTableMobileLabels() {
+        if ($this->getTableMobileLabels() == GROUP_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setTableMobileLabels($text) {
+        $this->setSettingValue(SETTING_TABLE_MOBILE_LABELS, $text);
     }
 
     /* comparison functions */
@@ -4508,6 +4615,31 @@ class VariableDescriptive extends Component {
     function setButtonFormatting($value) {
         $this->setSettingValue(SETTING_BUTTON_FORMATTING, $value);
     }
+    
+    function getXiTemplate($default = true) {
+        
+        /* variable level setting */
+        $val = $this->getSettingValue(SETTING_GROUP_XI_TEMPLATE, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+            return $val;
+        }
+
+        /* type level setting */
+        if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
+            if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+                return SETTING_FOLLOW_TYPE;
+            }
+            $val = $this->type->getXiTemplate($default);
+            if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+                return $val;
+            }
+        }
+        return "";
+    }
+
+    function setXiTemplate($text) {
+        $this->setSettingValue(SETTING_GROUP_XI_TEMPLATE, $text);
+    }
 
     /* button functions */
 
@@ -5429,6 +5561,35 @@ class VariableDescriptive extends Component {
     function setFillCode($text) {
         $this->setSettingValue(SETTING_FILLCODE, $text);
     }
+    
+    /* check functions */
+    
+    function getCheckText() {
+        return $this->getSettingValue(SETTING_CHECKTEXT);
+    }
+
+    function getCheckTextByLine($line) {
+        $this->checklines = explode("\r\n", $this->getCheckText());
+        if (isset($this->checklines[$line - 1])) {
+            //echo'<br/><textarea rows=10 cols=50>' . $this->fillines[$line - 1] . '</textarea> ==== ' . $line;
+//echo '----found: ';// . $this->fillines[$line - 1] . "<br/>";
+            return $this->checklines[$line - 1];
+        }
+
+        return "";
+    }
+
+    function setCheckText($text) {
+        $this->setSettingValue(SETTING_CHECKTEXT, $text);
+    }
+    
+    function getCheckCode($default = true) {
+        return $this->getSettingValue(SETTING_CHECKCODE, $default);
+    }
+
+    function setCheckCode($text) {
+        $this->setSettingValue(SETTING_CHECKCODE, $text);
+    }
 
     /* keyboard binding functions isKeyboardBinding */
 
@@ -5892,7 +6053,7 @@ class VariableDescriptive extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -5910,7 +6071,7 @@ class VariableDescriptive extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -5935,7 +6096,7 @@ class VariableDescriptive extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -5979,7 +6140,7 @@ class VariableDescriptive extends Component {
         $mode = getSurveyMode();
         $default = $survey->getDefaultLanguage($mode);
         foreach ($arr as $a) {
-            $s = $this->getSetting($a);
+            $s = $this->getSetting($a, false);
             $s1 = $this->getSettingModeLanguage($a, $mode, $default, $this->getObjectType());
             if (($s->getValue() == "" && $s1->getValue() != "") || ($s1->getTimestamp() > $s->getTimestamp())) {
                 return false;
@@ -6001,7 +6162,7 @@ class VariableDescriptive extends Component {
         $r = $db->selectQuery($query);
         $row = $db->getRow($r);
         $vsid = $row["max"] + 1;
-
+        $oldsuid = $this->getSuid();
         $this->remove();
 
         /* set position */
@@ -6014,7 +6175,16 @@ class VariableDescriptive extends Component {
         $this->setObjectName($vsid);
         $this->setVsid($vsid);
         $this->setSuid($suid);
-        $this->setSeid($seid);
+        $this->setSeid($seid);        
+        
+        // check for type
+        if ($this->hasType()) {
+            if ($oldsuid != $suid) {        
+                $this->type->copy($suid);
+                $this->setTyd($this->type->getTyd());
+            }
+        }
+        
         $this->save();
     }
 
@@ -6032,12 +6202,13 @@ class VariableDescriptive extends Component {
         $db->executeQuery($query);
     }
 
-    function copy($newname, $newsuid = "", $newseid = "") {
+    function copy($newname, $newsuid = "", $newseid = "", $types = true) {
         global $db;
         $query = "select max(vsid) as max from " . Config::dbSurvey() . "_variables";
         $r = $db->selectQuery($query);
         $row = $db->getRow($r);
         $vsid = $row["max"] + 1;
+        $oldsuid = $this->getSuid();
         $this->setObjectName($vsid);
         $this->setVsid($vsid);
         $this->setName($newname);
@@ -6054,7 +6225,16 @@ class VariableDescriptive extends Component {
         $row = $db->getRow($r);
         $pos = $row["max"] + 1;
         $this->setPosition($pos);
-
+        
+        // check for type
+        if ($types == true && $this->hasType()) {
+            //echo 'nonon';
+            if ($newsuid != "" && $oldsuid != $newsuid) {        
+                $this->type->copy($newsuid);
+                $this->setTyd($this->type->getTyd());
+            }
+        }
+        
         $this->save();
     }
 

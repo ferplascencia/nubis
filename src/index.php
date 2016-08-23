@@ -110,9 +110,27 @@ if (!isset($_SESSION['COMMSERVER'])) {
     $_SESSION['COMMSERVER'] = 0;
 }
 
+/* session level survey locking */
+if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
+
+    if (isset($_SESSION['REQUEST_IN_PROGRESS']) && $_SESSION['REQUEST_IN_PROGRESS'] == 1) {        
+        $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = 1;
+    }
+    else {
+        //echo 'hhhmmm';
+        $_SESSION['REQUEST_IN_PROGRESS'] = 1;
+        $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = null;
+        unset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS']);
+    }
+}
+
 require_once('globals.php');
 if (loadvar('r') != '') {
-    getSessionParamsPost(loadvar('r'));
+    
+    // if real request (not second submitted one while first is still running), load session information
+    if (!isset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'])) {
+        getSessionParamsPost(loadvar('r'));
+    }
 }
 
 /* survey entry */
@@ -137,6 +155,10 @@ if (loadvar(POST_PARAM_SMS_AJAX) == SMS_AJAX_CALL) { // sms ajax call
 } else { // handle action
     $action = new Action($sesid);
     echo $action->getAction();
+
+    // clear session locking (if not already done by earlier script exit)
+    doExit();
 }
+
 ?>
 

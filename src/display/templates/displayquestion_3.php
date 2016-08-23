@@ -15,7 +15,7 @@ class DisplayQuestion extends DisplayQuestionBasic {
     
     function redirect($page){
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
   		  $returnStr .= '<form method="post" action="../index.php">';
 	  	  $returnStr .= '<input type=hidden name="' . POST_PARAM_PRIMKEY . '" value="' . addslashes(encryptC($this->primkey, Config::directLoginKey())) . '">';
 		    $returnStr .= '<input type=hidden name="' . POST_PARAM_SUID . '" value="' . getSurvey() . '">';
@@ -32,12 +32,12 @@ class DisplayQuestion extends DisplayQuestionBasic {
 
     function showEndSurvey() {
       echo $this->redirect("survey.return.end");
-      exit;
+      doExit();
     }
 
     function showCompletedSurvey() {
       echo $this->redirect("survey.return.alreadycompleted");
-      exit;
+      doExit();
     }
 
 }

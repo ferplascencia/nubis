@@ -23,6 +23,8 @@ require_once("../user.php");
 require_once('reportissue.php');
 require_once('watchwindow.php');
 require_once('jumpback.php');
+require_once('updater.php');
+require_once("../display/templates/displayquestion_" . getSurveyTemplate() . ".php");
 
 if (loadvar('r') != '') {
     getSessionParamsPost(loadvar('r'));
@@ -40,7 +42,11 @@ $_SESSION['SYSTEM_ENTRY'] = USCIC_SURVEY; // switch back to survey
 
 $page = getFromSessionParams('testpage');
 
-$_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_TEST;
+if (getFromSessionParams('type') != "2") {
+    $_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_TEST;
+}
+
+$engine = null; // needed for updater
 switch ($page) {
     case "watch":
         $watch = new Watcher();
@@ -62,10 +68,20 @@ switch ($page) {
         $jumper = new JumpBack();
         $jumper->jumpRes();
         break;
+    case "update":        
+        $update = new Updater();
+        $update->update();
+        break;
+    case "updateRes":        
+        $update = new Updater();
+        $update->updateRes();
+        break;
     default:
         //$reportissue->report();
         break;
 }
-$_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_NORMAL;
+if (getFromSessionParams('type') != "2") {
+    $_SESSION[SURVEY_EXECUTION_MODE] = SURVEY_EXECUTION_MODE_NORMAL;
+}
 
 ?>

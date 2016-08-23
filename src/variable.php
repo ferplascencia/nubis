@@ -29,12 +29,9 @@ class Variable {
     var $variable;
 
     function __construct($variablenameOrRow = "") {
-
         if (is_array($variablenameOrRow)) {
-
             $this->variable = $variablenameOrRow;
         } elseif ($variablenameOrRow != "") {
-
             $this->setVariable($variablenameOrRow);
         }
     }
@@ -104,7 +101,11 @@ class Variable {
                     if ($ans == "") {
                         $this->variable["answer"] = null;
                     } else {
-                        $this->variable["answer"] = unserialize(gzuncompress($this->retrieveAnswer($primkey, $this->completevariablename)));
+                        $t = unserialize(gzuncompress($this->retrieveAnswer($primkey, $this->completevariablename)));
+                        if (is_array($t) && sizeof($t) == 0) {
+                            $t = null;
+                        }
+                        $this->variable["answer"] = $t;
                     }
                 }
 
@@ -149,7 +150,11 @@ class Variable {
                         $data = @gzuncompress($ans);                        
                         if ($data !== false) {
                             //echo $this->completevariablename . '-----array answer!!!<hr>';
-                            $this->variable["answer"] = unserialize($data);
+                            $t = unserialize($data);
+                            if (is_array($t) && sizeof($t) == 0) {
+                                $t = null;
+                            }
+                            $this->variable["answer"] = $t;
                         }
                         else {
                             //echo $this->completevariablename . '-----not an array answer!!!<hr>';                            
@@ -164,6 +169,19 @@ class Variable {
         return $this->variable["answer"];
     }
 
+    function retrieveDirty($primkey, $dataname) {
+        global $db;        
+        $query = "select dirty from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString(getSurvey()) . " and primkey='" . prepareDatabaseString($primkey) . "' and variablename='" . prepareDatabaseString($dataname) . "'";
+        //echo $query;
+        if ($res = $db->selectQuery($query)) {
+            if ($db->getNumberOfRows($res) > 0) {
+                $row = $db->getRow($res);
+                return $row["dirty"];
+            }
+        }
+        return '';
+    }
+    
     private function retrieveAnswer($primkey, $dataname) {
         global $db, $survey;
         $key = $survey->getDataEncryptionKey();
@@ -171,11 +189,12 @@ class Variable {
         if ($key != "") {
             $answer = "aes_decrypt(answer, '" . $key . "') as answer";
         }
-        $query = "select $answer from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString(getSurvey()) . " and primkey='" . prepareDatabaseString($primkey) . "' and variablename='" . prepareDatabaseString($dataname) . "'";
+        $query = "select $answer, dirty from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString(getSurvey()) . " and primkey='" . prepareDatabaseString($primkey) . "' and variablename='" . prepareDatabaseString($dataname) . "'";
         //echo $query . "<br/>";
         if ($res = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($res) > 0) {
                 $row = $db->getRow($res);
+                $this->setDirty($row["dirty"]);
                 return $row["answer"];
             }
         }
@@ -412,7 +431,16 @@ class Variable {
     }
 
     private function storeAnswer($primkey, $variable, $answer, $striptags = true) {
-        global $db, $engine;
+        global $engine;
+        $localdb = null;
+        if (Config::useTransactions() == true) {
+            global $transdb;
+            $localdb = $transdb;
+        }
+        else {
+            global $db;
+            $localdb = $db;
+        }
         $dirty = $this->getDirty();
         $prim = $primkey;
         $var = $variable; //$engine->prefixVariableName($variable);
@@ -446,10 +474,10 @@ class Variable {
         $this->version = $version;
         $this->ts = date("Y-m-d h:i:s", time());
 
-        if (Common::prepareDataQueries() == false) {
+        if (Config::prepareDataQueries() == false) {
             global $survey;
             $key = $survey->getDataEncryptionKey();
-            if ($ans == null) {
+            if ($ans == null && $ans !== 0) {
                 $answer = 'null';
             }
             else {
@@ -469,7 +497,7 @@ class Variable {
             $queryvalues .= "," . prepareDatabaseString($mode);
             $query = 'REPLACE INTO ' . Config::dbSurveyData() . '_data (' . $queryparams . ') VALUES (' . $queryvalues . ')';
             //echo $query;
-            if ($db->executeQuery($query)) {
+            if ($localdb->executeQuery($query)) {
                 $this->variable["answer"] = $ans;
 
                 // hook for extra storage
@@ -501,7 +529,7 @@ class Variable {
             $queryparams = 'suid, primkey, variablename, answer, dirty, version, language, mode';
             $queryvalues = '?,?,?,' . $answer . ',?,?,?,?';
             $query = 'REPLACE INTO ' . Config::dbSurveyData() . '_data (' . $queryparams . ') VALUES (' . $queryvalues . ')';
-            if ($db->executeBoundQuery($query, $bp->get())) {
+            if ($localdb->executeBoundQuery($query, $bp->get())) {
                 $this->variable["answer"] = $ans;
 
                 // hook for extra storage
@@ -512,7 +540,7 @@ class Variable {
             }
             return false;
         }
-    }
+    }    
 
     function getDirty() {
         return $this->dirty;

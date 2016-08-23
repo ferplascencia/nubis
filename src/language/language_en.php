@@ -362,6 +362,10 @@ class Language extends LanguageBase {
     static function errorLocked() {
         return "A problem occurred. Please contact the survey administrator.";
     }
+    
+    static function errorInProgress() {
+        return "Your previous request is still being processed. Please wait a bit before attempting to refresh this page again in order to continue the survey. Please contact the survey administrator if the problem persists.";
+    }
 
     static function errorCompleted() {
         return "We already received your responses, thank you!";
@@ -375,6 +379,10 @@ class Language extends LanguageBase {
 
     static function errorAssignmentInvalid() {
         return 'Invalid assignment statement';
+    }
+    
+    static function errorCheckReturnInvalid() {
+        return 'Invalid return error statement';
     }
 
     static function errorInspectInvalid() {
@@ -1529,6 +1537,10 @@ class Language extends LanguageBase {
     static function labelIfEmptyDefaultOrder() {
         return 'If empty, default order';
     }
+    
+    static function labelIfEmptyColumns() {
+        return 'If empty, all options in a single column';
+    }
 
     static function labelIfEmptyDefaultHeaders() {
         return 'If empty, no headers';
@@ -1536,6 +1548,10 @@ class Language extends LanguageBase {
 
     static function labelIfEmptyDefaultOrderPlaceholder() {
         return 'Question name';
+    }
+    
+    static function labelIfEmptyColumnsPlaceholder() {
+        return 'Number of options per column';
     }
 
     static function labelCustomFunctionCall() {
@@ -1593,6 +1609,10 @@ class Language extends LanguageBase {
     static function labelFill() {
         return 'Use as fill';
     }
+    
+    static function labelCheck() {
+        return 'Apply check(s)';
+    }    
 
     static function labelText() {
         return 'Text';
@@ -1700,6 +1720,18 @@ class Language extends LanguageBase {
 
     static function labelTypeEditGeneralName() {
         return 'Name';
+    }
+    
+    static function labelTypeEditGeneralTemplate() {
+        return 'Template';
+    }
+    
+    static function labelTypeEditGeneralStatus() {
+        return 'Status';
+    }
+    
+    static function labelTypeEditGeneralPosition() {
+        return 'Position';
     }
 
     static function labelTypeEditGeneralVariableType() {
@@ -1985,9 +2017,17 @@ class Language extends LanguageBase {
     static function labelEnumeratedTextBox() {
         return 'Or type in:';
     }
+    
+    static function labelEnumeratedTextBoxBefore() {
+        return 'Text before box:';
+    }
 
     static function labelSliderTextBox() {
         return 'Or type in:';
+    }
+    
+    static function labelSliderTextBoxBefore() {
+        return 'Text before box:';
     }
 
     static function labelTypeEditLayoutSliderLabels() {
@@ -2049,6 +2089,10 @@ class Language extends LanguageBase {
     static function labelTypeEditEnumeratedRandomizer() {
         return 'Options order';
     }
+    
+    static function labelTypeEditEnumeratedColumns() {
+        return 'Options per column';
+    }
 
     static function labelTypeEditLayoutOrientation() {
         return 'Orientation';
@@ -2064,6 +2108,10 @@ class Language extends LanguageBase {
 
     static function labelTypeEditLayoutEnumeratedLabel() {
         return 'Label';
+    }
+    
+    static function labelTypeEditLayoutEnumeratedColumns() {
+        return 'Number of columns';
     }
 
     static function labelTypeEditLayoutTooltip() {
@@ -2404,6 +2452,14 @@ class Language extends LanguageBase {
 
     static function labelTypeEditFillCode() {
         return 'Code';
+    }
+    
+    static function labelTypeEditCheckCode() {
+        return 'Code';
+    }
+    
+    static function labelTypeEditCheckText() {
+        return 'Errors';
     }
 
     static function labelTypeEditInteractiveTexts() {
@@ -2929,6 +2985,10 @@ class Language extends LanguageBase {
     static function messageFillRoutingNeedsFix() {
         return 'There were one or more error(s) in the fill code. Please check the following messages.';
     }
+    
+    static function messageCheckRoutingNeedsFix() {
+        return 'There were one or more error(s) in the check code. Please check the following messages.';
+    }
 
     static function messageToolsCleanOk() {
         return 'Cleaned.';
@@ -3363,7 +3423,7 @@ class Language extends LanguageBase {
     static function messageCheckerTypeExists($name) {
         return 'A type with the name `' . $name . '` already exists.';
     }
-
+    
     static function messageCheckerSectionExists($name) {
         return 'A section with the name `' . $name . '` already exists.';
     }
@@ -4476,7 +4536,8 @@ class Language extends LanguageBase {
     static function getLanguagesArray() {
         $languages = array();
         $languages['en'] = array('name' => 'English', 'country' => 'US', 'value' => 1);
-        $languages['om'] = array('name' => 'Afaan Oromo', 'country' => 'ET', 'value' => 2);
+        $languages['es'] = array('name' => 'español', 'country' => 'ES', 'value' => 2);
+        $languages['om'] = array('name' => 'Afaan Oromo', 'country' => 'ET', 'value' => 34);
         $languages['aa'] = array('name' => 'Afaraf', 'country' => 'ER', 'value' => 3);
         $languages['af'] = array('name' => 'Afrikaans', 'country' => 'SA', 'value' => 4);
         $languages['ak'] = array('name' => 'Akan', 'country' => 'GH', 'value' => 5);
@@ -4508,7 +4569,7 @@ class Language extends LanguageBase {
         $languages['et'] = array('name' => 'eesti', 'country' => 'EE', 'value' => 31);
         $languages['na'] = array('name' => 'Ekakairũ Naoero', 'country' => 'NR', 'value' => 32);
         $languages['uk'] = array('name' => 'English', 'country' => 'GB', 'value' => 33);
-        $languages['es'] = array('name' => 'Español', 'country' => 'ES', 'value' => 34);
+        //$languages['es'] = array('name' => 'Español', 'country' => 'ES', 'value' => 34);
         $languages['eo'] = array('name' => 'Esperanto', 'value' => 35); // 'country' => '',
         $languages['ee'] = array('name' => 'Eʋegbe', 'country' => 'TG', 'value' => 36);
         $languages['to'] = array('name' => 'faka Tonga', 'country' => 'TO', 'value' => 37);
@@ -6934,7 +6995,7 @@ class Language extends LanguageBase {
     }
     
     static function messageRemoveData() {
-        return "Are you sure you want to remove all data for the selected components? Type `REMOVE` to continue.";
+        return "Are you sure you want to remove all data for the selected survey(s)? Type `REMOVE` to continue.";
     }
     
     static function messageImportSurvey() {
@@ -6985,6 +7046,10 @@ class Language extends LanguageBase {
         return 'Assignment';
     }
     
+    static function labelTypeEditChecks() {
+        return 'Variable checks';
+    }
+    
     static function labelValidateAssignment() {
         return 'Validate value';
     }
@@ -6995,6 +7060,288 @@ class Language extends LanguageBase {
     
     static function optionsValidateNo() {
         return 'No';
+    }
+    
+    static function labelApplyChecks() {
+        return 'Enable variable checks';
+    }
+    
+    static function optionsApplyChecksYes() {
+        return 'Yes';
+    }
+    
+    static function optionsApplyChecksNo() {
+        return 'No';
+    }
+    
+    static function labelSurveysAddNew() {
+        return 'add new survey';
+    }
+    
+    static function labelSurveysAddNewCaps() {
+        return 'Add new survey';
+    }
+    
+    static function labelSectionsAddNew() {
+        return 'add new section';
+    }
+    
+    static function labelTypesAddNew() {
+        return 'add new type';
+    }
+    
+    static function labelGroupsAddNew() {
+        return 'add new group';
+    }
+    
+    static function labelVariablesAddNew() {
+        return 'add new variable';
+    }
+    
+    static function labelClean() {
+        return 'Clean';
+    }
+    
+    static function labelDirty() {
+        return 'Dirty';
+    }
+    
+    static function labelWatchClean() {
+        return 'Clean/dirty';
+    }
+    
+    static function linkCalculator() {
+        return 'Calculator';
+    }
+    
+    static function linkUpdate() {
+        return 'Update data';
+    }
+    
+    static function labelUpdateVariable() {
+        return 'Variable';
+    }
+    
+    static function labelUpdateCurrent() {
+        return 'Current answer';
+    }
+    
+    static function labelUpdateChangeTo() {
+        return 'Change to';
+    }
+    
+    static function labelUpdateChange() {
+        return '';
+    }
+    
+    static function labelUpdateQuestion() {
+        return 'Question text';
+    }
+    
+    static function labelTypeEditMobile() {
+        return 'Auto-adjust on mobile';
+    }
+    
+    static function labelTypeEditMobileLabels() {
+        return 'Labels on mobile';
+    }
+    
+    static function headerOutputStatisticsParadata() {
+        return 'Paradata';
+    }
+    
+    static function errorCodeLabels() {
+        return array(
+            "ER1" => "Empty warning",
+            "ER2" => "Pattern not satisfied",
+            "ER3" => "Empty warning",
+            "ER4" => "Not left empty",
+            "ER5" => "Not enough characters",
+            "ER6" => "Too many characters",
+            "ER7" => "Not enough or too many characters",
+            "ER8" => "Minimum not met",
+            "ER9" => "Maximum exceeded",
+            "ER10" => "Out of range",
+            "ER11" => "Out of range",
+            "ER12" => "Invalid email",
+            "ER13" => "Invalid URL",
+            "ER14" => "Invalid date",
+            "ER15" => "Invalid date",
+            "ER16" => "Not a number",
+            "ER17" => "Not an integer",
+            "ER18" => "Not only digits",
+            "ER19" => "Not equal to",
+            "ER20" => "Equal to",
+            "ER21" => "Not all alpha numerical",
+            "ER22" => "Invalid zip code",
+            "ER23" => "Not only letters",
+            "ER24" => "Too many words",
+            "ER25" => "Not enough words",
+            "ER26" => "Not enough or too many words",
+            "ER27" => "Not enough options selected",
+            "ER28" => "Not exactly enough options selected",
+            "ER29" => "Too many options selected",
+            "ER30" => "Invalid combination selected",
+            "ER31" => "Invalid combination selected",
+            "ER32" => "Not enough options selected",
+            "ER33" => "Not exactly enough options selected",
+            "ER34" => "Too many options selected",
+            "ER35" => "Invalid combination selected",
+            "ER36" => "Invalid combination selected",
+            "ER37" => "Too many inline fields answered",
+            "ER38" => "Not all inline fields answered",
+            "ER39" => "Not enough inline fields answered",
+            "ER40" => "Too many inline fields answered",
+            "ER41" => "Not exactly enough inline fields answered",
+            "ER42" => "No inline fields answered",
+            "ER43" => "Too many questions answered",
+            "ER44" => "Not all questions answered",
+            "ER45" => "Not enough questions answered",
+            "ER46" => "Too many questions answered",
+            "ER47" => "Not exactly enough questions answered",
+            "ER48" => "Not all unique answers",
+            "ER49" => "Not all same answers",
+            "ER50" => "Not entered",
+            "ER51" => "Not entered",
+            "ER52" => "Not equal to",
+            "ER53" => "Equal to",
+            "ER54" => "Not greater or equal to",
+            "ER55" => "Not greater than",
+            "ER56" => "Not smaller or equal to",
+            "ER57" => "Not smaller than",
+            "ER58" => "Not equal to",
+            "ER59" => "Equal to",
+            "ER60" => "Not greater or equal to",
+            "ER61" => "Not greater than",
+            "ER62" => "Not smaller or equal to",
+            "ER63" => "Not smaller than",
+            "ER64" => "Not equal to",
+            "ER65" => "Equal to",
+            "ER66" => "Not equal to ignoring case",
+            "ER67" => "Equal to ignoring case",
+            "ER68" => "Not equal to date",
+            "ER69" => "Equal to date",
+            "ER70" => "Not greater or equal to date",
+            "ER71" => "Not greater than date",
+            "ER72" => "Not smaller or equal to date",
+            "ER73" => "Not smaller than date",
+            "ER74" => "Not equal to time",
+            "ER75" => "Equal to time",
+            "ER76" => "Not greater or equal to time",
+            "ER77" => "Not greater than time",
+            "ER78" => "Not smaller or equal to time",
+            "ER79" => "Not smaller than time",
+            "FO" => "Left screen",
+            "FI" => "Returned to screen"
+        );
+    }
+    
+    static function labelErrors() {
+        return 'Detected errors';
+    }
+    
+    static function labelNumberOfTimes() {
+        return 'Number of times';
+    }
+    
+    static function labelResearcherParadata() {
+        return 'Paradata';
+    }
+    
+    static function headerReportsParadata() {
+        return 'Paradata';
+    }
+    
+    static function labelParadataDetails() {
+        return 'Details';
+    }
+    
+    static function optionsParadataRaw() {
+        return 'Raw (CSV only)';
+    }
+    
+    static function optionsParadataProcessed() {
+        return 'Event counts';
+    }
+    
+    static function labelOutputDataTypeParadata() {
+        return 'Type';
+    }
+    
+    static function messageCheckerTypeNotExists($name) {
+        return 'The type for variable `' . $name . '` does not exist.';
+    }
+    
+    static function installLabelPerformance() {
+        return 'Performance';
+    }
+    
+    static function installPerformanceWelcome() {
+        return 'NubiS can be tweaked for optimal performance on a particular platform by modifying the settings below. Please refer to the NubiS System Administrator manual for more information.';
+    }
+    
+    static function installLabelPerformanceUseLocking() {
+        return 'Use interview locking';
+    }
+    
+    static function installLabelPerformanceUseTransactions() {
+        return 'Use transactions for data storage';
+    }
+    
+    static function installLabelPerformanceUsePreparedQueries() {
+        return 'Use prepared statements for data storage';
+    }
+    
+    static function installLabelPerformanceUseDataRecords() {
+        return 'Use serialized data storage';
+    }
+    
+    static function installLabelPerformanceUseState() {
+        return 'Use data storage from state';
+    }
+    
+    static function installLabelPerformanceUseMinify() {
+        return 'Use script minification';
+    }
+    
+    static function installLabelPerformanceUseSerialize() {
+        return 'Use serialized survey components';
+    }
+    
+    static function linkXiCompiler() {
+        return 'Deploy to Xi';
+    }
+    
+    static function headerToolsXiCompiler() {
+        return 'Deploy to Xi';
+    }
+    
+    static function buttonDeploy() {
+        return 'Deploy';
+    }
+    
+    static function labelToolsXiCompileCriteria() {
+        return 'Settings';
+    }
+    
+    static function labelToolsCompileModes() {
+        return 'Interview mode';
+    }
+    
+    static function linkRouting() {
+        return 'Routing';
+    }
+    
+    static function linkVariables() {
+        return 'Variables';
+    }
+    
+    static function labelTypeEditGeneralGroupXiTemplate() {
+        return 'Xi template';
+    }
+    
+    static function labelTypeEditLayoutXi() {
+        return 'Xi';
     }
 }
 

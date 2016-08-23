@@ -451,7 +451,6 @@ body {
 }
 
 .uscic-singledropdown-inline {
-    margin-top: -12px;
     height: 24px;
 }
 
@@ -464,8 +463,7 @@ body {
     padding: 0px;
 }
 
-.uscic-multidropdown-inline {
-    margin-top: -12px;
+.uscic-multipledropdown-inline {
     height: 24px;
 }
 
@@ -508,11 +506,19 @@ body {
     background-color: #428BCA;
 }
 
+.btn.btn-default.uscic-dkbutton-active {
+    background-color: #428BCA;
+}
+
 #uscic-rfbutton {
 
 }
 
 .uscic-rfbutton-active {
+    background-color: #428BCA;
+}
+
+.btn.btn-default.uscic-rfbutton-active {
     background-color: #428BCA;
 }
 
@@ -524,12 +530,20 @@ body {
     background-color: #428BCA;
 }
 
+.btn.btn-default.uscic-nabutton-active {
+    background-color: #428BCA;
+}
+
 .uscic-remarkbutton-active {
     background-color: #428BCA;
 }
 
 #uscic-remarkbutton {
 
+}
+
+.btn.btn-default.uscic-remarkbutton-active {
+    background-color: #428BCA;
 }
 
 /* TABLE STYLES */
@@ -618,12 +632,34 @@ body {
 
 .uscic-radio-label-first-radio input[type="radio"] {
     cursor: pointer;
+    margin-top: 1px;
+}
+
+.uscic-enumerated-column-padding {
+    min-width: 30px;
+    width: 30px;
+    max-width: 30px;
+}
+
+.uscic-table-row-cell-enumerated .radio {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+.uscic-checkbox-box input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.uscic-table-row-cell-enumerated .checkbox {
+    margin-bottom: 0px;
+    margin-top: 5px;
 }
 
 /* SET OF ENUMERATED VERTICAL LABEL FIRST */
 
 .uscic-checkbox-label-first-checkbox {
-    margin-bottom: 2px;
+    /*margin-bottom: 2px;*/
+    cursor: pointer;
     margin-top: 2px;
 }
 .uscic-checkbox-label-first-label {
@@ -638,6 +674,7 @@ body {
 
 .uscic-checkbox-label-first-checkbox input[type="checkbox"] {
     cursor: pointer;
+    margin-top: 1px;
 }
 
 /* ENUMERATED HORIZONTAL DISPLAY OF SINGLE QUESTION */
@@ -1003,4 +1040,22 @@ th.uscic-table-row-cell-header-enumerated {
 
 .table-responsive tr th:first-child {
     position: absolute;
+}
+
+/* slider on mobile */
+@media all and (max-width: 29.9999em) {
+    .slider.slider-horizontal {
+        max-width: 210px;
+    }
+}
+
+@media all and (min-width: 30.0000em) and (max-width: 39.9375em) {
+    .slider.slider-horizontal {
+        max-width: 350px;
+    }
+}
+
+/* fix for inline horizontal display in table to ensure horizontal centering in table cell */
+.uscic-table-row-cell-enumerated-horizontal label {
+    display: block;    
 }

@@ -100,7 +100,7 @@ class DisplayUsers extends DisplaySysAdmin {
             $returnStr .= '</tbody>';
             $returnStr .= '</table><br/><br/>';
         } else {
-            $returnStr .= $this->displayWarning(Language::messageNoUsersYet());
+            $returnStr .= "<br/><br/>" . $this->displayWarning(Language::messageNoUsersYet());
         }
         return $returnStr;
     }

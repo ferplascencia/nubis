@@ -481,7 +481,7 @@ class Translator {
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
 
         /* return result */
-        return $displaySysAdmin->showTranslateVariable($_SESSION['VSID'], $content);
+        return $displayTranslator->showTranslateVariable($_SESSION['VSID'], $content);
     }
 
     /* TYPE FUNCTIONS */

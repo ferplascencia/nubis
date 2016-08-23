@@ -26,7 +26,7 @@ class Remarks {
             $remarks = $this->remarksArray[$primkey];
         } else {
             $remarks = array();
-            $query = 'select *, aes_decrypt(remark, "' . Config::smsRemarkKey() . '") as remark_dec, t1.ts as ts from ' . Config::dbSurvey() . '_remarks as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where primkey = "' . prepareDatabaseString($primkey) . '" order by t1.ts desc';
+            $query = 'select *, aes_decrypt(remark, "' . Config::smsRemarkKey() . '") as remark_dec, t1.ts as ts from ' . Config::dbSurvey() . '_remarks as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where primkey = \'' . prepareDatabaseString($primkey) . '\' order by t1.ts desc';
             $result = $db->selectQuery($query);
             while ($row = $db->getRow($result)) {
                 $remarks[] = $row;
@@ -42,7 +42,7 @@ class Remarks {
 
     function addRemark($primkey, $remark, $urid) {
         global $db;
-        $query = 'replace into ' . Config::dbSurvey() . '_remarks (primkey, remark, urid, ts) values ("' . prepareDatabaseString($primkey) . '", aes_encrypt("' . prepareDatabaseString($remark) . '","' . Config::smsRemarkKey() . '"), ' . $urid . ', "' . date('Y-m-d H:i:s') . '")';
+        $query = 'replace into ' . Config::dbSurvey() . '_remarks (primkey, remark, urid, ts) values (\'' . prepareDatabaseString($primkey) . '\', aes_encrypt(\'' . prepareDatabaseString($remark) . '\',\'' . Config::smsRemarkKey() . '\'), ' . $urid . ', \'' . date('Y-m-d H:i:s') . '\')';
 //      echo '<br/><br/><br/>' . $query;
         $db->executeQuery($query);
         if (isset($this->remarksArray[$primkey])) {

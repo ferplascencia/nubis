@@ -942,7 +942,7 @@ jQuery.validator.addMethod('maximumselected', function(value, element, param) {
 
 jQuery.validator.addMethod('invalidsubselected', function(value, element, param) {
     var name = $(element).attr("name");
-    var invalids = param.split(";");
+    var invalids = param.split("#");
     var indices = new Array();
     $('[name="' + name + '"]:checked').each(function() {
         indices.push(parseInt($(this).val()));
@@ -990,7 +990,7 @@ jQuery.validator.addMethod('invalidsubselected', function(value, element, param)
 
 jQuery.validator.addMethod('invalidselected', function(value, element, param) {
     var name = $(element).attr("name");
-    var invalids = param.split(";");
+    var invalids = param.split("#");
     var indices = new Array();
     $('[name="' + name + '"]:checked').each(function() {
         indices.push(parseInt($(this).val()));

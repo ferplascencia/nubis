@@ -24,13 +24,13 @@ class LogActions {
         global $db;
         $query = 'INSERT INTO ' . Config::dbSurveyData() . '_actions (primkey, sessionid, urid, suid, ipaddress, systemtype, action, actiontype, params, language, mode, version) VALUES (';
         if ($primkey != '') {
-            $query .= '"' . prepareDatabaseString($primkey) . '", ';
+            $query .= '\'' . prepareDatabaseString($primkey) . '\', ';
         } else {
             $query .= 'NULL, ';
         }
-        $query .= '"' . session_id() . '", ';
+        $query .= '\'' . session_id() . '\', ';
         if ($urid != '') {
-            $query .= '"' . $urid . '", ';
+            $query .= '\'' . $urid . '\', ';
         } else {
             $query .= 'NULL, ';
         }
@@ -40,12 +40,12 @@ class LogActions {
             $query .= 'NULL, ';
         }
         
-        $query .= '"' . prepareDatabaseString(getClientIp()) . '", ';
+        $query .= '\'' . prepareDatabaseString(getClientIp()) . '\', ';
         $query .= $systemtype . ', ';
-        $query .= '"' . prepareDatabaseString($page) . '", ';
+        $query .= '\'' . prepareDatabaseString($page) . '\', ';
         $query .= $actiontype . ', ';
         if (Config::logParams()) { //log post vars?
-            $query .= ' AES_ENCRYPT("' . prepareDatabaseString(serialize($_POST)) . '", "' . Config::logActionParamsKey() . '"), ';
+            $query .= ' AES_ENCRYPT(\'' . prepareDatabaseString(serialize($_POST)) . '\', \'' . Config::logActionParamsKey() . '\'), ';
         } else {
             $query .= ' NULL, ';
         }
@@ -59,9 +59,7 @@ class LogActions {
         }
         $query .= ")";
         
-        //echo$query;
         $db->executeQuery($query);
-        
         if (isset($this->LogActions[$primkey])) { //unset so it is read in again..
             unset($this->LogActions[$primkey]);
         }
@@ -117,7 +115,7 @@ class LogActions {
             $contacts = $this->LogActions[$primkey];
         } else {
             $actions = array();
-            $query = 'SELECT * FROM ' . Config::dbSurveyData() . '_actions as t1 left join ' . Config::dbSurveyData() . '_users as t2 on t1.urid = t2.urid where primkey = "' . prepareDatabaseString($primkey) . '" and action like "interviewer.%" order by t1.ts desc';
+            $query = 'SELECT * FROM ' . Config::dbSurveyData() . '_actions as t1 left join ' . Config::dbSurveyData() . '_users as t2 on t1.urid = t2.urid where primkey = \'' . prepareDatabaseString($primkey) . '\' and action like \'interviewer.%\' order by t1.asid desc';
             //echo '<br/><br/><br/>' . $query;
             $result = $db->selectQuery($query);
             while ($row = $db->getRow($result)) {
@@ -130,7 +128,7 @@ class LogActions {
 
     function getNumberOfActionsBySession($sessionid, $systemtype) {
         global $db;
-        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and systemtype = ' . $systemtype;
+        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;
         if ($result = $db->selectQuery($query)) {
             $row = $db->getRow($result);
             return $row["count"];
@@ -140,7 +138,7 @@ class LogActions {
     
     function getNumberOfSurveyActionsBySession($sessionid, $systemtype) {
         global $db;
-        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and systemtype = ' . $systemtype;
+        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;
         if ($result = $db->selectQuery($query)) {
             $row = $db->getRow($result);
             return $row["count"];
@@ -150,7 +148,7 @@ class LogActions {
     
     function getLoggedInSMSSession($sessionid) {
         global $db;
-        $query = 'select count(*) as count, urid from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and urid != "" and actiontype = 1 and systemtype = ' . USCIC_SMS;
+        $query = 'select count(*) as count, urid from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and urid != \'\' and actiontype = 1 and systemtype = ' . USCIC_SMS;
         //echo 'select count(*) as count, urid from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and urid != "" and actiontype = 1 and systemtype = ' . USCIC_SMS;
         if ($result = $db->selectQuery($query)) {            
             $row = $db->getRow($result);
@@ -161,7 +159,7 @@ class LogActions {
     
     function getLoggedInSurveySession($sessionid) {
         global $db;
-        $query = 'select primkey, suid, language, mode, version from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and primkey != "" and systemtype = ' . USCIC_SURVEY . " order by asid desc";
+        $query = 'select primkey, suid, language, mode, version from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and primkey != \'\' and systemtype = ' . USCIC_SURVEY . " order by asid desc";
         if ($result = $db->selectQuery($query)) {
             $num = $db->getNumberOfRows($result);
             if ($num > 0) {
@@ -174,13 +172,13 @@ class LogActions {
 
     function deleteLoggedInSurveySession($sessionid){
         global $db;
-        $query = 'delete from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and primkey != "" and systemtype = ' . USCIC_SURVEY . " ";
+        $query = 'delete from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and primkey != \'\' and systemtype = ' . USCIC_SURVEY . " ";
         $result = $db->selectQuery($query);
     }
     
     function getLastSurveyAction($sessionid, $primkey) {
         global $db;
-        $query = 'select asid from ' . Config::dbSurveyData() . '_actions where sessionid = "' . prepareDatabaseString($sessionid) . '" and primkey = "' . prepareDatabaseString($primkey) . '" and systemtype = ' . USCIC_SURVEY . " and actiontype != " . ACTION_WINDOW_IN . " and actiontype != " . ACTION_WINDOW_OUT . " order by asid desc limit 0,1";
+        $query = 'select asid from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and primkey = \'' . prepareDatabaseString($primkey) . '\' and systemtype = ' . USCIC_SURVEY . " and actiontype != " . ACTION_WINDOW_IN . " and actiontype != " . ACTION_WINDOW_OUT . " order by asid desc limit 0,1";
         if ($result = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($result) == 0) {
                 return 0;

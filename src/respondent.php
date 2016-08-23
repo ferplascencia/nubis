@@ -35,7 +35,7 @@ class Respondent {
 
             $this->respondent = $rowOrPrimkey;
         } else {
-            $query = 'select *, ' . Respondents::getDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where primkey = "' . prepareDatabaseString($rowOrPrimkey) . '"';
+            $query = 'select *, ' . Respondents::getDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where primkey = \'' . prepareDatabaseString($rowOrPrimkey) . '\'';
             $result = $db->selectQuery($query);
             $this->respondent = $db->getRow($result);
         }
@@ -75,8 +75,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'firstname = AES_ENCRYPT("' . prepareDatabaseString($this->getFirstName()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'firstname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getFirstName()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                     //echo '<br/><br/><br/>' . $this->lastQuery;
                 }
             }
@@ -96,8 +96,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'lastname = AES_ENCRYPT("' . prepareDatabaseString($this->getLastName()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'lastname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getLastName()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -116,8 +116,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'address1 = AES_ENCRYPT("' . prepareDatabaseString($this->getAddress1()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = ' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'address1 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getAddress1()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = ' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -136,8 +136,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'address2 = AES_ENCRYPT("' . prepareDatabaseString($this->getAddress2()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'address2 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getAddress2()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -156,8 +156,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'zip = AES_ENCRYPT("' . prepareDatabaseString($this->getZip()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'zip = AES_ENCRYPT(\'' . prepareDatabaseString($this->getZip()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -175,8 +175,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'city = AES_ENCRYPT("' . prepareDatabaseString($this->getCity()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'city = AES_ENCRYPT(\'' . prepareDatabaseString($this->getCity()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -214,8 +214,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'email = AES_ENCRYPT("' . prepareDatabaseString($this->getEmail()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'email = AES_ENCRYPT(\'' . prepareDatabaseString($this->getEmail()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -234,8 +234,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'telephone1 = AES_ENCRYPT("' . prepareDatabaseString($this->getTelephone1()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'telephone1 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getTelephone1()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -254,8 +254,8 @@ class Respondent {
                 $user = new User($_SESSION['URID']);
                 if ($user->getUserType() == USER_SUPERVISOR) {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-                    $this->lastQuery .= 'telephone2 = AES_ENCRYPT("' . prepareDatabaseString($this->getTelephone2()) . '", "' . Config::smsPersonalInfoKey() . '") ';
-                    $this->lastQuery .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+                    $this->lastQuery .= 'telephone2 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getTelephone2()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
+                    $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
                 }
             }
         }
@@ -599,93 +599,93 @@ class Respondent {
         $errorMessage = array();
 
         $query = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
-        $query .= 'logincode = AES_ENCRYPT("' . prepareDatabaseString($this->getLoginCode()) . '", "' . Config::loginCodeKey() . '"), ';
+        $query .= 'logincode = AES_ENCRYPT(\'' . prepareDatabaseString($this->getLoginCode()) . '\', \'' . Config::loginCodeKey() . '\'), ';
 
-        $query .= 'firstname = AES_ENCRYPT("' . prepareDatabaseString($this->getFirstName()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'firstname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getFirstName()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'lastname = AES_ENCRYPT("' . prepareDatabaseString($this->getLastName()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'lastname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getLastName()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'address1 = AES_ENCRYPT("' . prepareDatabaseString($this->getAddress1()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'address1 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getAddress1()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'address2 = AES_ENCRYPT("' . prepareDatabaseString($this->getAddress2()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'address2 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getAddress2()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'city = AES_ENCRYPT("' . prepareDatabaseString($this->getCity()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'city = AES_ENCRYPT(\'' . prepareDatabaseString($this->getCity()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'puid = "' . prepareDatabaseString($this->getPuid()) . '", ';
-
-
-        $query .= 'longitude = AES_ENCRYPT("' . prepareDatabaseString($this->getLongitude()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-        $query .= 'latitude = AES_ENCRYPT("' . prepareDatabaseString($this->getLatitude()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'puid = \'' . prepareDatabaseString($this->getPuid()) . '\', ';
 
 
-        $query .= 'zip = AES_ENCRYPT("' . prepareDatabaseString($this->getZip()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-
-        $query .= 'telephone1 = AES_ENCRYPT("' . prepareDatabaseString($this->getTelephone1()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-
-        $query .= 'telephone2 = AES_ENCRYPT("' . prepareDatabaseString($this->getTelephone2()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-
-        $query .= 'email = AES_ENCRYPT("' . prepareDatabaseString($this->getEmail()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'longitude = AES_ENCRYPT(\'' . prepareDatabaseString($this->getLongitude()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+        $query .= 'latitude = AES_ENCRYPT(\'' . prepareDatabaseString($this->getLatitude()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
 
+        $query .= 'zip = AES_ENCRYPT(\'' . prepareDatabaseString($this->getZip()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'age = AES_ENCRYPT("' . prepareDatabaseString($this->getAge()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'telephone1 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getTelephone1()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'sex = AES_ENCRYPT("' . prepareDatabaseString($this->getSex()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'telephone2 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getTelephone2()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'birthdate = AES_ENCRYPT("' . prepareDatabaseString($this->getBirthDate()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+        $query .= 'email = AES_ENCRYPT(\'' . prepareDatabaseString($this->getEmail()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
 
 
-        $query .= 'schoolingyears = "' . prepareDatabaseString($this->getYearsOfSchooling()) . '", ';
-        $query .= 'educationlevel = "' . prepareDatabaseString($this->getEducationLevel()) . '", ';
-        $query .= 'occupationalstatus = "' . prepareDatabaseString($this->getOccupationalStatus()) . '", ';
-        $query .= 'relationshiphh = "' . prepareDatabaseString($this->getRelationshipHhHead()) . '", ';
-        $query .= 'spouseprimkey = "' . prepareDatabaseString($this->getSpousePrimkey()) . '", ';
+        $query .= 'age = AES_ENCRYPT(\'' . prepareDatabaseString($this->getAge()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-        $query .= 'consenttype = "' . prepareDatabaseString($this->getConsentType()) . '", ';
-        $query .= 'hhhead = "' . prepareDatabaseString($this->getHhHead()) . '", ';
+        $query .= 'sex = AES_ENCRYPT(\'' . prepareDatabaseString($this->getSex()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+
+        $query .= 'birthdate = AES_ENCRYPT(\'' . prepareDatabaseString($this->getBirthDate()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
 
 
-        $query .= 'famr = "' . prepareDatabaseString($this->getFamR()) . '", ';
-        $query .= 'finr = "' . prepareDatabaseString($this->getFinR()) . '", ';
-        $query .= 'covr = "' . prepareDatabaseString($this->getCovR()) . '", ';
+        $query .= 'schoolingyears = \'' . prepareDatabaseString($this->getYearsOfSchooling()) . '\', ';
+        $query .= 'educationlevel = \'' . prepareDatabaseString($this->getEducationLevel()) . '\', ';
+        $query .= 'occupationalstatus = \'' . prepareDatabaseString($this->getOccupationalStatus()) . '\', ';
+        $query .= 'relationshiphh = \'' . prepareDatabaseString($this->getRelationshipHhHead()) . '\', ';
+        $query .= 'spouseprimkey = \'' . prepareDatabaseString($this->getSpousePrimkey()) . '\', ';
+
+        $query .= 'consenttype = \'' . prepareDatabaseString($this->getConsentType()) . '\', ';
+        $query .= 'hhhead = \'' . prepareDatabaseString($this->getHhHead()) . '\', ';
+
+
+
+        $query .= 'famr = \'' . prepareDatabaseString($this->getFamR()) . '\', ';
+        $query .= 'finr = \'' . prepareDatabaseString($this->getFinR()) . '\', ';
+        $query .= 'covr = \'' . prepareDatabaseString($this->getCovR()) . '\', ';
 
         if (isset($this->respondent['permanent'])) {
-            $query .= 'permanent = "' . prepareDatabaseString($this->getPermanent()) . '", ';
+            $query .= 'permanent = \'' . prepareDatabaseString($this->getPermanent()) . '\', ';
         }
         if (isset($this->respondent['validation'])) {
-            $query .= 'validation = "' . prepareDatabaseString($this->getValidation()) . '", ';
+            $query .= 'validation = \'' . prepareDatabaseString($this->getValidation()) . '\', ';
         }
         if (isset($this->respondent['movedout'])) {
-            $query .= 'movedout = "' . prepareDatabaseString($this->getMovedOut()) . '", ';
+            $query .= 'movedout = \'' . prepareDatabaseString($this->getMovedOut()) . '\', ';
         }
 
         if (isset($this->respondent['hhorder'])) {
-            $query .= 'hhorder = "' . prepareDatabaseString($this->getHhOrder()) . '", ';
+            $query .= 'hhorder = \'' . prepareDatabaseString($this->getHhOrder()) . '\', ';
         }
 
 
-        $query .= 'present = "' . prepareDatabaseString($this->getPresent()) . '", ';
+        $query .= 'present = \'' . prepareDatabaseString($this->getPresent()) . '\', ';
 
-        $query .= 'selected = "' . prepareDatabaseString($this->getSelected()) . '", ';
+        $query .= 'selected = \'' . prepareDatabaseString($this->getSelected()) . '\', ';
 
         if (dbConfig::defaultSeparateInterviewAddress()) {
             // begin custom personal networks
-            $query .= 'original_firstname = AES_ENCRYPT("' . prepareDatabaseString($this->getOriginalFirstName()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+            $query .= 'original_firstname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getOriginalFirstName()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-            $query .= 'original_lastname = AES_ENCRYPT("' . prepareDatabaseString($this->getOriginalLastName()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+            $query .= 'original_lastname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getOriginalLastName()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-            $query .= 'originalR = "' . prepareDatabaseString($this->getOriginalR()) . '", ';
-            $query .= 'callbackOtherR = "' . prepareDatabaseString($this->getCallbackOtherR()) . '", ';
+            $query .= 'originalR = \'' . prepareDatabaseString($this->getOriginalR()) . '\', ';
+            $query .= 'callbackOtherR = \'' . prepareDatabaseString($this->getCallbackOtherR()) . '\', ';
 
-            $query .= 'interview_address1 = AES_ENCRYPT("' . prepareDatabaseString($this->getInterviewAddress1()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-            $query .= 'interview_address2 = AES_ENCRYPT("' . prepareDatabaseString($this->getInterviewAddress2()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-            $query .= 'interview_zip = AES_ENCRYPT("' . prepareDatabaseString($this->getInterviewZip()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-            $query .= 'interview_city = AES_ENCRYPT("' . prepareDatabaseString($this->getInterviewCity()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
-            $query .= 'interview_state = AES_ENCRYPT("' . prepareDatabaseString($this->getInterviewState()) . '", "' . Config::smsPersonalInfoKey() . '"), ';
+            $query .= 'interview_address1 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getInterviewAddress1()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+            $query .= 'interview_address2 = AES_ENCRYPT(\'' . prepareDatabaseString($this->getInterviewAddress2()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+            $query .= 'interview_zip = AES_ENCRYPT(\'' . prepareDatabaseString($this->getInterviewZip()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+            $query .= 'interview_city = AES_ENCRYPT(\'' . prepareDatabaseString($this->getInterviewCity()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
+            $query .= 'interview_state = AES_ENCRYPT(\'' . prepareDatabaseString($this->getInterviewState()) . '\', \'' . Config::smsPersonalInfoKey() . '\'), ';
 
-            $query .= 'interview_mode = "' . prepareDatabaseString($this->getInterviewMode()) . '", ';
+            $query .= 'interview_mode = \'' . prepareDatabaseString($this->getInterviewMode()) . '\', ';
             // end custom personal networks
         }
         $query .= 'status = ' . prepareDatabaseString($this->getStatus()) . ', ';
@@ -693,7 +693,7 @@ class Respondent {
 
 
 
-        $query .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
+        $query .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
 
         //echo '<br/><br/><br/>' . $query . '<br/>';
 
@@ -870,7 +870,7 @@ class Respondent {
 
     function hasPicture($fieldname) {
         global $db;
-        $query = 'select *, AES_DECRYPT(picture, "' . Config::filePictureKey() . '") as picture1 from ' . Config::dbSurveyData() . '_pictures where primkey="' . $this->getPrimkey() . '" and variablename = "' . $fieldname . '"';
+        $query = 'select *, AES_DECRYPT(picture, \'' . Config::filePictureKey() . '\') as picture1 from ' . Config::dbSurveyData() . '_pictures where primkey=\'' . $this->getPrimkey() . '\' and variablename = \'' . $fieldname . '\'';
         $result = $db->selectQuery($query);
         if ($result != null) {
             $row = $db->getRow($result);

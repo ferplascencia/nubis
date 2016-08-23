@@ -19,12 +19,13 @@ class Data {
     }
 
     function getRespondentData($suid, $primkey) {
-        global $db, $survey;
+        global $db;
+        $survey = new Survey($suid);
         $key = "answer as answer_dec";
         if ($survey->getDataEncryptionKey() != "") {
             $key = "aes_decrypt(answer, '" . $survey->getDataEncryptionKey() . "') as answer_dec";
         }
-        $query = "select variablename, " . $key . ", language, mode, ts from " . Config::dbSurveyData() . "_data where suid=" . $suid . " and primkey='" . $primkey . "' order by ts asc, variablename asc";
+        $query = "select variablename, " . $key . ", dirty, language, mode, ts from " . Config::dbSurveyData() . "_data where suid=" . $suid . " and primkey='" . $primkey . "' order by ts asc, variablename asc";
         //echo $query;
         $res = $db->selectQuery($query);
         $arr = array();
@@ -312,7 +313,12 @@ class Data {
 
             // get everyone completed
             $completed = array();
-            $query1 = "select primkey from " . Config::dbSurveyData() . "_datarecords where suid=" . $suid . ' and completed=1';
+            if (Config::useDataRecords()) {
+                $query1 = "select primkey from " . Config::dbSurveyData() . "_datarecords where suid=" . $suid . ' and completed=1';
+            }
+            else {
+                $query1 = "select distinct primkey from " . Config::dbSurveyData() . "_data where suid=" . $suid . ' and completed=1';
+            }
             if ($result = $db->selectQuery($query1)) {
                 if ($db->getNumberOfRows($result) > 0) {
                     while ($row1 = $db->getRow($result)) {
@@ -362,9 +368,14 @@ class Data {
             // get everyone completed
             $completed = array();
             $tses = array();
-            $query1 = "select primkey, ts from " . Config::dbSurveyData() . "_datarecords where suid=" . $suid . ' and completed=1';
+            if (Config::useDataRecords()) {
+                $query1 = "select primkey, ts from " . Config::dbSurveyData() . "_datarecords where suid=" . $suid . ' and completed=1';
+            }
+            else {
+                $query1 = "select primkey, ts from " . Config::dbSurveyData() . "_data where suid=" . $suid . ' and variablename="' . VARIABLE_PRIMKEY . '" and completed=1';
+            }
             if ($result = $db->selectQuery($query1)) {
-                if ($db->getNumberOfRows($result) > 0) {
+                if ($db->getNumberOfRows($result) > 0) {                    
                     while ($row1 = $db->getRow($result)) {
                         $completed[] = $row1['primkey'];
                         $tses[$row1["primkey"]] = $row1["ts"];
@@ -438,7 +449,12 @@ class Data {
             $decrypt = "aes_decrypt(data, '" . $survey->getDataEncryptionKey() . "') as data_dec";
         }
 
-        $query = "select $decrypt from " . Config::dbSurveyData() . "_datarecords where suid=" . $survey->getSuid() . $extracompleted . " order by primkey";
+        if (Config::useDataRecords()) {
+            $query = "select $decrypt from " . Config::dbSurveyData() . "_datarecords where suid=" . $survey->getSuid() . $extracompleted . " order by primkey";
+        }
+        else {
+            $query = "select $decrypt from " . Config::dbSurveyData() . "_data where suid=" . $survey->getSuid() . " and variablename='" . VARIABLE_PRIMKEY . "' " . $extracompleted . " order by primkey";
+        }
         $res = $db->selectQuery($query);
         $datanames = array();
         if ($res) {
@@ -466,7 +482,7 @@ class Data {
             $answer = "cast(aes_decrypt(answer, '" . $survey->getDataEncryptionKey() . "') as char) as answer_dec";
         }
         $select = "select " . $answer . " from " . Config::dbSurveyData() . "_data where suid=" . $suid . " and variablename='" . VARIABLE_PLATFORM . "'";
-        echo $select;
+        //echo $select;
         global $db;
         $res = $db->selectQuery($select);
         $data = array();
@@ -478,6 +494,229 @@ class Data {
             }
         }
         return $data;
+    }
+
+    function getParaData($variable, $name, &$brackets) {
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
+        $answertype = $variable->getAnswerType();
+        if (inArray($answertype, array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
+            return null;
+        }
+        $this->processParaData();
+        //return array();
+
+        global $survey, $db;
+        $arr = array();
+        $key = $survey->getDataEncryptionKey();
+        if ($key != "") {
+            $query = "select variablename, sum(aes_decrypt(answer, '" . $key . "')) as total from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $survey->getSuid() . " and variablename like '" . $name . "\_%' group by variablename order by variablename";
+        } else {
+            $query = "select variablename, sum(answer) as total from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $survey->getSuid() . " and variablename like '" . $name . "\_%' group by variablename order by variablename";
+        }
+        $res = $db->selectQuery($query);
+        //echo $query;
+        if ($res) {
+            if ($db->getNumberOfRows($res) > 0) {
+                while ($row = $db->getRow($res)) {
+                    $code = str_replace(strtoupper($name . "_"), "", strtoupper($row["variablename"]));
+                    $arr[strtoupper($code)] = $row["total"];
+                }
+            }
+        }
+        //print_r($arr);
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
+        return $arr;
+
+        /*
+          // BELOW IS OLD
+          $decrypt = "paradata as data_dec";
+          if ($survey->getDataEncryptionKey() != "") {
+          $decrypt = "aes_decrypt(paradata, '" . $survey->getDataEncryptionKey() . "') as data_dec";
+          }
+
+          //if ($variable->isArray()) {
+          //    $query = "select $decrypt from " . Config::dbSurveyData() . "_data where suid=" . $survey->getSuid() . ' and variablename like "' . $name . '"' . " order by primkey";
+          //} else {
+          $query = "select primkey, $decrypt, displayed from " . Config::dbSurveyData() . "_paradata where suid=" . $survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey';
+          //}
+          //echo $query;
+          $res = $db->selectQuery($query);
+          $codes = array_values(Common::errorCodes());
+          if ($res) {
+          if ($db->getNumberOfRows($res) > 0) {
+          while ($row = $db->getRow($res)) {
+          $line = strtoupper($row["displayed"]);
+
+          // if displayed == variable OR displayed contains ~varname~ or displayed starts with varname~, process; otherwise skip
+          if ($line == strtoupper($name) || contains($line, "~" . $name . "~") || startsWith($line, $name . "~")) {
+          $a = explode("||", $row["data_dec"]);
+          $displayed = explode("~", $row["displayed"]);
+          $variables = array();
+          foreach ($displayed as $d) {
+          if (startsWith($d, ROUTING_IDENTIFY_SUBGROUP) == false && startsWith($d, ROUTING_IDENTIFY_ENDSUBGROUP) == false) {
+          $variables[] = $d;
+          }
+          }
+          $position = array_search($name, $variables) + 1;
+          foreach ($a as $k) {
+          $t = explode(":", $k);
+          $code = $t[0];
+          if (inArray($code, $codes)) {
+          $s = explode("=", $t[1]);
+          $varname = $s[0];
+          $number = str_replace("answer", "", str_replace("_name[]", "", $varname));
+          if ($position == $number) {
+          if (isset($arr[strtoupper($code)])) {
+          $arr[strtoupper($code)] = $arr[strtoupper($code)] + 1;
+          } else {
+          $arr[strtoupper($code)] = 1;
+          }
+          }
+          }
+          }
+          //echo $row["data_dec"] . "<br/>";
+          }
+          }
+          }
+          }
+          //print_r($arr);
+          // ||FO=1447956435841||MM:318:792=1447956438952||FI=1447956442805
+
+          $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
+          return $arr; */
+    }
+
+    function processParaData($name = "") {
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
+
+
+        global $survey, $db;
+
+        $query = "select max(pid) as pid from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $survey->getSuid();
+        //}
+        //echo $query;
+        $pid = 0;
+        $res = $db->selectQuery($query);
+        if ($res) {
+            $row = $db->getRow($res);
+            $pid = $row["pid"];
+            if ($pid == "") {
+                $pid = 0;
+            }
+        }
+
+        $arr = array();
+        $decrypt = "paradata as data_dec";
+        $key = "";
+        if ($survey->getDataEncryptionKey() != "") {
+            $key = $survey->getDataEncryptionKey();
+            $decrypt = "aes_decrypt(paradata, '" . $survey->getDataEncryptionKey() . "') as data_dec";
+        }
+
+        if ($name == "") {
+            $query = "select *, $decrypt from " . Config::dbSurveyData() . "_paradata where pid > $pid and suid=" . $survey->getSuid() . ' order by primkey, pid asc';
+        } else {
+            $query = "select *, $decrypt from " . Config::dbSurveyData() . "_paradata where pid > $pid and suid=" . $survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey, pid asc';
+        }
+        //}
+        //echo $query;
+        $res = $db->selectQuery($query);
+        $codes = array_values(Common::errorCodes());
+        if ($res) {
+            $oldprimkey = "";
+            $arr = array();
+            if ($db->getNumberOfRows($res) > 0) {
+                while ($row = $db->getRow($res)) {
+
+                    // end of primkey, so store
+                    if ($oldprimkey != "" && $row["primkey"] != $oldprimkey) {
+
+                        // k: varname
+                        // a: array of error codes with number of times
+                        foreach ($arr as $k => $a) {
+                            foreach ($a as $error => $times) {
+                                $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
+                                if ($key != "") {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "',aes_encrypt('" . $times . "','" . $key . "')," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                } else {
+                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "','" . $times . "'," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                }
+                                $query .= ")";
+                                $db->executeQuery($query);
+                                //echo $query . "<hr>";
+                            }
+                        }
+
+                        // reset
+                        $arr = array();
+                    }
+                    $oldprimkey = $row["primkey"];
+
+                    $line = strtoupper($row["displayed"]);
+
+                    // if displayed == variable OR displayed contains ~varname~ or displayed starts with varname~, process; otherwise skip
+                    if ($name == "" || $line == strtoupper($name) || contains($line, "~" . $name . "~") || startsWith($line, $name . "~")) {
+
+                        $line = $row["data_dec"];
+                        $line = str_replace("FO=", "FO:", $line);
+                        $line = str_replace("FI=", "FI:", $line);
+                        $a = explode("||", $line);
+                        $displayed = explode("~", $row["displayed"]);
+                        $variables = array();
+                        foreach ($displayed as $d) {
+                            if (startsWith($d, ROUTING_IDENTIFY_SUBGROUP) == false && startsWith($d, ROUTING_IDENTIFY_ENDSUBGROUP) == false) {
+                                $variables[] = $d;
+                            }
+                        }
+
+                        foreach ($a as $k) {
+                            $t = explode(":", $k);
+                            $code = $t[0];
+
+                            // error code
+                            if (inArray($code, $codes)) {
+                                $s = explode("=", $t[1]);
+                                $varname = $s[0];
+                                $number = str_replace("answer", "", str_replace("_name[]", "", $varname));
+
+                                // find varname
+                                if (isset($variables[$number - 1])) {
+                                    $variable = $variables[$number - 1];
+                                    if (isset($arr[strtoupper($variable)])) {
+                                        $vararray = $arr[strtoupper($variable)];
+                                    } else {
+                                        $vararray = array();
+                                    }
+                                    if (isset($vararray[strtoupper($code)])) {
+                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
+                                        $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
+                                    } else {
+                                        $vararray[strtoupper($code)] = 1;
+                                    }
+                                    $arr[strtoupper($variable)] = $vararray;
+                                }
+                            } else if (inArray($code, array("FO", "FI"))) {
+                                foreach ($variables as $variable) {
+                                    if (isset($arr[strtoupper($variable)])) {
+                                        $vararray = $arr[strtoupper($variable)];
+                                    } else {
+                                        $vararray = array();
+                                    }
+                                    if (isset($vararray[strtoupper($code)])) {
+                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
+                                        $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
+                                    } else {
+                                        $vararray[strtoupper($code)] = 1;
+                                    }
+                                    $arr[strtoupper($variable)] = $vararray;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
     }
 
 }

@@ -339,6 +339,14 @@ class Checker {
                 }
             }
         }
+        
+        if ($var->hasType()) {
+            $tempsurv = new Survey($var->getSuid());
+            $temptype = $tempsurv->getType($var->getTyd());
+            if ($temptype->getTyd() == "") {
+                $messages[] = Language::messageCheckerTypeNotExists($var->getName());
+            }
+        }
         return $messages;
     }
 

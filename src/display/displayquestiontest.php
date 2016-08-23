@@ -36,7 +36,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
     }
 
     function showSurveyHeader($title, $style = '') {
-        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = parent::showSurveyHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $this->showNavBar();
         $user = $_SESSION['URID'];
         if ($this->editable == true) {
@@ -196,7 +196,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
 
     function showEndSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.test', 'suid' => $this->engine->getSuid()));
@@ -212,7 +212,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
 
     function showCompletedSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.test', 'suid' => $this->engine->getSuid()));

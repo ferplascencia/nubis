@@ -22,7 +22,6 @@
 --
 
 
-;
 CREATE TABLE IF NOT EXISTS `survey1_actions` (
 
   `asid` int(11) NOT NULL AUTO_INCREMENT,
@@ -54,8 +53,8 @@ CREATE TABLE IF NOT EXISTS `survey1_actions` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`asid`),
-  KEY `actionindex` (`sessionid`)
-
+  KEY `actionindex` (`sessionid`),
+  KEY `sessionindex` (`sessionid`,`systemtype`)
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
 
 
@@ -144,6 +143,8 @@ CREATE TABLE IF NOT EXISTS `survey1_context` (
   `getfills` mediumblob,
 
   `setfills` mediumblob,
+
+  `checks` mediumblob,
 
   `inlinefields` mediumblob,
 
@@ -601,6 +602,34 @@ CREATE TABLE IF NOT EXISTS `survey1_pictures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+
+CREATE TABLE IF NOT EXISTS `survey1_processed_paradata` (
+
+  `pid` int(11) NOT NULL,
+
+  `suid` int(11) NOT NULL DEFAULT '1',
+
+  `primkey` varchar(150) NOT NULL,
+
+  `rgid` int(11) NOT NULL DEFAULT '0',
+
+  `variablename` varchar(150) NOT NULL,
+
+  `answer` blob,
+
+  `language` int(11) NOT NULL,
+
+  `mode` int(11) NOT NULL,
+
+  `version` int(11) NOT NULL,
+
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`pid`, `suid`, `primkey`,`variablename`),
+  KEY `primkeyindex` (`suid`,`primkey`),   
+  KEY `variablenameindex` (`suid`,`variablename`)
+) ENGINE=MyIsam DEFAULT CHARSET=utf8;
+
 --
 
 -- Table structure for table `survey1_progressbars`
@@ -996,8 +1025,8 @@ CREATE TABLE IF NOT EXISTS `survey1_states` (
 
   PRIMARY KEY (`stateid`,`primkey`,`suid`,`seid`,`mainseid`),
   KEY `stateindex` (`suid`,`primkey`),
-  KEY `primindex` (`primkey`)
-
+  KEY `primindex` (`primkey`),
+  KEY `mainseidindex` (`suid`,`primkey`,`mainseid`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -1075,8 +1104,8 @@ CREATE TABLE IF NOT EXISTS `survey1_test_actions` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`asid`),
-  KEY `actionindex` (`sessionid`)
-
+  KEY `actionindex` (`sessionid`),
+  KEY `sessionindex` (`sessionid`,`systemtype`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -1352,6 +1381,33 @@ CREATE TABLE IF NOT EXISTS `survey1_test_pictures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+CREATE TABLE IF NOT EXISTS `survey1_test_processed_paradata` (
+
+  `pid` int(11) NOT NULL,
+
+  `suid` int(11) NOT NULL DEFAULT '1',
+
+  `primkey` varchar(150) NOT NULL,
+
+  `rgid` int(11) NOT NULL DEFAULT '0',
+
+  `variablename` varchar(150) NOT NULL,
+
+  `answer` blob,
+
+  `language` int(11) NOT NULL,
+
+  `mode` int(11) NOT NULL,
+
+  `version` int(11) NOT NULL,
+
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`pid`, `suid`, `primkey`,`variablename`),
+  KEY `primkeyindex` (`suid`,`primkey`),   
+  KEY `variablenameindex` (`suid`,`variablename`)
+) ENGINE=MyIsam DEFAULT CHARSET=utf8;
+
 --
 
 -- Table structure for table `survey1_test_screendumps`
@@ -1455,8 +1511,8 @@ CREATE TABLE IF NOT EXISTS `survey1_test_states` (
 
   PRIMARY KEY (`stateid`,`primkey`,`suid`,`seid`,`mainseid`),
   KEY `stateindex` (`suid`,`primkey`),
-  KEY `primindex` (`primkey`)
-
+  KEY `primindex` (`primkey`),
+  KEY `mainseidindex` (`suid`,`primkey`,`mainseid`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -1690,7 +1746,9 @@ CREATE TABLE IF NOT EXISTS `survey1_variables` (
 
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`vsid`,`suid`)
+  PRIMARY KEY (`vsid`,`suid`),
+  
+  KEY `variableindex` (`suid`,`variablename`)
 
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
 

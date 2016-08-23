@@ -15,7 +15,7 @@
 class DisplayQuestionNurse extends DisplayQuestionBasic {
 
     function showHeader($title, $style = '') {
-        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $this->showNavBar();
 
 //        $returnStr .= $this->engine->getDisplayed();
@@ -89,7 +89,7 @@ class DisplayQuestionNurse extends DisplayQuestionBasic {
 
     function showEndSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'nurse.surveycompleted', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid()));
@@ -106,7 +106,7 @@ class DisplayQuestionNurse extends DisplayQuestionBasic {
 
     function showCompletedSurvey() {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'nurse.backfromsms', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid()));

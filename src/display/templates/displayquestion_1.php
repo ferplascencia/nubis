@@ -52,15 +52,15 @@ class DisplayQuestion extends DisplayQuestionBasic {
 
     function displayBody() {
         $returnStr = '';
-        $returnStr .= '<link href="css/uscic.css" type="text/css" rel="stylesheet">';
-        $returnStr .= '<form id="form" role="form" method=post>';
+        //$returnStr .= '<link href="css/uscic.css" type="text/css" rel="stylesheet">';
+        $returnStr .= '<form id="form" role="form" method=post autocapitalize="off" autocorrect="off" autocomplete="off">';
         $returnStr .= '<div id="wrap">';
         $returnStr .= '<div class="container">';
 
         $returnStr .= '<div style="background-image: url(display/templates/images/uas_logo_background.png); height:100px; padding-top:45px">
 		<img alt="USC" title="USC" src="display/templates/images/uas_name.png" style="z-index:2">
         	</div>';
-        $returnStr .= '<div style="background:#c7c7c2; height:30px;">';
+        $returnStr .= '<div id="languagebar" style="background:#c7c7c2; height:30px;">';
         if (getSurveyLanguageAllowChange() == LANGUAGE_CHANGE_RESPONDENT_ALLOWED) {
             $returnStr .= $this->showLanguage();
         }
@@ -74,7 +74,7 @@ class DisplayQuestion extends DisplayQuestionBasic {
 
     function redirect($page) {
         global $survey;
-        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.css" rel="stylesheet">');
+        $returnStr = $this->showHeader($survey->getTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= '<form method="post" action="../../../panel/index.php">';
 
         $returnStr .= $this->setSessionParamsPost(array('page' => $page));
@@ -91,13 +91,13 @@ class DisplayQuestion extends DisplayQuestionBasic {
     function showEndSurvey() {
         global $survey;
         echo $this->redirect("completed." . $survey->getName());
-        exit;
+        doExit();
     }
 
     function showCompletedSurvey() {
         global $survey;
-        echo $this->redirect("completed." . $survey->getName());
-        exit;
+        echo $this->redirect("");
+        doExit();
     }
 
     function setSessionParamsPost($params) {
