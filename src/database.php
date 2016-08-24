@@ -54,6 +54,8 @@ class Database {
                 $this->db = @mysqli_connect($dbServer, $username, $password);  //default mysql                    
                 if ($this->db != null) {
                     if (mysqli_select_db($this->db, $dbName)) {
+                        @mysqli_query($this->db, 'SET CHARACTER SET utf8;');                        
+                        @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
                         return true;
                     }
                 }
