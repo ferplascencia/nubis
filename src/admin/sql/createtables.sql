@@ -1,25 +1,4 @@
 
-/*
-  ------------------------------------------------------------------------
-  Copyright (C) 2014 Bart Orriens, Albert Weerman
-
-  This library/program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-  ------------------------------------------------------------------------
- */
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_actions`
-
---
 
 
 CREATE TABLE IF NOT EXISTS `survey1_actions` (
@@ -59,12 +38,6 @@ CREATE TABLE IF NOT EXISTS `survey1_actions` (
 
 
 
--- --------------------------------------------------------
-
---
--- Table structure for table `survey1_communication`
---
-
 CREATE TABLE IF NOT EXISTS `survey1_communication` (
   `hnid` int(11) NOT NULL AUTO_INCREMENT,
   `urid` int(11) NOT NULL,
@@ -74,18 +47,6 @@ CREATE TABLE IF NOT EXISTS `survey1_communication` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`hnid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_contacts`
-
---
-
 
 
 CREATE TABLE IF NOT EXISTS `survey1_contacts` (
@@ -109,18 +70,6 @@ CREATE TABLE IF NOT EXISTS `survey1_contacts` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_context`
-
---
 
 
 
@@ -182,17 +131,6 @@ CREATE TABLE IF NOT EXISTS `survey1_consolidated_times` (
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_data`
-
---
-
-
 
 CREATE TABLE IF NOT EXISTS `survey1_data` (
 
@@ -223,14 +161,6 @@ CREATE TABLE IF NOT EXISTS `survey1_data` (
 
 
 
--- --------------------------------------------------------
-
---
-
--- Table structure for table `survey1_datarecords`
-
---
-
 CREATE TABLE IF NOT EXISTS `survey1_datarecords` (
   `suid` int(11) NOT NULL DEFAULT '1',
   `primkey` varchar(50) NOT NULL,
@@ -240,14 +170,6 @@ CREATE TABLE IF NOT EXISTS `survey1_datarecords` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`suid`,`primkey`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
---
-
--- Table structure for table `survey1_engines`
-
---
 
 
 
@@ -275,8 +197,6 @@ CREATE TABLE IF NOT EXISTS `survey1_engines` (
 
 
 
--- --------------------------------------------------------
-
 CREATE TABLE IF NOT EXISTS `survey1_files` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -289,13 +209,6 @@ CREATE TABLE IF NOT EXISTS `survey1_files` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
-
---
-
--- Table structure for table `survey1_groups`
-
---
 
 
 
@@ -342,12 +255,6 @@ CREATE TABLE IF NOT EXISTS `survey1_households` (
 
 
 
--- --------------------------------------------------------
-
---
--- Table structure for table `survey1_interviewstatus`
---
-
 CREATE TABLE IF NOT EXISTS `survey1_interviewstatus` (
   `suid` int(11) NOT NULL DEFAULT '1',
   `primkey` varchar(150) NOT NULL,
@@ -378,8 +285,6 @@ CREATE TABLE IF NOT EXISTS `survey1_issues` (
   PRIMARY KEY (`isid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-
--- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `survey1_lab` (
   `primkey` varchar(50) CHARACTER SET utf8 NOT NULL,
@@ -428,13 +333,6 @@ CREATE TABLE IF NOT EXISTS `survey1_lab` (
   PRIMARY KEY (`primkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
-
--- Table structure for table `survey1_logs`
-
---
-
-
 
 CREATE TABLE IF NOT EXISTS `survey1_logs` (
 
@@ -481,15 +379,6 @@ CREATE TABLE IF NOT EXISTS `survey1_loopdata` (
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
--- --------------------------------------------------------
-
---
-
--- Table structure for table `survey1_next`
-
---
-
-
 
 CREATE TABLE IF NOT EXISTS `survey1_next` (
 
@@ -507,18 +396,6 @@ CREATE TABLE IF NOT EXISTS `survey1_next` (
 
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_observations`
-
---
 
 
 CREATE TABLE IF NOT EXISTS `survey1_observations` (
@@ -546,18 +423,6 @@ CREATE TABLE IF NOT EXISTS `survey1_observations` (
   PRIMARY KEY (`primkey`,`suid`,`stateid`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_screendumps`
-
---
-
 
 
 
@@ -589,9 +454,6 @@ CREATE TABLE IF NOT EXISTS `survey1_paradata` (
 
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
-
-
--- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `survey1_pictures` (
   `primkey` varchar(25) NOT NULL DEFAULT '',
@@ -630,13 +492,6 @@ CREATE TABLE IF NOT EXISTS `survey1_processed_paradata` (
   KEY `variablenameindex` (`suid`,`variablename`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
---
-
--- Table structure for table `survey1_progressbars`
-
---
-
-
 
 CREATE TABLE IF NOT EXISTS `survey1_progressbars` (
 
@@ -662,16 +517,6 @@ CREATE TABLE IF NOT EXISTS `survey1_progressbars` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_psus`
-
---
-
 CREATE TABLE IF NOT EXISTS `survey1_psus` (
   `puid` int(11) NOT NULL,
   `code` varchar(25) DEFAULT NULL,
@@ -681,17 +526,6 @@ CREATE TABLE IF NOT EXISTS `survey1_psus` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`puid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_remarks`
-
---
 
 
 
@@ -706,18 +540,6 @@ CREATE TABLE IF NOT EXISTS `survey1_remarks` (
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_respondents`
-
---
 
 
 
@@ -771,19 +593,6 @@ CREATE TABLE IF NOT EXISTS `survey1_respondents` (
 
 
 
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_routing`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_routing` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -799,19 +608,6 @@ CREATE TABLE IF NOT EXISTS `survey1_routing` (
   PRIMARY KEY (`rgid`,`suid`,`seid`)
 
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_screendumps`
-
---
-
 
 
 
@@ -838,19 +634,6 @@ CREATE TABLE IF NOT EXISTS `survey1_screendumps` (
   PRIMARY KEY (`scdid`,`primkey`,`suid`)
 
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_screens`
-
---
-
 
 
 CREATE TABLE IF NOT EXISTS `survey1_screens` (
@@ -885,18 +668,6 @@ CREATE TABLE IF NOT EXISTS `survey1_screens` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_sections`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_sections` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -914,18 +685,6 @@ CREATE TABLE IF NOT EXISTS `survey1_sections` (
   PRIMARY KEY (`seid`,`suid`)
 
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_settings`
-
---
 
 
 
@@ -950,19 +709,6 @@ CREATE TABLE IF NOT EXISTS `survey1_settings` (
   PRIMARY KEY (`name`,`suid`,`object`,`language`,`mode`,`objecttype`),
   KEY `stateindex` (`suid`,`object`, objecttype)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_states`
-
---
-
 
 
 CREATE TABLE IF NOT EXISTS `survey1_states` (
@@ -1031,18 +777,6 @@ CREATE TABLE IF NOT EXISTS `survey1_states` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_surveys`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_surveys` (
 
   `suid` int(11) NOT NULL AUTO_INCREMENT,
@@ -1058,18 +792,6 @@ CREATE TABLE IF NOT EXISTS `survey1_surveys` (
   PRIMARY KEY (`suid`)
 
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_test_actions`
-
---
 
 
 
@@ -1110,18 +832,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_actions` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_test_data`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_test_data` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -1148,14 +858,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_data` (
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
--- --------------------------------------------------------
-
---
-
--- Table structure for table `survey1_test_datarecords`
-
---
-
 CREATE TABLE IF NOT EXISTS `survey1_test_datarecords` (
   `suid` int(11) NOT NULL DEFAULT '1',
   `primkey` varchar(50) NOT NULL,
@@ -1167,8 +869,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_datarecords` (
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
-
--- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `survey1_test_files` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -1183,11 +883,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_files` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
---
-
--- Table structure for table `survey1_test_interviewstatus`
-
---
 
 CREATE TABLE IF NOT EXISTS `survey1_test_interviewstatus` (
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -1248,15 +943,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_lab` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-
---
-
--- Table structure for table `survey1_test_logs`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_test_logs` (
 
   `lgid` int(11) NOT NULL AUTO_INCREMENT,
@@ -1302,16 +988,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_loopdata` (
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_test_observations`
-
---
-
 
 CREATE TABLE IF NOT EXISTS `survey1_test_observations` (
 
@@ -1339,7 +1015,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_observations` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
 
 
 CREATE TABLE IF NOT EXISTS `survey1_test_paradata` (
@@ -1408,13 +1083,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_processed_paradata` (
   KEY `variablenameindex` (`suid`,`variablename`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
---
-
--- Table structure for table `survey1_test_screendumps`
-
---
-
-
 
 CREATE TABLE IF NOT EXISTS `survey1_test_screendumps` (
 
@@ -1439,17 +1107,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_screendumps` (
   PRIMARY KEY (`scdid`,`primkey`,`suid`)
 
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_test_states`
-
---
 
 
 
@@ -1516,17 +1173,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_states` (
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_test_times`
-
---
-
 CREATE TABLE IF NOT EXISTS `survey1_test_consolidated_times` (
 
     `suid` int(11) NOT NULL DEFAULT '1',
@@ -1587,16 +1233,6 @@ CREATE TABLE IF NOT EXISTS `survey1_test_times` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_times`
-
---
-
 CREATE TABLE IF NOT EXISTS `survey1_times` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -1631,14 +1267,6 @@ CREATE TABLE IF NOT EXISTS `survey1_times` (
 
 
 
-
-
--- --------------------------------------------------------
-
---
--- Table structure for table `survey1_tracks`
---
-
 CREATE TABLE IF NOT EXISTS `survey1_tracks` (
   `trid` int(11) NOT NULL AUTO_INCREMENT,
   `urid` int(11) NOT NULL DEFAULT '1',
@@ -1656,18 +1284,6 @@ CREATE TABLE IF NOT EXISTS `survey1_tracks` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_types`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_types` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -1681,18 +1297,6 @@ CREATE TABLE IF NOT EXISTS `survey1_types` (
   PRIMARY KEY (`tyd`,`suid`)
 
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_users`
-
---
 
 
 
@@ -1718,18 +1322,6 @@ CREATE TABLE IF NOT EXISTS `survey1_users` (
 
 
 
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_variables`
-
---
-
-
-
 CREATE TABLE IF NOT EXISTS `survey1_variables` (
 
   `suid` int(11) NOT NULL DEFAULT '1',
@@ -1751,18 +1343,6 @@ CREATE TABLE IF NOT EXISTS `survey1_variables` (
   KEY `variableindex` (`suid`,`variablename`)
 
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
-
-
-
--- --------------------------------------------------------
-
-
-
---
-
--- Table structure for table `survey1_versions`
-
---
 
 
 
