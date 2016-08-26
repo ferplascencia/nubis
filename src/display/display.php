@@ -332,12 +332,13 @@ class Display {
         $str = '';
         if (!isRegisteredScript("js/bootstrap-select/bootstrap-select-min.js")) {
             registerScript('js/bootstrap-select/bootstrap-select-min.js');
-            $str .= getScript("js/bootstrap-select/bootstrap-select.js");
+            $str .= getScript("js/bootstrap-select/bootstrap-select-min.js");
         }
         if ($css && !isRegisteredScript("css/bootstrap-select.min.css")) {
             registerScript('css/bootstrap-select.min.css');
             $str .= getCSS("css/bootstrap-select.min.css");
         }
+        
         $str .= minifyScript('<script type="text/javascript">
                     $(document).ready(function(){
                     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {

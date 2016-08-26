@@ -36,7 +36,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
     }
 
     function showSurveyHeader($title, $style = '') {
-        $returnStr = parent::showSurveyHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
+        $returnStr = parent::showSurveyHeader(Language::messageSMSTitle(), $style);
         $returnStr .= $this->showNavBar();
         $user = $_SESSION['URID'];
         if ($this->editable == true) {
@@ -47,7 +47,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
             else {
                 $returnStr .= $this->getTinyMCE(".uscic-inline-editable", 2, $this->getInlineEditIcon()); // allow to have all elements, because otherwise save will screw it up
             }
-        }        
+        }    
 
 //        $returnStr .= $this->engine->getDisplayed();
         $this->padding = true;
