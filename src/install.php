@@ -117,6 +117,19 @@ class Install {
                 $returnStr .= '<option ' . $selected . ' value="' . $k . '">' . $k . '</option>';
             }
         }
+        $keys = array();
+        $keys[1] = $this->generateKey();
+        $keys[2] = $this->generateKey();
+        $keys[3] = $this->generateKey();
+        $keys[4] = $this->generateKey();
+        $keys[5] = $this->generateKey();
+        $keys[6] = $this->generateKey();
+        $keys[7] = $this->generateKey();
+        $keys[8] = $this->generateKey();
+        $keys[9] = $this->generateKey();
+        $keys[10] = $this->generateKey();
+        $keys[11] = $this->generateKey();
+
         $returnStr .= '
                 </select>
             </td>    
@@ -191,37 +204,37 @@ class Install {
         <br/><br/>
         <table style="width: 550px; max-width: 550px;" class="table table-striped table-bordered">
         <tr>
-            <td style="width: 250px; max-width: 250px;">' . Language::installLabelEncryptionData() . '</td><td><input value="' . $this->generateKey() . '" type="text" class="form-control" name="encryptiondata" /></td>
+            <td style="width: 250px; max-width: 250px;">' . Language::installLabelEncryptionData() . '</td><td><input value="' . $keys[1] . '" type="text" class="form-control" name="encryptiondata" /></td>
         </tr>
         <tr>
-            <td>' . Language::installLabelEncryptionAdminLogin() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionadmin" /></td>
+            <td>' . Language::installLabelEncryptionAdminLogin() . '</td><td><input value="' . $keys[2] . '"  type="text" class="form-control" name="encryptionadmin" /></td>
         </tr>
         <tr>
-            <td>' . Language::installLabelEncryptionLoginCodes() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionlogincodes" /></td>
+            <td>' . Language::installLabelEncryptionLoginCodes() . '</td><td><input value="' . $keys[3] . '"  type="text" class="form-control" name="encryptionlogincodes" /></td>
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionDirect() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptiondirect" /></td>
+            <td>' . Language::installLabelEncryptionDirect() . '</td><td><input value="' . $keys[4] . '"  type="text" class="form-control" name="encryptiondirect" /></td>
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionRespondent() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionrespondent" /></td>
+            <td>' . Language::installLabelEncryptionRespondent() . '</td><td><input value="' . $keys[5] . '"  type="text" class="form-control" name="encryptionrespondent" /></td>
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionContactName() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptioncontactnames" /></td>                
+            <td>' . Language::installLabelEncryptionContactName() . '</td><td><input value="' . $keys[6] . '"  type="text" class="form-control" name="encryptioncontactnames" /></td>                
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionContactRemark() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptioncontactremarks" /></td>
+            <td>' . Language::installLabelEncryptionContactRemark() . '</td><td><input value="' . $keys[7] . '"  type="text" class="form-control" name="encryptioncontactremarks" /></td>
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionLab() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionlab" /></td>
+            <td>' . Language::installLabelEncryptionLab() . '</td><td><input value="' . $keys[8] . '"  type="text" class="form-control" name="encryptionlab" /></td>
         </tr>        
         <tr>
-            <td>' . Language::installLabelEncryptionFilePicture() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionfile" /></td>
+            <td>' . Language::installLabelEncryptionFilePicture() . '</td><td><input value="' . $keys[9] . '"  type="text" class="form-control" name="encryptionfile" /></td>
         </tr> 
         <tr>
-            <td>' . Language::installLabelEncryptionParameters() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionparameters" /></td>
+            <td>' . Language::installLabelEncryptionParameters() . '</td><td><input value="' . $keys[10] . '"  type="text" class="form-control" name="encryptionparameters" /></td>
         </tr> 
         <tr>
-            <td>' . Language::installLabelEncryptionRemark() . '</td><td><input value="' . $this->generateKey() . '"  type="text" class="form-control" name="encryptionremarks" /></td>
+            <td>' . Language::installLabelEncryptionRemark() . '</td><td><input value="' . $keys[11] . '"  type="text" class="form-control" name="encryptionremarks" /></td>
         </tr>                                
         </table>
         <br/>    
@@ -539,9 +552,9 @@ $configuration = array(
         CONFIGURATION_ENCRYPTION_CONTACTREMARK => "' . loadvar("encryptioncontactremarks") . '",
         CONFIGURATION_ENCRYPTION_CONTACTNAME => "' . loadvar("encryptioncontactnames") . '",
         CONFIGURATION_ENCRYPTION_ACTION_PARAMS => "' . loadvar("encryptionparameters") . '",
-        CONFIGURATION_ENCRYPTION_DIRECT => "' . loadvar("encryptiondirect") . '#1sa",
+        CONFIGURATION_ENCRYPTION_DIRECT => "' . loadvar("encryptiondirect") . '",
         CONFIGURATION_ENCRYPTION_LAB => "' . loadvar("encryptionlab") . '",
-        CONFIGURATION_ENCRYPTION_FILE => "' . loadvar("encryptionfile") . '3"
+        CONFIGURATION_ENCRYPTION_FILE => "' . loadvar("encryptionfile") . '"
     ),
     CONFIGURATION_DATETIME => array(
         CONFIGURATION_DATETIME_TIMEZONE => "' . loadvar("timezone") . '",
@@ -755,14 +768,13 @@ $configuration = array(
     }
 
     function generateKey($length = 32) {
-        mt_srand((double) microtime() * 1000000);
-        $password = "";
+        $str = "";
         $chars = "abcdefghijklmnopqrstuvwxyz123456*&#!*1234567890";
         for ($i = 0; $i < $length; $i++) {
             $x = mt_rand(0, strlen($chars) - 1);
-            $password .= $chars{$x};
+            $str .= $chars{$x};
         }
-        return $password;
+        return $str;
     }
 
 }
