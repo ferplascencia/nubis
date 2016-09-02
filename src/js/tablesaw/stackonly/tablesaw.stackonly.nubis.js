@@ -42,10 +42,10 @@ if (Tablesaw.mustard) {
         create: "tablesawcreate",
         destroy: "tablesawdestroy",
         refresh: "tablesawrefresh"
-    },    
+    },
     defaultMode = "stack",
             initSelector = "table[data-tablesaw-mode],table[data-tablesaw-sortable]";
-            
+
     var Table = function(element) {
         if (!element) {
             throw new Error("Tablesaw requires an element.");
@@ -209,15 +209,20 @@ if (Tablesaw.mustard) {
     };
 
     Stack.prototype.init = function(colstart) {
-        this.$table.addClass(classes.stackTable);
 
+        if (this.$table.hasClass("stackdone")) {
+            return; // check for multiple tables on same screen
+        }
+
+        this.$table.addClass(classes.stackTable);
+        this.$table.addClass("stackdone");
         if (this.labelless) {
             return;
         }
 
         // get headers in reverse order so that top-level headers are appended last
         var reverseHeaders = $(this.allHeaders);
-        var hideempty = this.hideempty;        
+        var hideempty = this.hideempty;
         var postappend = this.postappend;
         var preappend = this.preappend;
 

@@ -67,6 +67,7 @@ class Compiler {
     private $lastwhileactions; // keeps track of last action of a while
     private $whileactions; // keeps track of actions of whiles
     private $whilenextrgids; // keeps track of while next rgids for exitwhile
+    private $ifrgidafter;
 
     function __construct($suid, $version) {
         $this->suid = $suid;
@@ -2981,7 +2982,7 @@ class Compiler {
                         if (endsWith(strtoupper($rule), ROUTING_THEN) == true) {
 
                             $this->cnt = $cnt;
-                            $rgidafter = $this->instructions[$cnt]->getRgid();
+                            $this->ifrgidafter = $this->instructions[$cnt]->getRgid();
                             $found = true;
                             break;
                         }
@@ -3173,7 +3174,7 @@ class Compiler {
 
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
-        $rgidafter = $rgid;
+        $this->ifrgidafter = $rgid;
 
         $ifstmt = $this->analyzeIf($rule);
         if (!$ifstmt) {
@@ -3206,7 +3207,7 @@ class Compiler {
         /* if: true statement */
 
         /* get next (real: question or complex statement) rgid for when the if statement is true */
-        $nexttruergid = $this->findNextStatement($rgidafter, true); // TODO: WE SAY TO IGNORE ELSE HERE, IS THAT CORRECT? I THINK SO, SINCE IF CANNOT BE FOLLOWED IF TRUE BY AN ELSE/ELSEIF
+        $nexttruergid = $this->findNextStatement($this->ifrgidafter, true); // TODO: WE SAY TO IGNORE ELSE HERE, IS THAT CORRECT? I THINK SO, SINCE IF CANNOT BE FOLLOWED IF TRUE BY AN ELSE/ELSEIF
 
         /* if loop, check that next after if is true is not beyond the loop */
         if (sizeof($this->loops) > 0 || sizeof($this->whiles) > 0) {
