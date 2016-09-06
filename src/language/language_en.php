@@ -6651,7 +6651,7 @@ class Language extends LanguageBase {
     }
     
     static function installLabelDatabaseSurvey() {
-        return 'Table name';
+        return 'Table name prefix';
     }
     
     static function installDateTimeWelcome() {
