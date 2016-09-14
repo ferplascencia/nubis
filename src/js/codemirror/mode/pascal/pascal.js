@@ -1,12 +1,25 @@
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
 CodeMirror.defineMode("pascal", function() {
   function words(str) {
     var obj = {}, words = str.split(" ");
     for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
     return obj;
   }
-  var keywords = words("cardinal group subgroup endgroup end subgroup GROUP ENDGROUP SUBGROUP ENDSUBGROUP EMPTY NONRESPONSE DK RF dk rf empty nonresponse ENDIF IF THEN ELSE ELSEIF DO do ENDDO enddo FOR endif for and AND array begin case const div do downto else end file forward integer " +
-                       "boolean char function goto if then elseif in label mod nil not of or OR packed procedure " +
-                       "program record repeat set string then to TO type until var while with inline INLINE inspect INSPECT fill FILL");
+  var keywords = words("and array begin case const div do downto else end file for forward integer " +
+                       "boolean char function goto if in label mod nil not of or packed procedure " +
+                       "program record repeat set string then to type until var while with");
   var atoms = {"null": true};
 
   var isOperatorChar = /[+\-*&%=<>!?|\/]/;
@@ -92,3 +105,5 @@ CodeMirror.defineMode("pascal", function() {
 });
 
 CodeMirror.defineMIME("text/x-pascal", "pascal");
+
+});

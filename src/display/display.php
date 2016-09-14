@@ -4111,32 +4111,24 @@ function inputMaskingSupported() {
         }
 
         if ($inline == 1) {
-            $returnStr .= '$( document ).ready(function() {
+            $returnStr .= 'var old = "";
+               $( document ).ready(function() {
                 
-                $("textarea.tinymce").focusin(function() {
+                /*$("textarea.tinymce").focusin(function() {
                     $(this).click();
-                });
-                
-                $("textarea.tinymce").click(function() {
-                    var select = "#" + $(this).attr(\'id\');
-                    if (tinymce.get($(this).attr(\'id\'))) {
-                        tinymce.get($(this).attr(\'id\')).show();
-                        tinyMCE.get($(this).attr(\'id\')).focus();
-                        return;
-                    }
-                    tinymce.init({  
+                });*/
+                                
+                tinymce.init({  
                     valid_elements : "*[*]",
                     mode : "textareas",
-                    selector: select,    
+                    selector: "' . $selector . '",    
                     menubar: "insert edit table format view tools",
                     setup: function(editor) {
                                 editor.on("blur", function(e) {
-                                    if (tinyMCE.activeEditor) {                                    
-                                        tinyMCE.activeEditor.hide();
-                                    }
+                                    return;
                                 });
                                 editor.on("init", function(e) {
-                                    tinyMCE.get($(this).attr(\'id\')).focus(); // does not work first time round
+                                    tinyMCE.activeEditor.focus(); // does not work first time round
                                 });
                 
                                 
@@ -4211,7 +4203,6 @@ function inputMaskingSupported() {
         }
         if ($inline == 1) {
             $returnStr .= '
-                });                                  
                 });';
         }
 

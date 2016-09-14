@@ -30,6 +30,7 @@ class SmsAjax {
             case 'sysadmin.inline.getcontent': return $this->showEditInlineGetContent();
             case 'sysadmin.history.getentry': return $this->showHistoryGetEntry();
             case 'sysadmin.autocomplete': return $this->showAutoComplete();
+            case 'sysadmin.autocompletecodemirror': return $this->showAutoCompleteCodemirror();
         }
         //$this->testLog();
     }
@@ -38,6 +39,12 @@ class SmsAjax {
     function showAutoComplete() {
         global $survey;
         return json_encode($survey->getVariableDescriptiveNames());
+    }
+    
+    function showAutoCompleteCodemirror() {
+        global $survey;
+        $arr = array_merge($survey->getVariableDescriptiveNames(), $survey->getSectionNames(), $survey->getGroupNames());
+        return json_encode($arr);
     }
     
     /* HISTORY LOAD FUNCTIONS */

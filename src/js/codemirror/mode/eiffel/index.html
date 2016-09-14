@@ -13,12 +13,12 @@
       .cm-s-default span.cm-arrow { color: red; }
     </style>
 <div id=nav>
-  <a href="http://codemirror.net"><img id=logo src="../../doc/logo.png"></a>
+  <a href="http://codemirror.net"><h1>CodeMirror</h1><img id=logo src="../../doc/logo.png"></a>
 
   <ul>
     <li><a href="../../index.html">Home</a>
     <li><a href="../../doc/manual.html">Manual</a>
-    <li><a href="https://github.com/marijnh/codemirror">Code</a>
+    <li><a href="https://github.com/codemirror/codemirror">Code</a>
   </ul>
   <ul>
     <li><a href="../index.html">Language modes</a>
@@ -39,8 +39,8 @@ note
     library: "Free implementation of ELKS library"
     status: "See notice at end of class."
     legal: "See notice at end of class."
-    date: "$Date: 2014/02/05 00:29:00 $"
-    revision: "$Revision: 1.1.1.1 $"
+    date: "$Date: 2013-01-25 11:49:00 -0800 (Fri, 25 Jan 2013) $"
+    revision: "$Revision: 712 $"
 
 class
     ANY
@@ -417,7 +417,6 @@ end
     <script>
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         mode: "text/x-eiffel",
-        tabMode: "indent",
         indentUnit: 4,
         lineNumbers: true,
         theme: "neat"

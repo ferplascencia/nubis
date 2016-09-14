@@ -434,7 +434,7 @@ function getSurveyMode() {
                 $_SESSION['SURVEY_MODE'] = $default;
                 return $default;
             case USER_TRANSLATOR:
-                $modes = $user->getModes();
+                $modes = $user->getModes(getSurvey());
                 $default = getDefaultSurveyMode();
                 if (inArray($default, $modes)) {
                     $_SESSION['SURVEY_MODE'] = $default;

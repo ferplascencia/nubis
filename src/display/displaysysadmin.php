@@ -584,8 +584,16 @@ class DisplaySysAdmin extends Display {
             if ($line > 0) { // coming in from search result
                 $extra .= "jumpToLine(" . $line . ");";
             }
-            $returnStr .= '<script src="js/codemirror/mode/nubis/nubis.js"></script>';
+            $returnStr .= '<link rel="stylesheet" href="js/codemirror/addon/hint/show-hint.css"/>
+                <script src="js/codemirror/addon/hint/show-hint.js"></script>
+                <script src="js/codemirror/addon/hint/nubis-hint.js"></script>';
+            
+             
             $returnStr .= '<script type="text/javascript">
+                
+                CodeMirror.commands.autocomplete = function(cm) {
+                    cm.showHint({hint: CodeMirror.hint.nubis});
+                  }
                 function jumpToLine(i) {
                     var editor = $("#routing").data("CodeMirrorInstance");
                         // editor.getLineHandle does not help as it does not return the reference of line.
@@ -609,7 +617,7 @@ class DisplaySysAdmin extends Display {
                     }
                     var keywords = words("cardinal card group subgroup endgroup endsubgroup empty nonresponse dk rf do enddo endif for and array if then elseif else in mod not or to inline inspect fill");
                     var mirrorchanged = false;
-                    var editor = CodeMirror.fromTextArea(document.getElementById("routing"), {mode: "text/x-nubis", lineNumbers: true});
+                    var editor = CodeMirror.fromTextArea(document.getElementById("routing"), {mode: "text/x-nubis", lineNumbers: true, extraKeys: {"Ctrl-Space": "autocomplete"}});
                     $("#routing").data("CodeMirrorInstance", editor);
                     editor.on("dblclick", function(cm, event) {
                        if (event.ctrlKey) {                          
@@ -622,7 +630,7 @@ class DisplaySysAdmin extends Display {
                             $("#hiddenform").submit();                                        
                           }
                        }
-                    });
+                    });                    
 
                     editor.on("change", function(from, to, text, removed, origin) {
                         $("#routing").dirtyForms("setDirty");
@@ -1716,9 +1724,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
 
         if (inArray($answertype, $array)) {
-            $returnStr .= '<tr id="categories"><td valign=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin tinymce autocomplete" name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($var->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
+            $returnStr .= '<tr id="categories"><td valign=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin autocomplete" name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($var->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
         } else {
-            $returnStr .= '<tr id="categories" style="display: none;"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin tinymce autocomplete" name="' . SETTING_OPTIONS . '"></textarea></td></tr>';
+            $returnStr .= '<tr id="categories" style="display: none;"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin ' . $tinymce . ' autocomplete" name="' . SETTING_OPTIONS . '"></textarea></td></tr>';
         }
 
         $suid = $_SESSION['SUID'];
@@ -2569,13 +2577,18 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
             $returnStr .= $this->getCodeMirror();
             $returnStr .= '<script src="js/codemirror/mode/nubis/nubis.js"></script>';
-            //$returnStr .= '<script type="text/javascript"></script>';
+            $returnStr .= '<link rel="stylesheet" href="js/codemirror/addon/hint/show-hint.css"/>
+                <script src="js/codemirror/addon/hint/show-hint.js"></script>
+                <script src="js/codemirror/addon/hint/nubis-hint.js"></script>';
             $returnStr .= '<script type="text/javascript">
                 
                             $(document).ready(function() {
                 
+                                CodeMirror.commands.autocomplete = function(cm) {
+                                    cm.showHint({hint: CodeMirror.hint.nubis});
+                                  }
                                 var editor = CodeMirror.fromTextArea(document.getElementById("filltext"), {mode: "text/x-plain", lineNumbers: true});
-                                var editor2 = CodeMirror.fromTextArea(document.getElementById("fillcode"), {mode: "text/x-nubis", lineNumbers: true});
+                                var editor2 = CodeMirror.fromTextArea(document.getElementById("fillcode"), {mode: "text/x-nubis", lineNumbers: true, extraKeys: {"Ctrl-Space": "autocomplete"}});
                                 function words(str) {
                                     var obj = [], words = str.split(" ");
                                     for (var i = 0; i < words.length; ++i) {
@@ -2727,8 +2740,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
         if ($user->hasRoutingAutoIndentation()) {
             $returnStr .= $this->getCodeMirror('height: 100px; width: 500px;');
             $returnStr .= '<script src="js/codemirror/mode/javascript/javascript.js"></script>';
-            $returnStr .= '<script src="js/codemirror/mode/css/css.js"></script>';
-            $returnStr .= '<script type="text/javascript">$(document).ready(function() {
+            $returnStr .= '<script src="js/codemirror/mode/css/css.js"></script>';            
+            $returnStr .= '<script type="text/javascript">                                
+                                $(document).ready(function() {
                                    var editor = CodeMirror.fromTextArea(document.getElementById("' . SETTING_JAVASCRIPT_WITHIN_ELEMENT . '"), {mode: "text/javascript", lineNumbers: false});
                                    var editor1 = CodeMirror.fromTextArea(document.getElementById("' . SETTING_JAVASCRIPT_WITHIN_PAGE . '"), {mode: "text/javascript", lineNumbers: true});
                                    var editor2 = CodeMirror.fromTextArea(document.getElementById("' . SETTING_STYLE_WITHIN_ELEMENT . '"), {mode: "text/x-javascript", lineNumbers: false});

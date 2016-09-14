@@ -1931,7 +1931,14 @@ class SysAdmin {
             $variable->setQuestion(loadvarAllowHTML(SETTING_QUESTION));
             $variable->setAnswerType(loadvar(SETTING_ANSWERTYPE));
             $variable->setAnswerTypeCustom(loadvar(SETTING_ANSWERTYPE_CUSTOM));
-            $variable->setOptionsText(loadvarAllowHTML(SETTING_OPTIONS));
+            
+            $user = new User($_SESSION['URID']);
+            //if ($user->hasHTMLEditor()) {
+            //    $variable->setOptionsText(str_ireplace("<br />", "\r\n" ,loadvarAllowHTML(SETTING_OPTIONS)));
+            //}
+            //else {
+                $variable->setOptionsText(loadvarAllowHTML(SETTING_OPTIONS));
+            //}
             $variable->setArray(loadvar(SETTING_ARRAY));
             $variable->setKeep(loadvar(SETTING_KEEP));
             $answertype = loadvar(SETTING_ANSWERTYPE);

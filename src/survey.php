@@ -232,6 +232,16 @@ class Survey extends Component {
         }
         return $groups;
     }
+    
+    function getGroupNames() {
+        global $db;
+        $groups = array();
+        $result = $db->selectQuery('select name from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()));
+        while ($row = $db->getRow($result)) {
+            $groups[] = $row["name"];
+        }
+        return $groups;
+    }
 
     function getNumberOfGroups() {
         global $db;
@@ -270,6 +280,16 @@ class Survey extends Component {
         $result = $db->selectQuery('select seid from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()));
         while ($row = $db->getRow($result)) {
             $ids[] = $row["seid"];
+        }
+        return $ids;
+    }
+    
+    function getSectionNames() {
+        global $db;
+        $ids = array();
+        $result = $db->selectQuery('select name from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()));
+        while ($row = $db->getRow($result)) {
+            $ids[] = $row["name"];
         }
         return $ids;
     }

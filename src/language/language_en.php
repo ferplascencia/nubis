@@ -362,7 +362,7 @@ class Language extends LanguageBase {
     static function errorLocked() {
         return "A problem occurred. Please contact the survey administrator.";
     }
-    
+
     static function errorInProgress() {
         return "Your previous request is still being processed. Please wait a bit before attempting to refresh this page again in order to continue the survey. Please contact the survey administrator if the problem persists.";
     }
@@ -380,7 +380,7 @@ class Language extends LanguageBase {
     static function errorAssignmentInvalid() {
         return 'Invalid assignment statement';
     }
-    
+
     static function errorCheckReturnInvalid() {
         return 'Invalid return error statement';
     }
@@ -1120,11 +1120,11 @@ class Language extends LanguageBase {
     static function labelToolsExportTypeSerialize() {
         return 'For import via NubiS';
     }
-    
+
     static function labelToolsExportTypeSQL() {
         return 'For import via e.g PHPMyAdmin';
     }
-    
+
     static function labelToolsExportType() {
         return 'Type';
     }
@@ -1140,7 +1140,7 @@ class Language extends LanguageBase {
     static function labelToolsImportTypeMMIC() {
         return 'MMIC';
     }
-    
+
     static function labelToolsImportTypeNubis() {
         return 'NubiS';
     }
@@ -1537,7 +1537,7 @@ class Language extends LanguageBase {
     static function labelIfEmptyDefaultOrder() {
         return 'If empty, default order';
     }
-    
+
     static function labelIfEmptyColumns() {
         return 'If empty, all options in a single column';
     }
@@ -1549,7 +1549,7 @@ class Language extends LanguageBase {
     static function labelIfEmptyDefaultOrderPlaceholder() {
         return 'Question name';
     }
-    
+
     static function labelIfEmptyColumnsPlaceholder() {
         return 'Number of options per column';
     }
@@ -1609,10 +1609,10 @@ class Language extends LanguageBase {
     static function labelFill() {
         return 'Use as fill';
     }
-    
+
     static function labelCheck() {
         return 'Apply check(s)';
-    }    
+    }
 
     static function labelText() {
         return 'Text';
@@ -1721,15 +1721,15 @@ class Language extends LanguageBase {
     static function labelTypeEditGeneralName() {
         return 'Name';
     }
-    
+
     static function labelTypeEditGeneralTemplate() {
         return 'Template';
     }
-    
+
     static function labelTypeEditGeneralStatus() {
         return 'Status';
     }
-    
+
     static function labelTypeEditGeneralPosition() {
         return 'Position';
     }
@@ -2017,7 +2017,7 @@ class Language extends LanguageBase {
     static function labelEnumeratedTextBox() {
         return 'Or type in:';
     }
-    
+
     static function labelEnumeratedTextBoxBefore() {
         return 'Text before box:';
     }
@@ -2025,7 +2025,7 @@ class Language extends LanguageBase {
     static function labelSliderTextBox() {
         return 'Or type in:';
     }
-    
+
     static function labelSliderTextBoxBefore() {
         return 'Text before box:';
     }
@@ -2089,7 +2089,7 @@ class Language extends LanguageBase {
     static function labelTypeEditEnumeratedRandomizer() {
         return 'Options order';
     }
-    
+
     static function labelTypeEditEnumeratedColumns() {
         return 'Options per column';
     }
@@ -2109,7 +2109,7 @@ class Language extends LanguageBase {
     static function labelTypeEditLayoutEnumeratedLabel() {
         return 'Label';
     }
-    
+
     static function labelTypeEditLayoutEnumeratedColumns() {
         return 'Number of columns';
     }
@@ -2453,11 +2453,11 @@ class Language extends LanguageBase {
     static function labelTypeEditFillCode() {
         return 'Code';
     }
-    
+
     static function labelTypeEditCheckCode() {
         return 'Code';
     }
-    
+
     static function labelTypeEditCheckText() {
         return 'Errors';
     }
@@ -2693,7 +2693,7 @@ class Language extends LanguageBase {
     static function labelTypeEditOnSubmit() {
         return 'On form submit (PHP function)';
     }
-    
+
     static function labelTypeEditOnClick() {
         return 'On click (embedded in JavaScript onclick statement)';
     }
@@ -2985,7 +2985,7 @@ class Language extends LanguageBase {
     static function messageFillRoutingNeedsFix() {
         return 'There were one or more error(s) in the fill code. Please check the following messages.';
     }
-    
+
     static function messageCheckRoutingNeedsFix() {
         return 'There were one or more error(s) in the check code. Please check the following messages.';
     }
@@ -3423,7 +3423,7 @@ class Language extends LanguageBase {
     static function messageCheckerTypeExists($name) {
         return 'A type with the name `' . $name . '` already exists.';
     }
-    
+
     static function messageCheckerSectionExists($name) {
         return 'A section with the name `' . $name . '` already exists.';
     }
@@ -4750,7 +4750,7 @@ class Language extends LanguageBase {
     }
 
     static function helpInvalidSet() {
-        return ' (e.g. 1,2 ' .SEPARATOR_COMPARISON . ' 2,3-4)';
+        return ' (e.g. 1,2 ' . SEPARATOR_COMPARISON . ' 2,3-4)';
     }
 
     static function labelHouseholdMember() {
@@ -6546,15 +6546,15 @@ class Language extends LanguageBase {
         return 'Timings per screen per respondent';
     }
 
-     static function labelResearcherPlatform() {
-        return 'Platform information';    
-     }
+    static function labelResearcherPlatform() {
+        return 'Platform information';
+    }
 
-     static function labelResearcherTimingsPer() {
+    static function labelResearcherTimingsPer() {
         return 'Timings per screen';
-    }    
-    
-     static function headerReports() {
+    }
+
+    static function headerReports() {
         return 'Reports';
     }
 
@@ -6569,299 +6569,299 @@ class Language extends LanguageBase {
     static function headerInstallTitle() {
         return 'NubiS Setup';
     }
-    
+
     static function installWarning() {
         return 'Please ensure that the conf.php is writable by the web server before proceeding.';
     }
-    
+
     static function installWarningDatabase() {
         return 'Could not connect to the database. Please verify your database settings.';
     }
-    
+
     static function installWelcome() {
         return 'Welcome to the NubiS setup wizard. Please just use the following steps to install and configure NuBiS.';
     }
-    
+
     static function installConfirmation() {
         return 'NubiS has been successfully installed. Please just click \'Next >>\' to proceed to the login screen to setup your first survey. Your initial login is sysadmin/sysadmin.';
     }
-    
+
     static function installLabelWelcome() {
         return 'Welcome';
     }
-    
+
     static function installLabelDatabase() {
         return 'Database';
     }
-    
+
     static function installLabelLogging() {
         return 'Logging';
     }
-    
+
     static function installLabelEncryption() {
         return 'Encryption';
     }
-    
+
     static function installLabelSession() {
         return 'Session handling';
     }
-    
+
     static function installLabelSample() {
         return 'Sample';
     }
-    
+
     static function installLabelDatetime() {
         return 'Date/time';
     }
-    
+
     static function installButtonNext() {
         return 'Next >>';
     }
-    
+
     static function installButtonFinish() {
         return 'Finish';
     }
-    
+
     static function installButtonBack() {
         return '<< Back';
     }
-    
+
     static function installDatabaseWelcome() {
         return 'Please provide the database details in which you wish to install NubiS:';
     }
-    
+
     static function installDatabaseWelcome2() {
         return 'At this point you can choose to fast complete the setup process by clicking \'Finish\' in which case NubiS will auto-configure itself with a standard configuration. Alternatively, you can click \'Next >>\' to configure NubiS\' various options.';
     }
-    
+
     static function installLabelDatabaseServer() {
         return 'Server';
     }
-    
+
     static function installLabelDatabaseName() {
         return 'Database name';
     }
-    
+
     static function installLabelDatabaseUser() {
         return 'Username';
     }
-    
+
     static function installLabelDatabasePassword() {
         return 'Password';
     }
-    
+
     static function installLabelDatabaseSurvey() {
         return 'Table name prefix';
     }
-    
+
     static function installDateTimeWelcome() {
         return 'Please select your date/time preferences:';
     }
-    
+
     static function installLabelTimezone() {
         return 'Timezone';
     }
-    
+
     static function installLabelTimeformat() {
         return 'US format';
     }
-    
+
     static function installLabelTimeUseMinutes() {
         return 'Allow minutes usage';
     }
-    
+
     static function installLabelTimeUseSeconds() {
         return 'Allow seconds usage';
     }
-    
+
     static function installLabelYes() {
         return 'Yes';
     }
-    
+
     static function installLabelNo() {
         return 'No';
     }
-    
+
     static function installLabelSMS() {
         return 'SMS';
     }
-    
+
     static function installLabelSurvey() {
         return 'Survey';
     }
-    
+
     static function installEncryptionWelcome() {
         return 'NubiS uses a series of encryption keys to protect sensitive information. The ones below are auto-generated suggestions. If you wish to adjust one or more, just change them accordingly:';
     }
-    
+
     static function installLabelEncryptionLoginCodes() {
         return 'Survey logins';
     }
-    
+
     static function installLabelEncryptionDirect() {
         return 'Direct login';
     }
-    
+
     static function installLabelEncryptionAdminLogin() {
         return 'Administrative logins';
     }
-    
+
     static function installLabelEncryptionRespondent() {
         return 'Sample information';
     }
-    
+
     static function installLabelEncryptionRemark() {
         return 'Remarks';
     }
-    
+
     static function installLabelEncryptionContactRemark() {
         return 'Contact remarks';
     }
-    
+
     static function installLabelEncryptionContactName() {
         return 'Contact name';
     }
-    
+
     static function installLabelEncryptionParameters() {
         return 'Submitted survey parameters';
     }
-    
+
     static function installLabelEncryptionDirectLogin() {
         return 'Direct login';
     }
-    
+
     static function installLabelEncryptionData() {
         return 'Main key';
     }
-    
+
     static function installLabelEncryptionLab() {
         return 'Lab results';
     }
-    
+
     static function installLabelEncryptionFilePicture() {
         return 'Files and pictures';
-    }  
-    
+    }
+
     static function installLoggingWelcome() {
         return 'Please indicate which items you want NubiS to log (recommended is to log all):';
     }
-    
+
     static function installLabelLoggingActions() {
         return 'Survey actions';
     }
-    
+
     static function installLabelLoggingTimings() {
         return 'Survey times';
     }
-    
+
     static function installLabelLoggingParadata() {
         return 'Survey paradata';
     }
-    
+
     static function installLabelLoggingTabSwitch() {
         return 'Survey tab switches';
     }
-    
+
     static function installLabelLoggingParadataMouseMovement() {
         return 'Mouse movement every # milliseconds';
     }
-    
+
     static function installSessionWelcome() {
         return 'Please indicate if you wish to enable NubiS\' session timeout warning mechanism (applies to surveys only):';
     }
-    
+
     static function installLabelSessionWarn() {
         return 'Warn for session timeout';
     }
-    
+
     static function installLabelSessionDuration() {
         return 'Session duration (seconds)';
     }
-    
+
     static function installLabelSessionLogout() {
         return 'After logout go to';
     }
-    
+
     static function installLabelSessionRedirect() {
         return 'After redirect go to';
     }
-    
+
     static function installLabelSessionPing() {
         return 'Refresh every # of milliseconds';
     }
-    
+
     static function installSampleWelcome() {
         return 'Please specify the following for the sample you plan to survey:';
     }
-    
+
     static function installLabelSampleType() {
         return 'Type';
     }
-    
+
     static function installLabelSampleTracking() {
         return 'Tracking';
     }
-    
+
     static function installLabelSampleInterviewAddress() {
         return 'Separate interview address';
     }
-    
+
     static function installLabelHousehold() {
         return 'Households';
     }
-    
+
     static function installLabelRespondent() {
         return 'Individual respondents';
     }
-    
+
     static function installLabelSampleProxyContact() {
         return 'Allow proxy contact';
     }
-    
+
     static function installLabelSampleProxyCodes() {
         return 'Use proxy codes';
     }
-    
+
     static function installLabelSampleCommunication() {
         return 'Communication address for laptops';
     }
-    
+
     static function installLabelSampleFileLocation() {
         return 'File location for script updates';
     }
-     
+
     static function labelSMSLaptopAll() {
         return 'All interviewers';
     }
-    
+
     static function labelSMSLaptopNoInterviewers() {
         return 'No interviewers found';
     }
-    
+
     static function labelSMSLaptopSelectInterviewers() {
         return 'Please select one or more interviewers first.';
     }
-    
+
     static function labelSMSLaptopSQLUpdateReady() {
         return 'Metadata update ready for interviewers.';
     }
-    
+
     static function labelSMSLaptopSelectItems() {
         return 'Please select one or more items to update first.';
     }
-    
+
     static function labelSMSLaptopScriptUpdateReady() {
         return 'Script update ready for interviewers.';
     }
-    
+
     static function labelSMSLaptopScriptUpdateNoFiles($location) {
         return 'Please place one or more files in ' . $location . ' first.';
-    }    
-    
+    }
+
     static function labelOutputParaData() {
         return 'Paradata';
     }
-    
+
     static function headerOutputParadataData() {
         return 'Paradata';
     }
@@ -6869,11 +6869,11 @@ class Language extends LanguageBase {
     static function timingsBracketsPerQuestion() {
         return array("Less than 30 seconds", "Less than 1 minute", "Less than 1.5 minutes", "Less than 2 minutes", "Less than 2.5 minutes", "Less than 3 minutes", "Less than 3.5 minutes", "Less than 4 minutes", "Less than 4.5 minutes");
     }
-    
+
     static function labelAggregateTimings() {
         return 'Total time spent';
     }
-    
+
     static function labelInterviews() {
         return 'interviews';
     }
@@ -6885,271 +6885,271 @@ class Language extends LanguageBase {
     static function labelShowRawData() {
         return 'Raw data';
     }
-    
-     static function labelShowTimingsData() {
+
+    static function labelShowTimingsData() {
         return 'Timings';
     }
 
     static function labelShowParadata() {
         return 'Paradata';
-    }    
-    
+    }
+
     static function labelShowAuxData() {
         return 'Auxiliary data';
-    }   
-    
+    }
+
     static function labelDataSingle() {
         return 'From a single survey';
     }
 
     static function labelDataMultiple() {
         return 'Combined from multiple surveys';
-    }      
-    
+    }
+
     static function labelUserSurveyAllowed() {
         return 'Surveys';
     }
-    
+
     static function labelUserGeneral() {
         return 'General';
     }
-    
+
     static function labelUserAccess() {
         return 'Access';
     }
-    
+
     static function labelSysadminMain() {
         return 'Allowed to manage users';
     }
-    
+
     static function labelSysadminAdmin() {
         return 'Not allowed to manage users';
     }
-    
+
     static function labelUserSurveyAccess() {
         return 'Survey';
     }
-    
+
     static function labelUserAddUser() {
         return 'Add new user';
     }
-    
+
     static function labelUserFilter() {
         return 'Filter on user type: ';
     }
-    
+
     static function labelUserUserName() {
         return 'Username';
-    } 
-    
+    }
+
     static function labelUserUserNameName() {
         return 'Name';
     }
-    
+
     static function labelUserUserType() {
         return 'Type';
     }
-    
+
     static function labelAll() {
         return 'All';
     }
-      
+
     static function labelUserActive() {
         return 'Active';
     }
-    
+
     static function labelUserUserSubType() {
         return 'Sub type';
     }
-    
+
     static function labelUserSupervisor() {
         return 'Supervisor';
     }
-    
+
     static function labelUserPassword() {
         return 'Password';
     }
-    
+
     static function labelUserPassword2() {
         return 'Password (re-enter)';
     }
-    
+
     static function labelSettingsLanguageAdd() {
         return 'If adding language, update users:';
     }
-    
+
     static function labelSettingsModeAdd() {
         return 'If adding mode, update users:';
     }
-    
+
     static function labelToolsExportHistoryYes() {
         return 'Yes';
     }
-    
+
     static function labelToolsExportHistoryNo() {
         return 'No';
     }
-    
+
     static function labelToolsExportHistory() {
         return 'Include history';
     }
-    
+
     static function messageRemoveData() {
         return "Are you sure you want to remove all data for the selected survey(s)? Type `REMOVE` to continue.";
     }
-    
+
     static function messageImportSurvey() {
         return "Are you sure you want to continue with the import? NOTE: If you are replacing the current survey(s), all survey components and data will be removed! Type `IMPORT` to continue.";
     }
-    
+
     static function labelImportText() {
         return 'Export file content';
     }
-    
+
     static function labelToolsImportFile() {
         return 'Import from';
     }
-    
+
     static function labelToolsExportCreate() {
         return 'Include database scheme';
     }
-    
+
     static function labelToolsExportCreateYes() {
         return 'Yes';
     }
-    
+
     static function labelToolsExportCreateNo() {
         return 'No';
     }
-    
+
     static function labelExportFile() {
         return 'Import from';
     }
-    
+
     static function messageImportNoFile() {
         return 'no file selected.';
     }
-    
+
     static function messageImportInvalidFile() {
         return 'invalid file selected.';
     }
-    
+
     static function messageToolsImportNotOk($result) {
         return 'Import failed: ' . $result;
     }
-    
+
     static function buttonBrowse() {
         return 'Browse';
     }
-    
+
     static function labelTypeEditValidationAssignment() {
         return 'Assignment';
     }
-    
+
     static function labelTypeEditChecks() {
         return 'Variable checks';
     }
-    
+
     static function labelValidateAssignment() {
         return 'Validate value';
     }
-    
+
     static function optionsValidateYes() {
         return 'Yes';
     }
-    
+
     static function optionsValidateNo() {
         return 'No';
     }
-    
+
     static function labelApplyChecks() {
         return 'Enable variable checks';
     }
-    
+
     static function optionsApplyChecksYes() {
         return 'Yes';
     }
-    
+
     static function optionsApplyChecksNo() {
         return 'No';
     }
-    
+
     static function labelSurveysAddNew() {
         return 'add new survey';
     }
-    
+
     static function labelSurveysAddNewCaps() {
         return 'Add new survey';
     }
-    
+
     static function labelSectionsAddNew() {
         return 'add new section';
     }
-    
+
     static function labelTypesAddNew() {
         return 'add new type';
     }
-    
+
     static function labelGroupsAddNew() {
         return 'add new group';
     }
-    
+
     static function labelVariablesAddNew() {
         return 'add new variable';
     }
-    
+
     static function labelClean() {
         return 'Clean';
     }
-    
+
     static function labelDirty() {
         return 'Dirty';
     }
-    
+
     static function labelWatchClean() {
         return 'Clean/dirty';
     }
-    
+
     static function linkCalculator() {
         return 'Calculator';
     }
-    
+
     static function linkUpdate() {
         return 'Update data';
     }
-    
+
     static function labelUpdateVariable() {
         return 'Variable';
     }
-    
+
     static function labelUpdateCurrent() {
         return 'Current answer';
     }
-    
+
     static function labelUpdateChangeTo() {
         return 'Change to';
     }
-    
+
     static function labelUpdateChange() {
         return '';
     }
-    
+
     static function labelUpdateQuestion() {
         return 'Question text';
     }
-    
+
     static function labelTypeEditMobile() {
         return 'Auto-adjust on mobile';
     }
-    
+
     static function labelTypeEditMobileLabels() {
         return 'Labels on mobile';
     }
-    
+
     static function headerOutputStatisticsParadata() {
         return 'Paradata';
     }
-    
+
     static function errorCodeLabels() {
         return array(
             "ER1" => "Empty warning",
@@ -7235,114 +7235,115 @@ class Language extends LanguageBase {
             "FI" => "Returned to screen"
         );
     }
-    
+
     static function labelErrors() {
         return 'Detected errors';
     }
-    
+
     static function labelNumberOfTimes() {
         return 'Number of times';
     }
-    
+
     static function labelResearcherParadata() {
         return 'Paradata';
     }
-    
+
     static function headerReportsParadata() {
         return 'Paradata';
     }
-    
+
     static function labelParadataDetails() {
         return 'Details';
     }
-    
+
     static function optionsParadataRaw() {
         return 'Raw (CSV only)';
     }
-    
+
     static function optionsParadataProcessed() {
         return 'Event counts';
     }
-    
+
     static function labelOutputDataTypeParadata() {
         return 'Type';
     }
-    
+
     static function messageCheckerTypeNotExists($name) {
         return 'The type for variable `' . $name . '` does not exist.';
     }
-    
+
     static function installLabelPerformance() {
         return 'Performance';
     }
-    
+
     static function installPerformanceWelcome() {
         return 'NubiS can be tweaked for optimal performance on a particular platform by modifying the settings below. Please refer to the NubiS System Administrator manual for more information.';
     }
-    
+
     static function installLabelPerformanceUseLocking() {
         return 'Use interview locking';
     }
-    
+
     static function installLabelPerformanceUseTransactions() {
         return 'Use transactions for data storage';
     }
-    
+
     static function installLabelPerformanceUsePreparedQueries() {
         return 'Use prepared statements for data storage';
     }
-    
+
     static function installLabelPerformanceUseDataRecords() {
         return 'Use serialized data storage';
     }
-    
+
     static function installLabelPerformanceUseState() {
         return 'Use data storage from state';
     }
-    
+
     static function installLabelPerformanceUseMinify() {
         return 'Use script minification';
     }
-    
+
     static function installLabelPerformanceUseSerialize() {
         return 'Use serialized survey components';
     }
-    
+
     static function linkXiCompiler() {
         return 'Deploy to Xi';
     }
-    
+
     static function headerToolsXiCompiler() {
         return 'Deploy to Xi';
     }
-    
+
     static function buttonDeploy() {
         return 'Deploy';
     }
-    
+
     static function labelToolsXiCompileCriteria() {
         return 'Settings';
     }
-    
+
     static function labelToolsCompileModes() {
         return 'Interview mode';
     }
-    
+
     static function linkRouting() {
         return 'Routing';
     }
-    
+
     static function linkVariables() {
         return 'Variables';
     }
-    
+
     static function labelTypeEditGeneralGroupXiTemplate() {
         return 'Xi template';
     }
-    
+
     static function labelTypeEditLayoutXi() {
         return 'Xi';
     }
+
 }
 
 ?>
