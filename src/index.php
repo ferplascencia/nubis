@@ -109,17 +109,19 @@ if (!isset($_SESSION['COMMSERVER'])) {
     $_SESSION['COMMSERVER'] = 0;
 }
 
-/* session level survey locking */
-if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
+/* session level survey locking (ignore ajax calls) */
+if (loadvar(POST_PARAM_SMS_AJAX) != SMS_AJAX_CALL) { // not sms ajax call
+    if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
 
-    if (isset($_SESSION['REQUEST_IN_PROGRESS']) && $_SESSION['REQUEST_IN_PROGRESS'] == 1) {        
-        $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = 1;
-    }
-    else {
-        //echo 'hhhmmm';
-        $_SESSION['REQUEST_IN_PROGRESS'] = 1;
-        $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = null;
-        unset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS']);
+        if (isset($_SESSION['REQUEST_IN_PROGRESS']) && $_SESSION['REQUEST_IN_PROGRESS'] == 1) {        
+            $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = 1;
+        }
+        else {
+            //echo 'hhhmmm';
+            $_SESSION['REQUEST_IN_PROGRESS'] = 1;
+            $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = null;
+            unset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS']);
+        }
     }
 }
 
